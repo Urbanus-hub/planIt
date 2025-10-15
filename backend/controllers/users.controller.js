@@ -50,3 +50,18 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// fetch users
+export const getUsers=async (req,res)=>{
+  try{
+    const users= await User.find(); 
+    if(!users){
+     return res.status(404).json({message:"No users found"})
+    }
+  return res.status(200).send(users);
+
+  }catch(err){
+    console.log(err.message)
+
+  }
+}
