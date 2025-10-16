@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import {NODE_ENV,JWT_SECRET} from '../configs/env.js';
 
-export const registerUser = async (req, res) => {
+export const registerUser = async (req, res,next) => {
   try {
     const { name, email, password, role } = req.body;
     if (!name || !email || !password) {
@@ -21,6 +21,7 @@ export const registerUser = async (req, res) => {
         message: "User registered successfully",data:userData});
   } catch (err) {
     res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
@@ -48,12 +49,21 @@ export const loginUser = async (req, res) => {
     res.status(200).send({ message: "Login successful", user: { id: user._id, name: user.name, role: user.role } ,token});
   } catch (err) {
     res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
 // fetch users
-export const getUsers=async (req,res)=>{
+export const getUsers=async (req,res,next)=>{
+  const user=req.user;
+  console.log("Get users requested by:",user);
   try{
+    if(!user){
+      return res.status(401).json({message:"Unauthorized"});
+    }
+    if(user.role!=="admin"){
+      return res.status(403).json({message:"Access denied"});
+    }
     const users= await User.find(); 
     if(!users){
      return res.status(404).json({message:"No users found"})
@@ -62,6 +72,25 @@ export const getUsers=async (req,res)=>{
 
   }catch(err){
     console.log(err.message)
+    next(err);
 
   }
+}
+
+export const getUser=async(req,res,next)=>{
+  const user=req.user;
+  try{
+      if(!user.role==="admin"){
+          res.status(403).json({message:"Access denied"});
+      }
+      const fetchedUser=await User.findById(req.params.id);
+      
+      if(!fetchedUser){
+          res.status(404).json({message:"User not found"});
+      }
+      res.status(200).json(fetchedUser);
+  }catch(err){
+      res.status(500).json({error:err.message});
+      next(err);
+  } 
 }

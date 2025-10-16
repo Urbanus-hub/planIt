@@ -15,4 +15,4 @@ const authorize=async(req,res,next)=>{
         next(err);   
     }
 }    
-export default authorize;       
+export default authorize;     

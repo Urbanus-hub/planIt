@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: [true, "Please add a password"], minLength: [6, "Password must be at least 6 characters"] },
   role: { type: String, enum: ["client", "vendor", "admin"], default: "client" },
   // Add profile fields later: phone, location, bio, verified, portfolio, etc.
+  
 }, { timestamps: true });
 
 export default mongoose.model("User", userSchema);
