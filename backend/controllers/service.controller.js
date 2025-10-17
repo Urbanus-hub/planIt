@@ -76,7 +76,7 @@ const updateService = async (req, res, next) => {
     if (!service) {
       return res.status(404).json({ message: "Service not found" });
     }
-    const updatedService = await Service.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedService = await Service.findByIdAndUpdate(req.params.id, req.body, { $set: req.body, new: true});
     res.status(200).json({ message: "Service updated successfully", service: updatedService });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -87,7 +87,7 @@ const updateService = async (req, res, next) => {
 const deleteService = async (req, res, next) => {
     try{
         if(req.user.role!=="vendor" && req.user.role!=="admin"){
-            return res.status(403).json({message:"Forbidden"});
+            return res.status(403).json({message:"Not authorized"});
         }
     const service = await Service.findById(req.params.id);
     if(!service){
