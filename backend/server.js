@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import userRoutes from './routes/user.routes.js';
 import handleGlobalerror from './middlewares/globalErrorsHandler.middleware.js';
 import servicesRouter from './routes/service.route.js';
-
+import BookingRouter from './routes/bookings.route.js'
 
 
 
@@ -21,6 +21,8 @@ app.use(cookieParser());
 // routes
 app.use("/api/users",userRoutes);//user routes
 app.use("/api/services",servicesRouter);
+app.use("/api/bookings",BookingRouter);
+
 
 
 app.get('/', (req, res) => {

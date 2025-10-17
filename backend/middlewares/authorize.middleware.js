@@ -12,7 +12,7 @@ const authorize=async(req,res,next)=>{
     next()
     }catch(err){
         return res.status(401).json({message:"Not authorized"}); 
-        next(err);   
+        next(err);  //pass the error to the error handling middleware 
     }
 }    
 export default authorize;     
