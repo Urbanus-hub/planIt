@@ -63,14 +63,15 @@ const getServiceById = async (req, res, next) => {
 };
 // update a service
 const updateService = async (req, res, next) => {
-  const updater=req.user;   
+  
+  try {
+    const updater=req.user;   
   if(!updater){
     return res.status(401).json({message:"Unauthorized"});
   }
   if(updater.role!=="vendor" && updater.role!=="admin"){
     return res.status(403).json({message:"Forbidden"});
   }
-  try {
     const service = await Service.findById(req.params.id);
     if (!service) {
       return res.status(404).json({ message: "Service not found" });

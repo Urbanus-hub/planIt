@@ -7,8 +7,8 @@ const connectDB = async () => {
         console.log(`MongoDB connected in ${NODE_ENV} mode`);
         
     }catch(error){
-        console.error(`Error: ${error.message}`);
-        process.exit(1);
+        console.error(`Error connecting to db: ${error.message}`);
+        process.exit(1);//1 means there was an error 
     }
 };
 
