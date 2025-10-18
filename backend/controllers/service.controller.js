@@ -93,6 +93,11 @@ const deleteService = async (req, res, next) => {
     if(!service){
         return res.status(404).json({message:"Service not found"});
     }
+    const deletedService = await Service.findByIdAndDelete(req.params.id);
+    if(!deletedService){
+        return res.status(400).json({message:"Service deletion failed"});
+    }
+    res.status(200).json({message:"Service deleted successfully", service: deletedService});
     
     }catch(err){
         res.status(500).json({error:err.message});
