@@ -1,192 +1,239 @@
 import { Request, Response, NextFunction } from "express";
 import Service from "../models/services.model.js";
-import { JwtPayload } from "jsonwebtoken";
+import { AuthUser } from "../types/auth.types.js";
 
-interface UserPayload extends JwtPayload {
-  id: string;
-  role: "client" | "vendor" | "admin";
-}
-
-// create a service
-const createService = async (
+export const createService = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): Promise<void> => {
   try {
-    const creator = req.user as UserPayload;
+    const user = req.user as AuthUser;
+    const {
+      title,
+      category,
+      description,
+      price,
+      pricingType,
+      location,
+      images,
+      availability,
+      capacity,
+      duration,
+      tags,
+    } = req.body;
 
-    if (creator.role !== "vendor" && creator.role !== "admin") {
-      res.status(403).json({ message: "Forbidden" });
-      return;
-    }
-
-    const { title, category, description, price, location, image } = req.body;
-
+    // Validation
     if (!title || !category || !description || !price || !location) {
-      res.status(400).json({ message: "Missing required fields" });
+      res.status(400).json({
+        success: false,
+        message: "Missing required fields: title, category, description, price, location",
+      });
       return;
     }
 
-    const providerId = creator.id; // from authorize middleware
     const service = await Service.create({
       title,
       category,
       description,
       price,
+      pricingType: pricingType || "fixed",
       location,
-      image,
-      provider: providerId,
+      images: images || [],
+      availability,
+      capacity,
+      duration,
+      tags,
+      provider: user.id,
+      isActive: true,
     });
 
-    if (!service) {
-      res.status(400).json({ message: "Service creation failed" });
-      return;
-    }
+    await service.populate("provider", "name email businessName");
 
-    res.status(201).json({ message: "Service created successfully", service });
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({ error: error.message });
-    next(err);
+    res.status(201).json({
+      success: true,
+      message: "Service created successfully",
+      data: service,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to create service",
+      error: (error as Error).message,
+    });
   }
 };
 
-// get all services
-const getServices = async (
+export const getServices = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): Promise<void> => {
   try {
-    if (!req.user) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
+    const { category, location, minPrice, maxPrice, search, isActive } = req.query;
+
+    // Build filter
+    const filter: any = {};
+    
+    if (category) filter.category = category;
+    if (location) filter.location = { $regex: location, $options: "i" };
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { tags: { $in: [new RegExp(search as string, "i")] } },
+      ];
+    }
+    if (isActive !== undefined) {
+      filter.isActive = isActive === "true";
+    } else {
+      // By default, only show active services
+      filter.isActive = true;
     }
 
-    const services = await Service.find();
+    const services = await Service.find(filter)
+      .populate("provider", "name businessName rating reviewCount")
+      .sort({ createdAt: -1 });
 
-    if (!services || services.length === 0) {
-      res.status(404).json({ message: "No services found" });
-      return;
-    }
-
-    res.status(200).json({ services });
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({ error: error.message });
-    next(err);
+    res.status(200).json({
+      success: true,
+      count: services.length,
+      data: services,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch services",
+      error: (error as Error).message,
+    });
   }
 };
 
-// get a service by id
-const getServiceById = async (
+export const getServiceById = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
+): Promise<void> => {
+  try {
+    const service = await Service.findById(req.params.id).populate(
+      "provider",
+      "name email businessName businessDescription rating reviewCount"
+    );
+
+    if (!service) {
+      res.status(404).json({
+        success: false,
+        message: "Service not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: service,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch service",
+      error: (error as Error).message,
+    });
+  }
+};
+
+export const updateService = async (
+  req: Request,
+  res: Response
 ): Promise<void> => {
   try {
     const service = await Service.findById(req.params.id);
 
     if (!service) {
-      res.status(404).json({ message: "Service not found" });
+      res.status(404).json({
+        success: false,
+        message: "Service not found",
+      });
       return;
     }
 
-    res.status(200).json({ service });
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({ error: error.message });
-    next(err);
-  }
-};
-
-// update a service
-const updateService = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const updater = req.user as UserPayload;
-
-    if (!updater) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    if (updater.role !== "vendor" && updater.role !== "admin") {
-      res.status(403).json({ message: "Forbidden" });
-      return;
-    }
-
-    const service = await Service.findById(req.params.id);
-
-    if (!service) {
-      res.status(404).json({ message: "Service not found" });
-      return;
-    }
-
+    // Update service
     const updatedService = await Service.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
-      { new: true }
-    );
+      { new: true, runValidators: true }
+    ).populate("provider", "name businessName");
 
     res.status(200).json({
+      success: true,
       message: "Service updated successfully",
-      service: updatedService,
+      data: updatedService,
     });
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({ error: error.message });
-    next(err);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update service",
+      error: (error as Error).message,
+    });
   }
 };
 
-// delete a service
-const deleteService = async (
+export const deleteService = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): Promise<void> => {
   try {
-    const user = req.user as UserPayload;
-
-    if (user.role !== "vendor" && user.role !== "admin") {
-      res.status(403).json({ message: "Not authorized" });
-      return;
-    }
-
     const service = await Service.findById(req.params.id);
 
     if (!service) {
-      res.status(404).json({ message: "Service not found" });
+      res.status(404).json({
+        success: false,
+        message: "Service not found",
+      });
       return;
     }
 
-    const deletedService = await Service.findByIdAndDelete(req.params.id);
-
-    if (!deletedService) {
-      res.status(400).json({ message: "Service deletion failed" });
-      return;
-    }
+    // Soft delete - just mark as inactive
+    service.isActive = false;
+    await service.save();
 
     res.status(200).json({
+      success: true,
       message: "Service deleted successfully",
-      service: deletedService,
     });
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({ error: error.message });
-    next(err);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete service",
+      error: (error as Error).message,
+    });
   }
 };
 
-export {
-  createService,
-  getServices,
-  getServiceById,
-  updateService,
-  deleteService,
+// Get services by provider
+export const getProviderServices = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const user = req.user as AuthUser;
+    const providerId = req.params.providerId || user.id;
+
+    const services = await Service.find({ provider: providerId }).sort({
+      createdAt: -1,
+    });
+
+    res.status(200).json({
+      success: true,
+      count: services.length,
+      data: services,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch provider services",
+      error: (error as Error).message,
+    });
+  }
 };

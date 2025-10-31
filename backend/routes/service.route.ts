@@ -6,14 +6,43 @@ import {
   updateService,
   deleteService,
 } from "../controllers/service.controller.js";
-import authorize from "../middlewares/authorize.middleware.js";
+import authorize from "../middlewares/authorize.middleware";
+import { authorizeRole } from "../middlewares/roleBasedAccess.middleware";
+import { verifyServiceOwnership } from "../middlewares/serviceAuthorization";
 
 const router = Router();
 
-router.post("/create-service", authorize, createService);
-router.get("/", authorize, getServices);
-router.get("/:id", authorize, getServiceById);
-router.patch("/:id", authorize, updateService);
-router.delete("/:id", authorize, deleteService);
+// Get all services (public - no auth required, or add authorize if you want auth)
+// If you want filtering by category, location, etc., this should be public
+router.get("/", getServices);
+
+// Get single service by ID (public)
+router.get("/:id", getServiceById);
+
+// Create a new service (vendors only)
+router.post(
+  "/",
+  authorize,
+  authorizeRole("vendor", "admin"),
+  createService
+);
+
+// Update service (service owner or admin)
+router.patch(
+  "/:id",
+  authorize,
+  authorizeRole("vendor", "admin"),
+  verifyServiceOwnership,
+  updateService
+);
+
+// Delete service (service owner or admin)
+router.delete(
+  "/:id",
+  authorize,
+  authorizeRole("vendor", "admin"),
+  verifyServiceOwnership,
+  deleteService
+);
 
 export default router;

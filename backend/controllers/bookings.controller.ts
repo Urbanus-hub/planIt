@@ -1,275 +1,383 @@
 import { Request, Response, NextFunction } from "express";
 import Booking from "../models/bookings.model.js";
 import Service from "../models/services.model.js";
-import { JwtPayload } from "jsonwebtoken";
-
-interface UserPayload extends JwtPayload {
-  id: string;
-  role: "client" | "vendor" | "admin";
-}
+import { AuthUser } from "../types/auth.types.js";
 
 export const createBooking = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const user = req.user as UserPayload;
-    const { serviceId, date, notes } = req.body;
+    const user = req.user as AuthUser;
+    const { serviceId, date, notes, attendees } = req.body;
 
-    if (!user) {
-      res.status(401).json({ message: "Unauthorized" });
+    // Validation
+    if (!serviceId || !date) {
+      res.status(400).json({
+        success: false,
+        message: "Service ID and date are required",
+      });
       return;
     }
 
-    const userBookings = await Booking.find({
+    // Check for duplicate bookings
+    const existingBooking = await Booking.findOne({
       user: user.id,
       service: serviceId,
-      date: date,
+      date: new Date(date),
+      status: { $nin: ["cancelled", "refunded"] },
     });
 
-    if (userBookings && userBookings.length > 0) {
+    if (existingBooking) {
       res.status(400).json({
+        success: false,
         message: "You have already booked this service for the selected date",
       });
       return;
     }
 
-    // Ensure the service exists
+    // Verify service exists and is active
     const service = await Service.findById(serviceId);
     if (!service) {
-      res.status(404).json({ message: "Service not found" });
+      res.status(404).json({
+        success: false,
+        message: "Service not found",
+      });
       return;
     }
 
-    const booking = new Booking({
-      user: user.id, // from authorize middleware
+    if (!service.isActive) {
+      res.status(400).json({
+        success: false,
+        message: "This service is currently unavailable",
+      });
+      return;
+    }
+
+    // Check capacity if applicable
+    if (service.capacity) {
+      const bookingsOnDate = await Booking.countDocuments({
+        service: serviceId,
+        date: new Date(date),
+        status: { $nin: ["cancelled", "refunded"] },
+      });
+
+      if (bookingsOnDate >= service.capacity) {
+        res.status(400).json({
+          success: false,
+          message: "This service is fully booked for the selected date",
+        });
+        return;
+      }
+    }
+
+    // Create booking
+    const booking = await Booking.create({
+      user: user.id,
       service: service._id,
       provider: service.provider,
-      date,
+      startDate: new Date(date),
       notes,
+      attendees,
       totalPrice: service.price,
+      status: "pending",
+      paymentStatus: "unpaid",
     });
 
-    await booking.save();
+    // Populate booking data
+    await booking.populate([
+      { path: "user", select: "name email" },
+      { path: "service", select: "title category price" },
+      { path: "provider", select: "name email businessName" },
+    ]);
 
     res.status(201).json({
+      success: true,
       message: "Booking created successfully",
-      booking,
+      data: booking,
     });
   } catch (error) {
-    console.error(error);
-    const err = error as Error;
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("Create booking error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create booking",
+      error: (error as Error).message,
+    });
   }
 };
 
-// delete booking
 export const deleteBooking = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): Promise<void> => {
   try {
-    const user = req.user as UserPayload;
     const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
-      res.status(404).json({ message: "Booking not found" });
+      res.status(404).json({
+        success: false,
+        message: "Booking not found",
+      });
       return;
     }
 
-    if (booking.user.toString() !== user.id && user.role !== "admin") {
-      res
-        .status(403)
-        .json({ message: "Not authorized to delete this booking" });
-      return;
-    }
+    // Update status to cancelled instead of deleting
+    booking.status = "cancelled";
+    booking.cancelledAt = new Date();
+    booking.cancelledBy = (req.user as AuthUser).id as any;
+    await booking.save();
 
-    await Booking.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Booking deleted successfully" });
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({ error: error.message });
-    next(err);
+    res.status(200).json({
+      success: true,
+      message: "Booking cancelled successfully",
+      data: booking,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to cancel booking",
+      error: (error as Error).message,
+    });
   }
 };
 
-// get bookings for a user
 export const getUserBookings = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): Promise<void> => {
   try {
-    const user = req.user as UserPayload;
+    const user = req.user as AuthUser;
+    const userId = req.params.userId || user.id;
 
-    if (!user) {
-      res.status(401).json({ message: "Unauthorized" });
+    // Check authorization (user can only view their own bookings unless admin)
+    if (userId !== user.id && user.role !== "admin") {
+      res.status(403).json({
+        success: false,
+        message: "Access denied",
+      });
       return;
     }
 
-    const bookings = await Booking.find({ user: req.params.id });
-    res.status(200).json(bookings);
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({ error: error.message });
-    next(err);
+    const bookings = await Booking.find({ user: userId })
+      .populate("service", "title category price location")
+      .populate("provider", "name businessName")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: bookings.length,
+      data: bookings,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch bookings",
+      error: (error as Error).message,
+    });
   }
 };
 
-// get bookings for a service
 export const getServiceBookings = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): Promise<void> => {
   try {
-    const user = req.user as UserPayload;
+    const bookings = await Booking.find({ service: req.params.serviceId })
+      .populate("user", "name email")
+      .populate("provider", "name businessName")
+      .sort({ startDate: -1 });
 
-    if (!user) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    const bookings = await Booking.find({ service: req.params.id });
-    res.status(200).json(bookings);
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({ error: error.message });
-    next(err);
+    res.status(200).json({
+      success: true,
+      count: bookings.length,
+      data: bookings,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch service bookings",
+      error: (error as Error).message,
+    });
   }
 };
 
-// get bookings for a provider
 export const getProviderBookings = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): Promise<void> => {
   try {
-    const user = req.user as UserPayload;
+    const user = req.user as AuthUser;
+    const providerId = req.params.providerId || user.id;
 
-    if (!user) {
-      res.status(401).json({ message: "Unauthorized" });
+    // Vendors can only view their own bookings unless admin
+    if (user.role === "vendor" && providerId !== user.id) {
+      res.status(403).json({
+        success: false,
+        message: "Access denied",
+      });
       return;
     }
 
-    const bookings = await Booking.find({ provider: req.params.id });
-    res.status(200).json(bookings);
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({ error: error.message });
-    next(err);
+    const bookings = await Booking.find({ provider: providerId })
+      .populate("user", "name email phone")
+      .populate("service", "title category price")
+      .sort({ startDate: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: bookings.length,
+      data: bookings,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch provider bookings",
+      error: (error as Error).message,
+    });
   }
 };
 
-// get all bookings (admin only)
 export const getAllBookings = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): Promise<void> => {
   try {
-    const user = req.user as UserPayload;
+    const bookings = await Booking.find()
+      .populate("user", "name email")
+      .populate("service", "title category price")
+      .populate("provider", "name businessName")
+      .sort({ createdAt: -1 });
 
-    if (!user) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
-
-    if (user.role !== "admin") {
-      res.status(403).json({ message: "Access denied" });
-      return;
-    }
-
-    const bookings = await Booking.find();
-
-    if (!bookings || bookings.length === 0) {
-      res.status(404).json({ message: "No bookings found" });
-      return;
-    }
-
-    res.status(200).json(bookings);
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({ error: error.message });
-    next(err);
+    res.status(200).json({
+      success: true,
+      count: bookings.length,
+      data: bookings,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch bookings",
+      error: (error as Error).message,
+    });
   }
 };
 
-// update booking status
 export const updateBookingStatus = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): Promise<void> => {
   try {
-    const user = req.user as UserPayload;
+    const user = req.user as AuthUser;
+    const { status } = req.body;
+    const { isProvider, isBookingOwner } = req.body;
 
-    if (!user) {
-      res.status(401).json({ message: "Unauthorized" });
+    const validStatuses = ["pending", "confirmed", "completed", "cancelled", "refunded"];
+    if (!validStatuses.includes(status)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid status",
+      });
       return;
     }
 
     const booking = await Booking.findById(req.params.id);
-
     if (!booking) {
-      res.status(404).json({ message: "Booking not found" });
+      res.status(404).json({
+        success: false,
+        message: "Booking not found",
+      });
       return;
     }
 
-    booking.status = req.body.status;
+    // Business logic for status updates
+    if (status === "confirmed" && !isProvider && user.role !== "admin") {
+      res.status(403).json({
+        success: false,
+        message: "Only the service provider can confirm bookings",
+      });
+      return;
+    }
+
+    if (status === "completed" && !isProvider && user.role !== "admin") {
+      res.status(403).json({
+        success: false,
+        message: "Only the service provider can mark bookings as completed",
+      });
+      return;
+    }
+
+    if (status === "cancelled") {
+      booking.cancelledAt = new Date();
+      booking.cancelledBy = user.id as any;
+    }
+
+    if (status === "confirmed") {
+      booking.confirmedAt = new Date();
+    }
+
+    if (status === "completed") {
+      booking.completedAt = new Date();
+    }
+
+    booking.status = status;
     await booking.save();
 
     res.status(200).json({
-      message: "Booking status updated successfully",
-      booking,
+      success: true,
+      message: `Booking status updated to ${status}`,
+      data: booking,
     });
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({ error: error.message });
-    next(err);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update booking status",
+      error: (error as Error).message,
+    });
   }
 };
 
-// update booking
 export const updateBooking = async (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): Promise<void> => {
   try {
-    const user = req.user as UserPayload;
-
-    if (!user) {
-      res.status(401).json({ message: "Unauthorized" });
-      return;
-    }
+    const { date, notes, attendees } = req.body;
 
     const booking = await Booking.findById(req.params.id);
-
     if (!booking) {
-      res.status(404).json({ message: "Booking not found" });
+      res.status(404).json({
+        success: false,
+        message: "Booking not found",
+      });
       return;
     }
 
-    if (booking.user.toString() !== user.id && user.role !== "admin") {
-      res
-        .status(403)
-        .json({ message: "Not authorized to update this booking" });
+    // Don't allow updates to confirmed/completed bookings
+    if (["completed", "cancelled", "refunded"].includes(booking.status)) {
+      res.status(400).json({
+        success: false,
+        message: `Cannot update ${booking.status} bookings`,
+      });
       return;
     }
 
-    Object.assign(booking, req.body);
+    // Update allowed fields
+    if (date) booking.startDate = new Date(date);
+    if (notes !== undefined) booking.notes = notes;
+    if (attendees !== undefined) booking.attendees = attendees;
+
     await booking.save();
 
     res.status(200).json({
+      success: true,
       message: "Booking updated successfully",
-      booking,
+      data: booking,
     });
-  } catch (err) {
-    const error = err as Error;
-    res.status(500).json({ error: error.message });
-    next(err);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update booking",
+      error: (error as Error).message,
+    });
   }
 };
