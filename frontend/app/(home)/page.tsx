@@ -7,6 +7,8 @@ import CategoryShowcase from "@/components/layout/CategoryShowcaseSection";
 import FeaturedVendors from "@/components/layout/FeaturedVendors";
 import HowItWorks from '@/components/layout/HowItWorks'
 import WhyChoosePlanIt from "@/components/layout/WhyChoosePlanIt";
+import Testimonials from "@/components/layout/Testimonials";
+import CTA from "@/components/layout/CTA";
 
 export default function Home() {
   return (
@@ -17,6 +19,8 @@ export default function Home() {
       <FeaturedVendors/>
       <HowItWorks/>
       <WhyChoosePlanIt/>
+      <Testimonials/>
+      <CTA/>
       <Footer />
 
  
