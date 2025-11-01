@@ -1,1 +1,6 @@
 qodana.yaml
+./.idea/.gitignore
+./.idea/workspace.xml
+./.idea/httpRequests/
+./.idea/dataSources/
+./.idea/dataSources.local.xml

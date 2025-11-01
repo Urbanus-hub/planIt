@@ -77,31 +77,35 @@ export default function Footer() {
   return (
     <footer
       ref={footerRef}
-      className="bg-gray-50 text-gray-800 section-padding border-t border-gray-200"
+      className="bg-gray-50 text-gray-800 section-padding border-t border-gray-200 px-3 sm:px-6"
     >
       <div className="container lg:w-[90%] mx-auto px-4 sm:px-6 lg:px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-12">
           {/* Logo and Description */}
           <div className="footer-section">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-linear-to-br from-green-main to-green-dark rounded-lg flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-xl">P</span>
+            <div className="flex items-center space-x-2 mb-3 sm:mb-4">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-linear-to-br from-green-main to-green-dark rounded-lg flex items-center justify-center shadow-md">
+                <span className="text-white font-bold text-lg sm:text-xl">
+                  P
+                </span>
               </div>
-              <span className="text-2xl font-bold text-gray-900">PlanIt</span>
+              <span className="text-xl sm:text-2xl font-bold text-gray-900">
+                PlanIt
+              </span>
             </div>
-            <p className="text-sm mb-4 text-gray-600">
+            <p className="text-sm mb-3 sm:mb-4 text-gray-600">
               Your trusted partner for finding the best event vendors in Kenya.
               Plan your perfect event with confidence.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex space-x-3 sm:space-x-4">
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
                   href={social.href}
-                  className="w-10 h-10 bg-gray-200 hover:bg-green-main text-gray-600 hover:text-white rounded-lg flex items-center justify-center transition-all duration-300"
+                  className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-200 hover:bg-green-main text-gray-600 hover:text-white rounded-lg flex items-center justify-center transition-all duration-300"
                   aria-label={`Visit our ${social.icon.name}`}
                 >
-                  <social.icon size={20} />
+                  <social.icon size={18} className="sm:w-5 sm:h-5" />
                 </a>
               ))}
             </div>
@@ -110,8 +114,10 @@ export default function Footer() {
           {/* Footer Sections */}
           {footerSections.map((section, index) => (
             <div key={index} className="footer-section">
-              <h3 className="text-gray-900 font-bold mb-4">{section.title}</h3>
-              <ul className="space-y-2">
+              <h3 className="text-gray-900 font-bold mb-3 sm:mb-4 text-base sm:text-lg">
+                {section.title}
+              </h3>
+              <ul className="space-y-1.5 sm:space-y-2">
                 {section.links.map((link, linkIndex) => (
                   <li key={linkIndex}>
                     <a
@@ -130,31 +136,31 @@ export default function Footer() {
         {/* Newsletter */}
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-300 pt-8 flex flex-col md:flex-row justify-between items-center text-sm">
-          <p className="text-gray-600">
+        <div className="border-t border-gray-300 pt-6 sm:pt-8 flex flex-col md:flex-row justify-between items-center text-xs sm:text-sm gap-3 sm:gap-0">
+          <p className="text-gray-600 text-center md:text-left">
             © {new Date().getFullYear()} PlanIt. All rights reserved.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 mt-4 md:mt-0 text-gray-600">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-gray-600">
             <a
               href="#contact"
               className="flex items-center hover:text-green-main transition-colors"
             >
-              <Mail size={16} className="mr-1" />
-              hello@planit.co.ke
+              <Mail size={14} className="mr-1 sm:w-4 sm:h-4" />
+              <span className="text-xs sm:text-sm">hello@planit.co.ke</span>
             </a>
             <a
               href="#phone"
               className="flex items-center hover:text-green-main transition-colors"
             >
-              <Phone size={16} className="mr-1" />
-              +254 700 000 000
+              <Phone size={14} className="mr-1 sm:w-4 sm:h-4" />
+              <span className="text-xs sm:text-sm">+254 700 000 000</span>
             </a>
             <a
               href="#location"
               className="flex items-center hover:text-green-main transition-colors"
             >
-              <MapPin size={16} className="mr-1" />
-              Nairobi, Kenya
+              <MapPin size={14} className="mr-1 sm:w-4 sm:h-4" />
+              <span className="text-xs sm:text-sm">Nairobi, Kenya</span>
             </a>
           </div>
         </div>

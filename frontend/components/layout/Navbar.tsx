@@ -50,19 +50,19 @@ export default function Navbar() {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
           ? "bg-white/95 backdrop-blur-sm shadow-lg py-3"
-          : "bg-transparent py-5"
+          : "bg-white py-5  md:bg-transparent"
       }`}
     >
-      <div className="max-w-[90vw] mx-auto px-4 sm:px-6 lg:px-4">
+      <div className="max-w-[90vw] mx-auto  lg:px-5">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-11 h-11 bg-gradient-to-br from-green-main to-green-dark rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
+            <div className="w-11 h-11 bg-linear-to-br from-green-main to-green-dark rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
               <span className="text-white font-bold text-xl">P</span>
             </div>
             <span
               className={`text-2xl font-bold transition-colors duration-300 ${
-                isScrolled ? "text-gray-900" : "text-white"
+                isScrolled ? "text-gray-900" : "text-black md:text-white"
               }`}
             >
               PlanIt
@@ -70,7 +70,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex items-center space-x-1 ">
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -105,7 +105,7 @@ export default function Navbar() {
           <button
             onClick={toggleMobileMenu}
             className={`md:hidden ${
-              isScrolled ? "text-gray-700" : "text-white"
+              isScrolled ? "text-gray-700" : "text-black md:text-white"
             }`}
             aria-label="Toggle menu"
           >
@@ -116,7 +116,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg rounded-b-lg mt-2">
+        <div className="md:hidden bg-white shadow-lg rounded-b-lg mt-2 px-6">
           <div className="px-4 py-4 space-y-4">
             {navItems.map((item) => (
               <Link

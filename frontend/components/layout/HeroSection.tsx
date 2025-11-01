@@ -113,7 +113,7 @@ const HeroSection = () => {
   return (
     <section
       ref={heroRef}
-      className="relative h-screen flex items-center justify-center overflow-visible pt-20 px-4 sm:px-6 lg:px-8"
+      className="relative min-h-screen h-screen flex items-center justify-center overflow-visible pt-16 sm:pt-20 px-3 sm:px-6 lg:px-8"
     >
       {/* Background Image with Green Overlay */}
       <div className="absolute inset-0 z-0">
@@ -126,9 +126,9 @@ const HeroSection = () => {
           priority
         />
         {/* Darker gradient overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-green-900/70 to-emerald-800/80"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-black/60 via-green-900/70 to-emerald-800/80"></div>
         {/* Additional bottom gradient for depth */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent"></div>
         {/* Decorative pattern overlay */}
         <div className="absolute inset-0 opacity-5">
           <div
@@ -141,16 +141,16 @@ const HeroSection = () => {
       </div>
 
       {/* Content */}
-      <div className="container relative z-10 text-center text-white py-20">
+      <div className="container relative z-10 text-center text-white py-12 sm:py-20">
         <h1
           ref={headingRef}
-          className="font-serif text-4xl md:text-5xl lg:text-7xl font-bold mb-6 drop-shadow-2xl"
+          className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 drop-shadow-2xl px-2"
         >
           Plan Your Perfect Event with Kenya's Top Vendors
         </h1>
         <p
           ref={subheadingRef}
-          className="text-lg md:text-xl lg:text-2xl mb-10 max-w-3xl mx-auto text-white/90 drop-shadow-lg"
+          className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-10 max-w-3xl mx-auto text-white/90 drop-shadow-lg px-4"
         >
           From weddings to corporate events, connect with verified professionals
           who bring your vision to life
@@ -159,7 +159,7 @@ const HeroSection = () => {
         {/* Search Bar */}
         <div
           ref={searchBarRef}
-          className="bg-white rounded-lg shadow-xl p-2 max-w-3xl mx-auto mb-10"
+          className="bg-white rounded-lg shadow-xl p-2 sm:p-3 max-w-3xl mx-auto mb-6 sm:mb-10"
         >
           <div className="flex flex-col md:flex-row gap-2">
             <label htmlFor="category-select" className="sr-only">
@@ -168,7 +168,7 @@ const HeroSection = () => {
             <select
               id="category-select"
               aria-label="Category"
-              className="flex-1 px-4 py-3 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-main"
+              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-main"
             >
               <option>All Categories</option>
               <option>Photography</option>
@@ -180,11 +180,12 @@ const HeroSection = () => {
             <input
               type="text"
               placeholder="Enter location..."
-              className="flex-1 px-4 py-3 rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-main"
+              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-main"
             />
-            <button className="btn-primary px-8 py-3 whitespace-nowrap">
-              <Search className="inline-block mr-2" size={18} />
-              Find Services
+            <button className="btn-primary px-4 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base whitespace-nowrap">
+              <Search className="inline-block mr-1 sm:mr-2" size={16} />
+              <span className="hidden sm:inline">Find Services</span>
+              <span className="sm:hidden">Search</span>
             </button>
           </div>
         </div>
@@ -192,17 +193,17 @@ const HeroSection = () => {
         {/* Stats */}
         <div
           ref={statsRef}
-          className="flex flex-wrap justify-center gap-8 md:gap-12 mb-16"
+          className="flex flex-wrap justify-center gap-4 sm:gap-8 md:gap-12 mb-12 sm:mb-16 px-2"
         >
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="text-center backdrop-blur-sm bg-white/10 rounded-lg px-6 py-4"
+              className="text-center backdrop-blur-sm bg-white/10 rounded-lg px-4 sm:px-6 py-3 sm:py-4 min-w-[100px] sm:min-w-[120px]"
             >
-              <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">
+              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">
                 {stat.value}
               </div>
-              <div className="text-sm md:text-base text-white/80 mt-1">
+              <div className="text-xs sm:text-sm md:text-base text-white/80 mt-1">
                 {stat.label}
               </div>
             </div>
@@ -213,11 +214,12 @@ const HeroSection = () => {
       {/* Floating Vendor Cards */}
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 text-white animate-bounce z-30">
+      <div className="absolute bottom-20 sm:bottom-32 left-1/2 transform -translate-x-1/2 text-white animate-bounce z-30">
         <svg
-          width="30"
-          height="30"
+          width="24"
+          height="24"
           viewBox="0 0 30 30"
+          className="sm:w-[30px] sm:h-[30px]"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >

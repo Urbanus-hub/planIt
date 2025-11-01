@@ -116,14 +116,14 @@ export default function CategoryShowcase() {
     <section
       ref={sectionRef}
       id="services"
-      className="section-padding bg-white"
+      className="section-padding bg-white px-3 sm:px-6"
     >
       <div className="container">
-        <div className="text-center mb-16">
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-10 sm:mb-16">
+          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">
             Whatever Your Event Needs, We've Got You Covered
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto px-4">
             Browse through our extensive categories and find the perfect vendors
             for your special occasion
           </p>
@@ -131,7 +131,7 @@ export default function CategoryShowcase() {
 
         <div
           ref={cardsRef}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 relative z-10 max-w-7xl mx-auto"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 relative z-10 max-w-7xl mx-auto gap-y-0"
         >
           {categories.map((category, index) => (
             <CategoryCard key={category.title} {...category} index={index} />
@@ -160,23 +160,26 @@ const CategoryCard = ({
   return (
     <div
       className={cn(
-        "category-card flex flex-col lg:border-r border-gray-200 py-10 relative group/feature",
+        "category-card flex flex-col lg:border-r border-gray-200 py-8 sm:py-10 relative group/feature",
         (index === 0 || index === 4) && "lg:border-l border-gray-200",
-        index < 4 && "lg:border-b border-gray-200"
+        index < 4 && "lg:border-b border-gray-200",
+        "border-b sm:border-b-0",
+        index % 2 === 0 && "sm:border-r",
+        index < 6 && "sm:border-b"
       )}
     >
       {index < 4 && (
-        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-green-50 to-transparent pointer-events-none" />
+        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-linear-to-t from-green-50 to-transparent pointer-events-none" />
       )}
       {index >= 4 && (
-        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-b from-green-50 to-transparent pointer-events-none" />
+        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-linear-to-b from-green-50 to-transparent pointer-events-none" />
       )}
 
       {/* Icon */}
-      <div className="mb-4 relative z-10 px-10">
+      <div className="mb-3 sm:mb-4 relative z-10 px-6 sm:px-10">
         <div
           className={cn(
-            "w-14 h-14 rounded-xl flex items-center justify-center group-hover/feature:scale-110 transition-transform duration-300",
+            "w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center group-hover/feature:scale-110 transition-transform duration-300",
             color
           )}
         >
@@ -185,7 +188,7 @@ const CategoryCard = ({
       </div>
 
       {/* Title */}
-      <div className="text-lg font-bold mb-2 relative z-10 px-10">
+      <div className="text-base sm:text-lg font-bold mb-2 relative z-10 px-6 sm:px-10">
         <div className="absolute left-0 inset-y-0 h-6 group-hover/feature:h-8 w-1 rounded-tr-full rounded-br-full bg-gray-300 group-hover/feature:bg-green-main transition-all duration-200 origin-center" />
         <span className="group-hover/feature:translate-x-2 transition duration-200 inline-block text-gray-900">
           {title}
@@ -193,13 +196,13 @@ const CategoryCard = ({
       </div>
 
       {/* Description */}
-      <p className="text-sm text-gray-600 max-w-xs relative z-10 px-10 mb-3">
+      <p className="text-sm text-gray-600 max-w-xs relative z-10 px-6 sm:px-10 mb-2 sm:mb-3">
         {description}
       </p>
 
       {/* Vendor Count */}
-      <div className="relative z-10 px-10">
-        <span className="text-sm font-semibold text-green-main">
+      <div className="relative z-10 px-6 sm:px-10">
+        <span className="text-xs sm:text-sm font-semibold text-green-main">
           {vendorCount} vendors
         </span>
       </div>
