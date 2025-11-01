@@ -29,6 +29,6 @@ app.use(handleGlobalError);
 // spin server
 const port = PORT || 5000;
 app.listen(port, async () => {
+    await connectDB();
   console.log(`Server running at http://localhost:${port}`);
-  await connectDB();
 });

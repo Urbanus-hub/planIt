@@ -5,6 +5,7 @@ import {
   getServiceById,
   updateService,
   deleteService,
+  getProviderServices
 } from "../controllers/service.controller.js";
 import authorize from "../middlewares/authorize.middleware";
 import { authorizeRole } from "../middlewares/roleBasedAccess.middleware";
@@ -26,6 +27,7 @@ router.post(
   authorizeRole("vendor", "admin"),
   createService
 );
+router.get('/provider/:providerId', authorize, authorizeRole('vendor', 'admin'), getProviderServices);
 
 // Update service (service owner or admin)
 router.patch(

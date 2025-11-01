@@ -4,7 +4,8 @@ import { AuthUser } from "../types/auth.types.js";
 
 export const createService = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const user = req.user as AuthUser;
@@ -26,7 +27,8 @@ export const createService = async (
     if (!title || !category || !description || !price || !location) {
       res.status(400).json({
         success: false,
-        message: "Missing required fields: title, category, description, price, location",
+        message:
+          "Missing required fields: title, category, description, price, location",
       });
       return;
     }
@@ -55,24 +57,22 @@ export const createService = async (
       data: service,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to create service",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const getServices = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
-    const { category, location, minPrice, maxPrice, search, isActive } = req.query;
+    const { category, location, minPrice, maxPrice, search, isActive } =
+      req.query;
 
     // Build filter
     const filter: any = {};
-    
+
     if (category) filter.category = category;
     if (location) filter.location = { $regex: location, $options: "i" };
     if (minPrice || maxPrice) {
@@ -104,17 +104,14 @@ export const getServices = async (
       data: services,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch services",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const getServiceById = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const service = await Service.findById(req.params.id).populate(
@@ -135,17 +132,14 @@ export const getServiceById = async (
       data: service,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch service",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const updateService = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const service = await Service.findById(req.params.id);
@@ -171,17 +165,14 @@ export const updateService = async (
       data: updatedService,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to update service",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const deleteService = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const service = await Service.findById(req.params.id);
@@ -200,21 +191,18 @@ export const deleteService = async (
 
     res.status(200).json({
       success: true,
-      message: "Service deleted successfully",
+      message: "Service deactivated successfully",
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete service",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 // Get services by provider
 export const getProviderServices = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const user = req.user as AuthUser;
@@ -230,10 +218,6 @@ export const getProviderServices = async (
       data: services,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch provider services",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };

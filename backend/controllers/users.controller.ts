@@ -7,7 +7,8 @@ import { AuthUser } from "../types/auth.types.js";
 
 export const registerUser = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const { name, email, password, role, phone, businessName } = req.body;
@@ -83,17 +84,14 @@ export const registerUser = async (
       token,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Registration failed",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const loginUser = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const { email, password } = req.body;
@@ -158,17 +156,14 @@ export const loginUser = async (
       token,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Login failed",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const logoutUser = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   res.status(200).json({
     success: true,
@@ -178,7 +173,8 @@ export const logoutUser = async (
 
 export const getCurrentUser = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const user = req.user as AuthUser;
@@ -198,17 +194,14 @@ export const getCurrentUser = async (
       data: currentUser,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch user",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const getUsers = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const { role, isActive } = req.query;
@@ -227,17 +220,14 @@ export const getUsers = async (
       data: users,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch users",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const getUser = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const user = await User.findById(req.params.id).select("-password");
@@ -255,20 +245,24 @@ export const getUser = async (
       data: user,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch user",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const updateUser = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
-    const { name, phone, avatar, businessName, businessDescription, businessAddress } = req.body;
+    const {
+      name,
+      phone,
+      avatar,
+      businessName,
+      businessDescription,
+      businessAddress,
+    } = req.body;
 
     // Don't allow updating sensitive fields
     const allowedUpdates: any = {};
@@ -276,8 +270,10 @@ export const updateUser = async (
     if (phone !== undefined) allowedUpdates.phone = phone;
     if (avatar !== undefined) allowedUpdates.avatar = avatar;
     if (businessName !== undefined) allowedUpdates.businessName = businessName;
-    if (businessDescription !== undefined) allowedUpdates.businessDescription = businessDescription;
-    if (businessAddress !== undefined) allowedUpdates.businessAddress = businessAddress;
+    if (businessDescription !== undefined)
+      allowedUpdates.businessDescription = businessDescription;
+    if (businessAddress !== undefined)
+      allowedUpdates.businessAddress = businessAddress;
 
     const user = await User.findByIdAndUpdate(
       req.params.id,
@@ -299,17 +295,14 @@ export const updateUser = async (
       data: user,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to update user",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const deleteUser = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const user = await User.findById(req.params.id);
@@ -339,10 +332,6 @@ export const deleteUser = async (
       message: "User deleted successfully",
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete user",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };

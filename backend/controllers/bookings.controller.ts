@@ -5,7 +5,8 @@ import { AuthUser } from "../types/auth.types.js";
 
 export const createBooking = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const user = req.user as AuthUser;
@@ -98,17 +99,14 @@ export const createBooking = async (
     });
   } catch (error) {
     console.error("Create booking error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to create booking",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const deleteBooking = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const booking = await Booking.findById(req.params.id);
@@ -133,17 +131,14 @@ export const deleteBooking = async (
       data: booking,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to cancel booking",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const getUserBookings = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const user = req.user as AuthUser;
@@ -169,17 +164,14 @@ export const getUserBookings = async (
       data: bookings,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch bookings",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const getServiceBookings = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const bookings = await Booking.find({ service: req.params.serviceId })
@@ -193,17 +185,14 @@ export const getServiceBookings = async (
       data: bookings,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch service bookings",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const getProviderBookings = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const user = req.user as AuthUser;
@@ -229,17 +218,14 @@ export const getProviderBookings = async (
       data: bookings,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch provider bookings",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const getAllBookings = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const bookings = await Booking.find()
@@ -254,24 +240,27 @@ export const getAllBookings = async (
       data: bookings,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch bookings",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const updateBookingStatus = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const user = req.user as AuthUser;
     const { status } = req.body;
     const { isProvider, isBookingOwner } = req.body;
 
-    const validStatuses = ["pending", "confirmed", "completed", "cancelled", "refunded"];
+    const validStatuses = [
+      "pending",
+      "confirmed",
+      "completed",
+      "cancelled",
+      "refunded",
+    ];
     if (!validStatuses.includes(status)) {
       res.status(400).json({
         success: false,
@@ -328,17 +317,14 @@ export const updateBookingStatus = async (
       data: booking,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to update booking status",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
 
 export const updateBooking = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const { date, notes, attendees } = req.body;
@@ -374,10 +360,6 @@ export const updateBooking = async (
       data: booking,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to update booking",
-      error: (error as Error).message,
-    });
+    next(error);
   }
 };
