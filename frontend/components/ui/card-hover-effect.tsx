@@ -36,7 +36,7 @@ export const HoverEffect = ({
           <AnimatePresence>
             {hoveredIndex === idx && (
               <motion.span
-                className="absolute inset-0 h-full w-full bg-green-50 block rounded-3xl"
+                className="absolute inset-0 h-full w-full bg-green-50 dark:bg-green-950/30 block rounded-3xl"
                 layoutId="hoverBackground"
                 initial={{ opacity: 0 }}
                 animate={{
@@ -72,7 +72,7 @@ export const Card = ({
   return (
     <div
       className={cn(
-        "rounded-2xl h-full w-full overflow-hidden bg-white border border-gray-200 relative z-20 transition-all duration-300 group-hover:border-green-300 group-hover:shadow-xl",
+        "rounded-2xl h-full w-full overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 relative z-20 transition-all duration-300 group-hover:border-green-300 dark:group-hover:border-green-600 group-hover:shadow-xl",
         className
       )}
     >
@@ -85,7 +85,7 @@ export const Card = ({
 
 export const CardImage = ({ image }: { image: string }) => {
   return (
-    <div className="relative h-40 sm:h-48 -m-4 sm:-m-6 mb-4 sm:mb-6 overflow-hidden bg-green-50">
+    <div className="relative h-40 sm:h-48 -m-4 sm:-m-6 mb-4 sm:mb-6 overflow-hidden bg-green-50 dark:bg-green-950/20">
       <Image
         src={image}
         alt="Step illustration"
@@ -99,7 +99,7 @@ export const CardImage = ({ image }: { image: string }) => {
 
 export const CardIcon = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-main rounded-2xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-main dark:bg-green-600 rounded-2xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
       {children}
     </div>
   );
@@ -115,7 +115,7 @@ export const CardTitle = ({
   return (
     <h4
       className={cn(
-        "text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 tracking-tight",
+        "text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 tracking-tight",
         className
       )}
     >
@@ -134,7 +134,7 @@ export const CardDescription = ({
   return (
     <p
       className={cn(
-        "text-sm sm:text-base text-gray-600 leading-relaxed",
+        "text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed",
         className
       )}
     >

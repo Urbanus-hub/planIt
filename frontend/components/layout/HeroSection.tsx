@@ -159,16 +159,16 @@ const HeroSection = () => {
         {/* Search Bar */}
         <div
           ref={searchBarRef}
-          className="bg-white rounded-lg shadow-xl p-2 sm:p-3 max-w-3xl mx-auto mb-6 sm:mb-10"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-xl dark:shadow-gray-900/50 p-2 sm:p-3 max-w-3xl mx-auto mb-6 sm:mb-10 transition-colors duration-300"
         >
           <div className="flex flex-col md:flex-row gap-2">
-            <label htmlFor="category-select" className="sr-only">
+            <label htmlFor="category-select" className="sr-only dark:text-white">
               Category
             </label>
             <select
               id="category-select"
               aria-label="Category"
-              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-main"
+              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-main dark:text-green-main"
             >
               <option>All Categories</option>
               <option>Photography</option>
@@ -180,7 +180,7 @@ const HeroSection = () => {
             <input
               type="text"
               placeholder="Enter location..."
-              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-main"
+              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-md text-sm sm:text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-main dark:text-white"
             />
             <button className="btn-primary px-4 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base whitespace-nowrap">
               <Search className="inline-block mr-1 sm:mr-2" size={16} />
@@ -198,7 +198,7 @@ const HeroSection = () => {
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="text-center backdrop-blur-sm bg-white/10 rounded-lg px-4 sm:px-6 py-3 sm:py-4 min-w-[100px] sm:min-w-[120px]"
+              className="text-center backdrop-blur-sm bg-white/10 dark:bg-white/5 rounded-lg px-4 sm:px-6 py-3 sm:py-4 min-w-[100px] sm:min-w-[120px] transition-colors duration-300"
             >
               <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">
                 {stat.value}

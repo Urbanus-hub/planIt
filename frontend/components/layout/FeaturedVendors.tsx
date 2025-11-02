@@ -123,8 +123,7 @@ export default function FeaturedVendors() {
       reviewCount: 76,
       location: "Nairobi, Kenya",
       startingPrice: "18,000",
-      image:
-        "/decor.jpg",
+      image: "/decor.jpg",
       badge: { type: "most-booked", text: "Most Booked" },
       icon: Palette,
       description: "Transform spaces into magical settings",
@@ -138,8 +137,7 @@ export default function FeaturedVendors() {
       reviewCount: 103,
       location: "Karen, Nairobi",
       startingPrice: "50,000",
-      image:
-        "/venue.jpg",
+      image: "/venue.jpg",
       badge: { type: "top-rated", text: "Premium" },
       icon: MapPin,
       description: "Stunning outdoor and indoor event spaces",
@@ -151,12 +149,12 @@ export default function FeaturedVendors() {
     <section
       id="vendors"
       ref={sectionRef}
-      className="section-padding bg-gradient-to-b from-white via-gray-50 to-white relative overflow-hidden"
+      className="section-padding bg-gradient-to-b from-white dark:from-gray-900 via-gray-50 dark:via-gray-800 to-white dark:to-gray-900 relative overflow-hidden transition-colors duration-300"
     >
       {/* Background Decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-green-100 rounded-full blur-3xl opacity-20" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-100 rounded-full blur-3xl opacity-20" />
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-green-100 dark:bg-green-900/20 rounded-full blur-3xl opacity-20" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-100 dark:bg-purple-900/20 rounded-full blur-3xl opacity-20" />
       </div>
 
       <div className="container relative z-10">
@@ -167,14 +165,14 @@ export default function FeaturedVendors() {
             transition={{ duration: 0.6 }}
             className="inline-block"
           >
-            <span className="inline-block px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-semibold mb-4">
+            <span className="inline-block px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-semibold mb-4">
               ⭐ Featured Professionals
             </span>
           </motion.div>
-          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
+          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
             Meet Our Most Trusted Vendors
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
             Hand-picked professionals with proven track records of excellence
             and outstanding customer reviews
           </p>
@@ -236,7 +234,7 @@ const VendorCard = ({ vendor, index }: { vendor: any; index: number }) => {
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className="vendor-card-item group"
     >
-      <div className="relative h-full bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 border border-gray-100">
+      <div className="relative h-full bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl dark:shadow-gray-900/50 transition-all duration-500 border border-gray-100 dark:border-gray-700">
         {/* Image Container */}
         <div className="relative h-56 sm:h-64 overflow-hidden">
           <div
@@ -263,11 +261,17 @@ const VendorCard = ({ vendor, index }: { vendor: any; index: number }) => {
 
           {/* Action Icons */}
           <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button title="heart" className="w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg">
-              <Heart size={16} className="text-gray-700" />
+            <button
+              title="heart"
+              className="w-9 h-9 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors shadow-lg"
+            >
+              <Heart size={16} className="text-gray-700 dark:text-gray-300" />
             </button>
-            <button title="share"  className="w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg">
-              <Share2 size={16} className="text-gray-700" />
+            <button
+              title="share"
+              className="w-9 h-9 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-colors shadow-lg"
+            >
+              <Share2 size={16} className="text-gray-700 dark:text-gray-300" />
             </button>
           </div>
 
@@ -285,16 +289,16 @@ const VendorCard = ({ vendor, index }: { vendor: any; index: number }) => {
         <div className="p-5 sm:p-6">
           {/* Title & Category */}
           <div className="mb-3">
-            <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-green-main transition-colors">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 group-hover:text-green-main dark:group-hover:text-green-400 transition-colors">
               {vendor.name}
             </h3>
-            <p className="text-sm text-gray-500 font-medium">
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
               {vendor.category}
             </p>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
             {vendor.description}
           </p>
 
@@ -311,29 +315,31 @@ const VendorCard = ({ vendor, index }: { vendor: any; index: number }) => {
                 />
               ))}
             </div>
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="text-sm font-semibold text-gray-900 dark:text-white">
               {vendor.rating}
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               ({vendor.reviewCount} reviews)
             </span>
           </div>
 
           {/* Location */}
-          <div className="flex items-center gap-1.5 text-gray-600 mb-4">
-            <MapPin size={16} className="text-green-main" />
+          <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 mb-4">
+            <MapPin size={16} className="text-green-main dark:text-green-400" />
             <span className="text-sm">{vendor.location}</span>
           </div>
 
           {/* Price & CTA */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
             <div>
-              <p className="text-xs text-gray-500 mb-0.5">Starting from</p>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
+                Starting from
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
                 KES {vendor.startingPrice}
               </p>
             </div>
-            <button className="group/btn px-5 py-2.5 bg-green-main text-white rounded-lg font-semibold text-sm hover:bg-green-dark transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg">
+            <button className="group/btn px-5 py-2.5 bg-green-main dark:bg-green-600 text-white rounded-lg font-semibold text-sm hover:bg-green-dark dark:hover:bg-green-700 transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-lg">
               View Details
               <ArrowRight
                 size={16}

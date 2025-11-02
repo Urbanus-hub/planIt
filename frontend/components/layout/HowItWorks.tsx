@@ -138,28 +138,28 @@ export default function HowItWorks() {
     <section
       id="how-it-works"
       ref={sectionRef}
-      className="section-padding bg-gray-50 overflow-hidden"
+      className="section-padding bg-gray-50 dark:bg-gray-800 overflow-hidden transition-colors duration-300"
     >
       <div className="container lg:w-[90vw]">
         {/* Section Header */}
         <div className="how-it-works-header text-center mb-12 sm:mb-16">
           <div
             ref={badgeRef}
-            className="inline-block px-4 py-2 bg-green-100 rounded-full mb-4 sm:mb-6"
+            className="inline-block px-4 py-2 bg-green-100 dark:bg-green-900/30 rounded-full mb-4 sm:mb-6"
           >
-            <p className="text-sm sm:text-base font-semibold text-green-700">
+            <p className="text-sm sm:text-base font-semibold text-green-700 dark:text-green-400">
               Simple Process
             </p>
           </div>
           <h2
             ref={headingRef}
-            className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 sm:mb-6"
+            className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6"
           >
             How It Works
           </h2>
           <p
             ref={descriptionRef}
-            className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed"
           >
             Planning an event has never been easier. Follow our simple 4-step
             process to connect with the best vendors and create unforgettable
@@ -174,7 +174,7 @@ export default function HowItWorks() {
 
         {/* CTA Section */}
         <div ref={ctaRef} className="text-center mt-12 sm:mt-16">
-          <button className="inline-flex items-center gap-2 bg-green-main text-white font-semibold px-8 py-4 rounded-full hover:shadow-xl hover:scale-105 hover:bg-green-600 transition-all duration-300 text-base sm:text-lg">
+          <button className="inline-flex items-center gap-2 bg-green-main dark:bg-green-600 text-white font-semibold px-8 py-4 rounded-full hover:shadow-xl hover:scale-105 hover:bg-green-600 dark:hover:bg-green-700 transition-all duration-300 text-base sm:text-lg">
             Start Planning Your Event
             <PartyPopper className="w-5 h-5" />
           </button>

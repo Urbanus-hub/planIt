@@ -104,20 +104,20 @@ export default function CTA() {
   return (
     <section
       ref={sectionRef}
-      className="section-padding bg-gradient-to-b from-white via-gray-50 to-white overflow-hidden relative"
+      className="section-padding bg-gradient-to-b from-white dark:from-gray-900 via-gray-50 dark:via-gray-800 to-white dark:to-gray-900 overflow-hidden relative transition-colors duration-300"
     >
       {/* Background Decorations */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="floating-sparkle absolute top-10 left-10 w-20 h-20 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-30"></div>
-        <div className="floating-sparkle absolute top-20 right-20 w-32 h-32 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl opacity-30"></div>
-        <div className="floating-sparkle absolute bottom-10 left-1/4 w-24 h-24 bg-teal-200 rounded-full mix-blend-multiply filter blur-xl opacity-30"></div>
-        <div className="floating-sparkle absolute bottom-20 right-1/4 w-28 h-28 bg-green-300 rounded-full mix-blend-multiply filter blur-xl opacity-30"></div>
+        <div className="floating-sparkle absolute top-10 left-10 w-20 h-20 bg-green-200 dark:bg-green-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-xl opacity-30"></div>
+        <div className="floating-sparkle absolute top-20 right-20 w-32 h-32 bg-emerald-200 dark:bg-emerald-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-xl opacity-30"></div>
+        <div className="floating-sparkle absolute bottom-10 left-1/4 w-24 h-24 bg-teal-200 dark:bg-teal-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-xl opacity-30"></div>
+        <div className="floating-sparkle absolute bottom-20 right-1/4 w-28 h-28 bg-green-300 dark:bg-green-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-xl opacity-30"></div>
         <Sparkles
-          className="floating-sparkle absolute top-32 left-1/3 text-green-300"
+          className="floating-sparkle absolute top-32 left-1/3 text-green-300 dark:text-green-700"
           size={40}
         />
         <Sparkles
-          className="floating-sparkle absolute bottom-32 right-1/3 text-emerald-300"
+          className="floating-sparkle absolute bottom-32 right-1/3 text-emerald-300 dark:text-emerald-700"
           size={35}
         />
       </div>
@@ -127,15 +127,15 @@ export default function CTA() {
         <div className="text-center mb-12 sm:mb-16">
           <div
             ref={badgeRef}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 to-emerald-100 border border-green-200 rounded-full mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-100 dark:from-green-900/30 to-emerald-100 dark:to-emerald-900/30 border border-green-200 dark:border-green-800 rounded-full mb-6"
           >
-            <Sparkles className="w-4 h-4 text-green-600" />
-            <p className="text-sm font-semibold text-green-700">
+            <Sparkles className="w-4 h-4 text-green-600 dark:text-green-400" />
+            <p className="text-sm font-semibold text-green-700 dark:text-green-400">
               Join Our Community
             </p>
           </div>
 
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6">
+          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-white mb-6">
             Ready to Get Started?
           </h2>
 
@@ -216,13 +216,13 @@ export default function CTA() {
             transition={{ duration: 0.3 }}
             className="relative"
           >
-            <div className="h-full bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 sm:p-10 lg:p-12 shadow-2xl overflow-hidden relative">
+            <div className="h-full bg-gradient-to-br from-gray-900 dark:from-gray-800 to-gray-800 dark:to-gray-700 rounded-3xl p-8 sm:p-10 lg:p-12 shadow-2xl overflow-hidden relative border border-gray-700 dark:border-gray-600">
               {/* Decorative circles */}
               <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/10 rounded-full -mr-20 -mt-20"></div>
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-green-500/10 rounded-full -ml-16 -mb-16"></div>
 
               {/* Badge */}
-              <div className="absolute top-6 right-6 sm:top-8 sm:right-8 px-3 py-1 bg-green-500 text-white text-xs sm:text-sm font-bold rounded-full">
+              <div className="absolute top-6 right-6 sm:top-8 sm:right-8 px-3 py-1 bg-green-500 dark:bg-green-600 text-white text-xs sm:text-sm font-bold rounded-full">
                 Earn More
               </div>
 
@@ -279,33 +279,33 @@ export default function CTA() {
 
         {/* Bottom Stats */}
         <div className="mt-16 sm:mt-20 text-center">
-          <p className="text-gray-600 text-base sm:text-lg mb-6">
+          <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg mb-6">
             Trusted by thousands across Kenya
           </p>
           <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-12">
             <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-green-600">
+              <div className="text-3xl sm:text-4xl font-bold text-green-600 dark:text-green-400">
                 50K+
               </div>
-              <div className="text-sm sm:text-base text-gray-600">
+              <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Active Users
               </div>
             </div>
-            <div className="w-px h-12 bg-gray-300 hidden sm:block"></div>
+            <div className="w-px h-12 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
             <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-green-600">
+              <div className="text-3xl sm:text-4xl font-bold text-green-600 dark:text-green-400">
                 5K+
               </div>
-              <div className="text-sm sm:text-base text-gray-600">
+              <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Verified Vendors
               </div>
             </div>
-            <div className="w-px h-12 bg-gray-300 hidden sm:block"></div>
+            <div className="w-px h-12 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
             <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold text-green-600">
+              <div className="text-3xl sm:text-4xl font-bold text-green-600 dark:text-green-400">
                 98%
               </div>
-              <div className="text-sm sm:text-base text-gray-600">
+              <div className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Satisfaction Rate
               </div>
             </div>

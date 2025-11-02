@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { gsap } from "gsap";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -49,11 +50,11 @@ export default function Navbar() {
       ref={navbarRef}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? "bg-white/95 backdrop-blur-sm shadow-lg py-3"
-          : "bg-white py-5  md:bg-transparent"
+          ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg dark:shadow-gray-800/50 py-3"
+          : "bg-white dark:bg-gray-900 py-5 md:bg-transparent md:dark:bg-transparent"
       }`}
     >
-      <div className="max-w-[90vw] mx-auto  lg:px-5">
+      <div className="max-w-[90vw] mx-auto lg:px-5">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
@@ -62,7 +63,9 @@ export default function Navbar() {
             </div>
             <span
               className={`text-2xl font-bold transition-colors duration-300 ${
-                isScrolled ? "text-gray-900" : "text-black md:text-white"
+                isScrolled
+                  ? "text-gray-900 dark:text-white"
+                  : "text-black md:text-white dark:text-white"
               }`}
             >
               PlanIt
@@ -70,15 +73,15 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1 ">
+          <div className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                   isScrolled
-                    ? "text-gray-700 hover:text-green-main hover:bg-green-50"
-                    : "text-white hover:text-green-light hover:bg-white/10"
+                    ? "text-gray-700 dark:text-gray-300 hover:text-green-main dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-800"
+                    : "text-white hover:text-green-light hover:bg-white/10 dark:hover:bg-white/5"
                 }`}
               >
                 {item.name}
@@ -88,11 +91,12 @@ export default function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-4">
+            <ThemeToggle />
             <Link
               href="#signin"
               className={`font-medium transition-colors ${
                 isScrolled
-                  ? "text-gray-700 hover:text-green-main"
+                  ? "text-gray-700 dark:text-gray-300 hover:text-green-main dark:hover:text-green-400"
                   : "text-white hover:text-green-light"
               }`}
             >
@@ -105,7 +109,9 @@ export default function Navbar() {
           <button
             onClick={toggleMobileMenu}
             className={`md:hidden ${
-              isScrolled ? "text-gray-700" : "text-black md:text-white"
+              isScrolled
+                ? "text-gray-700 dark:text-gray-300"
+                : "text-black md:text-white dark:text-white"
             }`}
             aria-label="Toggle menu"
           >
@@ -116,22 +122,28 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg rounded-b-lg mt-2 px-6">
+        <div className="md:hidden bg-white dark:bg-gray-900 shadow-lg dark:shadow-gray-800/50 rounded-b-lg mt-2 px-6">
           <div className="px-4 py-4 space-y-4">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="block font-medium text-gray-700 hover:text-green-main"
+                className="block font-medium text-gray-700 dark:text-gray-300 hover:text-green-main dark:hover:text-green-400"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.name}
               </Link>
             ))}
-            <div className="pt-4 border-t border-gray-200 space-y-4">
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Theme
+                </span>
+                <ThemeToggle />
+              </div>
               <Link
                 href="#signin"
-                className="block font-medium text-gray-700 hover:text-green-main"
+                className="block font-medium text-gray-700 dark:text-gray-300 hover:text-green-main dark:hover:text-green-400"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Sign In

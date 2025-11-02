@@ -141,36 +141,37 @@ export default function WhyChoosePlanIt() {
   return (
     <section
       ref={sectionRef}
-      className="section-padding bg-gradient-to-b from-white via-green-50/30 to-white overflow-hidden relative"
+      className="section-padding bg-gradient-to-b from-white dark:from-gray-900 via-green-50/30 dark:via-gray-900 to-white dark:to-gray-900 overflow-hidden relative transition-colors duration-300"
     >
       {/* Background decoration */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-      <div className="absolute top-40 right-10 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+      <div className="absolute top-20 left-10 w-72 h-72 bg-green-200 dark:bg-green-500/10 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-20 dark:opacity-30 animate-blob"></div>
+      <div className="absolute top-40 right-10 w-72 h-72 bg-emerald-200 dark:bg-emerald-500/10 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-20 dark:opacity-30 animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-teal-200 dark:bg-teal-500/10 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-20 dark:opacity-30 animate-blob animation-delay-4000"></div>
 
       <div className="container lg:w-[90%] mx-auto px-4 sm:px-6 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-16 sm:mb-20">
           <div
             ref={badgeRef}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 border border-green-200 rounded-full mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-full mb-6"
           >
-            <CheckCircle2 className="w-4 h-4 text-green-600" />
-            <p className="text-sm font-semibold text-green-700">
+            <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+            <p className="text-sm font-semibold text-green-700 dark:text-green-400">
               Trusted by Thousands
             </p>
           </div>
 
           <h2
             ref={headingRef}
-            className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6"
+            className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6"
           >
-            Why Choose <span className="text-green-600">PlanIt</span>?
+            Why Choose{" "}
+            <span className="text-green-600 dark:text-green-400">PlanIt</span>?
           </h2>
 
           <p
             ref={descriptionRef}
-            className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed"
           >
             More than just a marketplace - we're your partner in creating
             unforgettable events with confidence
@@ -190,10 +191,22 @@ export default function WhyChoosePlanIt() {
               transition={{ duration: 0.3 }}
             >
               <div
-                className={`relative h-full bg-gradient-to-br ${feature.bgGradient} rounded-2xl p-6 sm:p-8 border border-green-100 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden`}
+                className={`relative h-full rounded-2xl p-6 sm:p-8 border shadow-lg hover:shadow-2xl dark:shadow-green-900/20 dark:hover:shadow-green-500/20 transition-all duration-300 overflow-hidden
+                  ${feature.bgGradient}
+                  dark:bg-gradient-to-br dark:from-gray-800/95 dark:via-gray-800/90 dark:to-gray-700/95
+                  border-green-100 dark:border-green-800/50
+                  backdrop-blur-sm
+                  dark:ring-1 dark:ring-green-500/10
+                `}
               >
                 {/* Decorative corner accent */}
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white/50 rounded-bl-full"></div>
+                <div className="absolute top-0 right-0 w-24 h-24 bg-white/30 dark:bg-green-500/5 rounded-bl-full"></div>
+                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-green-100/40 dark:bg-green-500/5 rounded-full blur-2xl"></div>
+
+                {/* Glow effect on hover - visible only in dark mode */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 dark:opacity-0 dark:group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-emerald-500/5 rounded-2xl"></div>
+                </div>
 
                 {/* Icon with gradient background */}
                 <div className="relative mb-6">
@@ -202,26 +215,26 @@ export default function WhyChoosePlanIt() {
                   >
                     <feature.icon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                   </div>
-                  {/* Icon shadow */}
+                  {/* Icon shadow - enhanced for dark mode */}
                   <div
-                    className={`absolute top-2 left-2 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br ${feature.gradient} opacity-20 blur-md -z-10`}
+                    className={`absolute top-2 left-2 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br ${feature.gradient} opacity-20 dark:opacity-30 blur-md -z-10`}
                   ></div>
                 </div>
 
                 {/* Content */}
                 <div className="relative z-10">
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 group-hover:text-green-700 transition-colors duration-300">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors duration-300">
                     {feature.title}
                   </h3>
 
-                  <p className="text-sm sm:text-base text-gray-600 mb-6 leading-relaxed">
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
                     {feature.description}
                   </p>
 
                   {/* Stat Badge */}
-                  <div className="stat-badge inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-green-200 shadow-md">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-bold text-gray-800">
+                  <div className="stat-badge inline-flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm rounded-full border border-green-200 dark:border-green-700/50 shadow-md">
+                    <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
                       {feature.stat}
                     </span>
                   </div>
@@ -229,7 +242,7 @@ export default function WhyChoosePlanIt() {
 
                 {/* Hover arrow indicator */}
                 <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                  <ArrowRight className="w-6 h-6 text-green-600" />
+                  <ArrowRight className="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
             </motion.div>
@@ -238,16 +251,19 @@ export default function WhyChoosePlanIt() {
 
         {/* Bottom CTA */}
         <div className="text-center mt-16">
-          <p className="text-gray-600 text-lg mb-4">
-            Join <span className="font-bold text-green-600">50,000+</span> happy
-            event planners
+          <p className="text-gray-600 dark:text-gray-400 text-lg mb-4">
+            Join{" "}
+            <span className="font-bold text-green-600 dark:text-green-400">
+              50,000+
+            </span>{" "}
+            happy event planners
           </p>
           <div className="flex flex-wrap justify-center gap-4 items-center">
             <div className="flex -space-x-2">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="w-10 h-10 rounded-full border-2 border-white bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white text-xs font-bold"
+                  className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-800 bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white text-xs font-bold"
                 >
                   {String.fromCharCode(64 + i)}
                 </div>
@@ -257,7 +273,7 @@ export default function WhyChoosePlanIt() {
               {[1, 2, 3, 4, 5].map((i) => (
                 <Star key={i} className="w-5 h-5 fill-current" />
               ))}
-              <span className="ml-2 text-gray-700 font-semibold">
+              <span className="ml-2 text-gray-700 dark:text-gray-300 font-semibold">
                 4.9/5 Rating
               </span>
             </div>

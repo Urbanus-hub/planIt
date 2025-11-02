@@ -231,7 +231,7 @@ export default function Footer() {
                       href={social.href}
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       whileTap={{ scale: 0.9 }}
-                      className={`social-icon w-11 h-11 bg-gray-800 ${social.color} text-white rounded-xl flex items-center justify-center transition-all duration-300 hover:shadow-lg group`}
+                      className={`social-icon w-11 h-11 bg-gray-700/50 ${social.color} text-white rounded-xl flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:bg-opacity-100 group backdrop-blur-sm border border-gray-600/50`}
                       aria-label={social.name}
                     >
                       <social.icon className="w-5 h-5" />

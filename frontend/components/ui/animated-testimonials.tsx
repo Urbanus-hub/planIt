@@ -87,12 +87,12 @@ export const AnimatedTestimonials = ({
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl"
+                    className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl p-4 shadow-xl"
                   >
-                    <h3 className="text-xl font-bold text-gray-900">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                       {testimonials[active].name}
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {testimonials[active].designation}
                     </p>
                     {testimonials[active].rating && (
@@ -129,7 +129,7 @@ export const AnimatedTestimonials = ({
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring" }}
               >
-                <Quote className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 fill-green-100" />
+                <Quote className="w-12 h-12 sm:w-16 sm:h-16 text-green-500 dark:text-green-400 fill-green-100 dark:fill-green-900/30" />
               </motion.div>
 
               {/* Quote Text */}
@@ -137,7 +137,7 @@ export const AnimatedTestimonials = ({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="text-xl sm:text-2xl lg:text-3xl font-medium text-gray-900 leading-relaxed"
+                className="text-xl sm:text-2xl lg:text-3xl font-medium text-gray-900 dark:text-white leading-relaxed"
               >
                 "{testimonials[active].quote}"
               </motion.p>
@@ -146,13 +146,13 @@ export const AnimatedTestimonials = ({
               <div className="flex gap-2 pt-4">
                 {testimonials.map((_, index) => (
                   <button
-                  title="Go to testimonial {index + 1}"
+                    title="Go to testimonial {index + 1}"
                     key={index}
                     onClick={() => setActive(index)}
                     className={`h-1 rounded-full transition-all duration-300 ${
                       index === active
-                        ? "w-8 bg-green-600"
-                        : "w-4 bg-gray-300 hover:bg-gray-400"
+                        ? "w-8 bg-green-600 dark:bg-green-500"
+                        : "w-4 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
                     }`}
                   />
                 ))}
@@ -163,16 +163,16 @@ export const AnimatedTestimonials = ({
           {/* Navigation Buttons */}
           <div className="flex gap-4 pt-8">
             <button
-            title="Previous testimonial"
+              title="Previous testimonial"
               onClick={handlePrev}
-              className="group h-12 w-12 rounded-full bg-white border-2 border-gray-200 hover:border-green-500 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:scale-110"
+              className="group h-12 w-12 rounded-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-400 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:scale-110"
             >
-              <ChevronLeft className="w-6 h-6 text-gray-600 group-hover:text-green-600 transition-colors" />
+              <ChevronLeft className="w-6 h-6 text-gray-600 dark:text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors" />
             </button>
             <button
-            title="Next testimonial"
+              title="Next testimonial"
               onClick={handleNext}
-              className="group h-12 w-12 rounded-full bg-green-600 hover:bg-green-700 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:scale-110"
+              className="group h-12 w-12 rounded-full bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:scale-110"
             >
               <ChevronRight className="w-6 h-6 text-white" />
             </button>
