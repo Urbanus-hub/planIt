@@ -1,13 +1,13 @@
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
-// Set default animation settings
+// Set default animation settings - faster for better UX
 gsap.defaults({
-  ease: 'power3.out',
-  duration: 0.8
+  ease: "power2.out",
+  duration: 0.4,
 });
 
 export { gsap, ScrollTrigger };

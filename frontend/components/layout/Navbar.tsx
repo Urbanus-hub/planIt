@@ -93,7 +93,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             <ThemeToggle />
             <Link
-              href="#signin"
+              href="/login"
               className={`font-medium transition-colors ${
                 isScrolled
                   ? "text-gray-700 dark:text-gray-300 hover:text-green-main dark:hover:text-green-400"
@@ -102,7 +102,7 @@ export default function Navbar() {
             >
               Sign In
             </Link>
-            <button className="btn-primary">Get Started</button>
+            <Link className="btn-primary" href="/register">Get Started</Link>
           </div>
 
           {/* Mobile Menu Button */}

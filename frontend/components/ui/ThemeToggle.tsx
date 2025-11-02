@@ -28,7 +28,7 @@ export default function ThemeToggle() {
       aria-label="Toggle theme"
     >
       {/* Background gradient when dark */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 dark:opacity-100 transition-opacity duration-300"></div>
+      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-dark via-green-main to-green-light opacity-0 dark:opacity-100 transition-opacity duration-300"></div>
 
       {/* Sliding circle */}
       <motion.div
