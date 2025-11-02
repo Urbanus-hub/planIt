@@ -37,32 +37,25 @@ export const AnimatedTestimonials = ({
     }
   }, [autoplay]);
 
-  const randomRotateY = () => {
-    return Math.floor(Math.random() * 21) - 10;
-  };
-
   return (
     <div className="w-full mx-auto px-4 md:px-8">
       <div className="relative grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-20 items-center">
         {/* Image Section */}
         <div className="relative h-[400px] sm:h-[500px] md:h-[600px] w-full order-2 md:order-1">
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             <motion.div
               key={active}
               initial={{
                 opacity: 0,
                 scale: 0.9,
-                rotateY: randomRotateY(),
               }}
               animate={{
                 opacity: 1,
                 scale: 1,
-                rotateY: 0,
               }}
               exit={{
                 opacity: 0,
                 scale: 0.9,
-                rotateY: randomRotateY(),
               }}
               transition={{
                 duration: 0.7,

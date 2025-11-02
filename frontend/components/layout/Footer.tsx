@@ -221,20 +221,20 @@ export default function Footer() {
 
               {/* Social Links */}
               <div>
-                <p className="text-sm font-semibold text-white mb-3">
+                <p className="text-sm font-semibold text-white mb-3 ">
                   Follow Us
                 </p>
-                <div className="flex gap-3">
+                <div className="flex gap-3 ">
                   {socialLinks.map((social, index) => (
                     <motion.a
                       key={index}
                       href={social.href}
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       whileTap={{ scale: 0.9 }}
-                      className={`social-icon w-11 h-11 bg-gray-700/50 ${social.color} text-white rounded-xl flex items-center justify-center transition-all duration-300 hover:shadow-lg hover:bg-opacity-100 group backdrop-blur-sm border border-gray-600/50`}
+                      className={`social-icon w-11 h-11 bg-white/10 ${social.color} rounded-xl flex items-center justify-center transition-all duration-300 hover:shadow-lg group backdrop-blur-sm border-2 border-white/20 hover:border-white/40`}
                       aria-label={social.name}
                     >
-                      <social.icon className="w-5 h-5" />
+                      <social.icon className="w-5 h-5 text-white group-hover:text-white" />
                     </motion.a>
                   ))}
                 </div>
@@ -256,7 +256,7 @@ export default function Footer() {
                     <li key={linkIndex}>
                       <a
                         href={link.href}
-                        className="text-gray-400 hover:text-green-400 transition-colors flex items-center gap-2 group text-sm sm:text-base"
+                        className="text-gray-300 hover:text-green-400 transition-colors flex items-center gap-2 group text-sm sm:text-base"
                       >
                         <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity -ml-4 group-hover:ml-0 duration-300">
                           {link.icon}
