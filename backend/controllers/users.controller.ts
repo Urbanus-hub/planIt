@@ -77,11 +77,18 @@ export const registerUser = async (
     // Return user without password
     const { password: _, ...userData } = user.toObject();
 
+    // Set cookie
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.status(201).json({
       success: true,
       message: "User registered successfully",
       data: userData,
-      token,
     });
   } catch (error) {
     next(error);
@@ -146,6 +153,14 @@ export const loginUser = async (
       { expiresIn: "7d" }
     );
 
+    // Set cookie
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     // Return user without password
     const { password: _, ...userData } = user.toObject();
 
@@ -153,7 +168,6 @@ export const loginUser = async (
       success: true,
       message: "Login successful",
       data: userData,
-      token,
     });
   } catch (error) {
     next(error);
@@ -165,6 +179,13 @@ export const logoutUser = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
+  // Clear the auth cookie
+  res.clearCookie("authToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  });
+
   res.status(200).json({
     success: true,
     message: "Logout successful",

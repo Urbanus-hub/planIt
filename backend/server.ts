@@ -1,13 +1,22 @@
 import express, { Request, Response } from "express";
-import { PORT } from "./configs/env";
+import { PORT, CLIENT_URL } from "./configs/env";
 import connectDB from "./configs/db";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import userRoutes from "./routes/user.routes";
 import handleGlobalError from "./middlewares/globalErrorsHandler.middleware";
 import servicesRouter from "./routes/service.route";
 import BookingRouter from "./routes/bookings.route";
 
 const app = express(); // express app instance
+
+// CORS configuration to allow cookies
+app.use(
+  cors({
+    origin: CLIENT_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
 
 // middlewares
 app.use(express.json());
@@ -20,7 +29,7 @@ app.use("/api/services", servicesRouter);
 app.use("/api/bookings", BookingRouter);
 
 app.get("/", (req: Request, res: Response) => {
-  res.json({message:"API is running..."});
+  res.json({ message: "API is running..." });
 }); // basic route
 
 // global error handler
@@ -29,6 +38,6 @@ app.use(handleGlobalError);
 // spin server
 const port = PORT || 5000;
 app.listen(port, async () => {
-    await connectDB();
+  await connectDB();
   console.log(`Server running at http://localhost:${port}`);
 });

@@ -7,9 +7,10 @@ interface EnvConfig {
   MONGO_URI: string;
   JWT_SECRET: string;
   NODE_ENV: string;
+  CLIENT_URL?: string;
 }
 
-const { PORT, MONGO_URI, JWT_SECRET, NODE_ENV } =
+const { PORT, MONGO_URI, JWT_SECRET, NODE_ENV, CLIENT_URL } =
   process.env as unknown as EnvConfig;
 
 if (!MONGO_URI || !JWT_SECRET) {
@@ -18,4 +19,4 @@ if (!MONGO_URI || !JWT_SECRET) {
   );
 }
 
-export { PORT, MONGO_URI, JWT_SECRET, NODE_ENV };
+export { PORT, MONGO_URI, JWT_SECRET, NODE_ENV, CLIENT_URL };

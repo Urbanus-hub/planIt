@@ -11,11 +11,12 @@ import {
   Briefcase,
   Building2,
   ArrowRight,
-  Sparkles,
   Phone,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 type UserRole = "client" | "vendor";
 
@@ -25,12 +26,52 @@ export function SignupForm({
 }: React.ComponentProps<"form">) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>("client");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+    businessName: "",
+  });
+  const [error, setError] = useState("");
+  const { register } = useAuth();
+  const router = useRouter();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
     setIsLoading(true);
-    // Add your login logic here
-    setTimeout(() => setIsLoading(false), 2000);
+
+    try {
+      const user = await register({
+        ...formData,
+        role: selectedRole,
+        businessName: selectedRole === "vendor" ? formData.businessName : undefined,
+      });
+      
+      // Redirect based on user role
+      switch (user.role) {
+        case "admin":
+          router.push("/admin");
+          break;
+        case "vendor":
+          router.push("/vendors");
+          break;
+        case "client":
+          router.push("/clients");
+          break;
+        default:
+          router.push("/");
+      }
+    } catch (err: any) {
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -44,6 +85,12 @@ export function SignupForm({
           Join PlanIt and start planning today
         </p>
       </div>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
+          {error}
+        </div>
+      )}
 
       <form
         className={cn("space-y-5", className)}
@@ -131,8 +178,11 @@ export function SignupForm({
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <Input
                 id="name"
+                name="name"
                 type="text"
                 placeholder="John Doe"
+                value={formData.name}
+                onChange={handleInputChange}
                 className="pl-10 h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 focus:border-green-500 dark:focus:border-green-400"
                 required
               />
@@ -151,8 +201,11 @@ export function SignupForm({
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="you@example.com"
+                value={formData.email}
+                onChange={handleInputChange}
                 className="pl-10 h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 focus:border-green-500 dark:focus:border-green-400"
                 required
               />
@@ -171,8 +224,11 @@ export function SignupForm({
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <Input
                 id="password"
+                name="password"
                 type="password"
                 placeholder="Min. 6 characters"
+                value={formData.password}
+                onChange={handleInputChange}
                 className="pl-10 h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 focus:border-green-500 dark:focus:border-green-400"
                 minLength={6}
                 required
@@ -193,8 +249,11 @@ export function SignupForm({
                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
                   id="businessName"
+                  name="businessName"
                   type="text"
                   placeholder="Your Company Name"
+                  value={formData.businessName}
+                  onChange={handleInputChange}
                   className="pl-10 h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 focus:border-green-500 dark:focus:border-green-400"
                   required={selectedRole === "vendor"}
                 />
