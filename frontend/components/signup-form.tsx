@@ -50,9 +50,10 @@ export function SignupForm({
       const user = await register({
         ...formData,
         role: selectedRole,
-        businessName: selectedRole === "vendor" ? formData.businessName : undefined,
+        businessName:
+          selectedRole === "vendor" ? formData.businessName : undefined,
       });
-      
+
       // Redirect based on user role
       switch (user.role) {
         case "admin":

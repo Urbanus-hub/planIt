@@ -82,28 +82,28 @@ export const authAPI = {
 // API methods for services
 export const servicesAPI = {
   getAll: (params?: any) => api.get("/services", { params }),
-  
+
   getById: (id: string) => api.get(`/services/${id}`),
-  
+
   create: (data: any) => api.post("/services", data),
-  
+
   update: (id: string, data: any) => api.put(`/services/${id}`, data),
-  
+
   delete: (id: string) => api.delete(`/services/${id}`),
 };
 
 // API methods for bookings
 export const bookingsAPI = {
   getAll: (params?: any) => api.get("/bookings", { params }),
-  
+
   getById: (id: string) => api.get(`/bookings/${id}`),
-  
+
   create: (data: any) => api.post("/bookings", data),
-  
+
   update: (id: string, data: any) => api.put(`/bookings/${id}`, data),
-  
+
   cancel: (id: string) => api.patch(`/bookings/${id}/cancel`),
-  
+
   delete: (id: string) => api.delete(`/bookings/${id}`),
 };
 

@@ -14,21 +14,27 @@ export default function ClientDashboard() {
                 My Bookings
               </h3>
               <p className="text-3xl font-bold text-green-600">0</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Active bookings</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                Active bookings
+              </p>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 Upcoming Events
               </h3>
               <p className="text-3xl font-bold text-green-600">0</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Scheduled events</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                Scheduled events
+              </p>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 Saved Vendors
               </h3>
               <p className="text-3xl font-bold text-green-600">0</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Favorited</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                Favorited
+              </p>
             </div>
           </div>
         </div>

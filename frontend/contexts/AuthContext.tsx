@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect, createContext, useContext, ReactNode } from "react";
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  ReactNode,
+} from "react";
 import { authAPI } from "@/lib/api";
 import { User, LoginData, RegisterData } from "@/lib/types";
 

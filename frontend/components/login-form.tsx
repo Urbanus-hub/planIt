@@ -28,7 +28,7 @@ export function LoginForm({
 
     try {
       const user = await login({ email, password });
-      
+
       // Redirect based on user role
       switch (user.role) {
         case "admin":

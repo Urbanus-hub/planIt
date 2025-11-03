@@ -14,28 +14,36 @@ export default function VendorDashboard() {
                 Total Bookings
               </h3>
               <p className="text-3xl font-bold text-green-600">0</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">This month</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                This month
+              </p>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 Active Services
               </h3>
               <p className="text-3xl font-bold text-green-600">0</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Listed services</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                Listed services
+              </p>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 Revenue
               </h3>
               <p className="text-3xl font-bold text-green-600">KSh 0</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">This month</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                This month
+              </p>
             </div>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 Reviews
               </h3>
               <p className="text-3xl font-bold text-green-600">0</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Average rating</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                Average rating
+              </p>
             </div>
           </div>
         </div>
