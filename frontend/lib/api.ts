@@ -1,4 +1,5 @@
 import axios from "axios";
+import { User } from "./types";
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -23,9 +24,15 @@ api.interceptors.response.use(
         case 401:
           // Unauthorized - token expired or invalid
           console.error("Unauthorized:", message);
-          // Redirect to login or refresh token
+          // Redirect to login only if not already on auth pages
           if (typeof window !== "undefined") {
-            window.location.href = "/login";
+            const currentPath = window.location.pathname;
+            if (
+              !currentPath.includes("/login") &&
+              !currentPath.includes("/register")
+            ) {
+              window.location.href = "/login";
+            }
           }
           break;
         case 403:

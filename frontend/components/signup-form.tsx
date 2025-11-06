@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { authAPI } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
 type UserRole = "client" | "vendor";
@@ -34,7 +34,7 @@ export function SignupForm({
     businessName: "",
   });
   const [error, setError] = useState("");
-  const { register } = useAuth();
+ 
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,7 +47,7 @@ export function SignupForm({
     setIsLoading(true);
 
     try {
-      const user = await register({
+      const user = await  authAPI.register({
         ...formData,
         role: selectedRole,
         businessName:
@@ -55,19 +55,10 @@ export function SignupForm({
       });
 
       // Redirect based on user role
-      switch (user.role) {
-        case "admin":
-          router.push("/admin");
-          break;
-        case "vendor":
-          router.push("/vendors");
-          break;
-        case "client":
-          router.push("/clients");
-          break;
-        default:
-          router.push("/");
+      if(user){
+        router.push('/login');
       }
+     
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.");
     } finally {

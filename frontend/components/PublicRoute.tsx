@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface PublicRouteProps {
   children: React.ReactNode;
@@ -15,22 +15,24 @@ interface PublicRouteProps {
 export function PublicRoute({ children }: PublicRouteProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && !hasRedirected.current) {
+      hasRedirected.current = true;
       // User is already authenticated, redirect to their dashboard
       switch (user.role) {
         case "admin":
-          router.push("/admin");
+          router.replace("/admin");
           break;
         case "vendor":
-          router.push("/vendors");
+          router.replace("/vendors");
           break;
         case "client":
-          router.push("/clients");
+          router.replace("/clients");
           break;
         default:
-          router.push("/");
+          router.replace("/");
       }
     }
   }, [user, loading, router]);

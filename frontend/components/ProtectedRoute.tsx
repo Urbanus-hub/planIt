@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -17,30 +17,33 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && !hasRedirected.current) {
       // Not authenticated
       if (!user) {
-        router.push(redirectTo);
+        hasRedirected.current = true;
+        router.replace(redirectTo);
         return;
       }
 
       // Check if user role is allowed
       if (allowedRoles && !allowedRoles.includes(user.role)) {
+        hasRedirected.current = true;
         // Redirect based on role
         switch (user.role) {
           case "admin":
-            router.push("/admin");
+            router.replace("/admin");
             break;
           case "vendor":
-            router.push("/vendors");
+            router.replace("/vendors");
             break;
           case "client":
-            router.push("/clients");
+            router.replace("/clients");
             break;
           default:
-            router.push("/");
+            router.replace("/");
         }
       }
     }

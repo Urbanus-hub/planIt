@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { authAPI } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
 export function LoginForm({
@@ -18,7 +18,7 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { login } = useAuth();
+  
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -27,22 +27,26 @@ export function LoginForm({
     setIsLoading(true);
 
     try {
-      const user = await login({ email, password });
-
-      // Redirect based on user role
-      switch (user.role) {
+      const user = await authAPI.login({ email, password });
+      if(user){
+        console.log(user);
+         // Redirect based on user role
+      switch (user?.data.data.role) {
         case "admin":
           router.push("/admin");
           break;
         case "vendor":
-          router.push("/vendors");
+          router.push("/vendor");
           break;
         case "client":
-          router.push("/clients");
+          router.push("/client");
           break;
         default:
           router.push("/");
       }
+      }
+      
+     
     } catch (err: any) {
       setError(err.message || "Login failed. Please try again.");
     } finally {

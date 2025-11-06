@@ -67,23 +67,23 @@ export const registerUser = async (
       isVerified: false,
     });
 
-    // Generate token
-    const token = jwt.sign(
-      { id: user?._id?.toString(), email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    // // Generate token
+    // const token = jwt.sign(
+    //   { id: user?._id?.toString(), email: user.email, role: user.role },
+    //   JWT_SECRET,
+    //   { expiresIn: "7d" }
+    // );
 
     // Return user without password
     const { password: _, ...userData } = user.toObject();
 
-    // Set cookie
-    res.cookie("authToken", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    // // Set cookie
+    // res.cookie("authToken", token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    //   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    // });
 
     res.status(201).json({
       success: true,
@@ -94,6 +94,8 @@ export const registerUser = async (
     next(error);
   }
 };
+
+//log in user
 
 export const loginUser = async (
   req: Request,
@@ -119,6 +121,7 @@ export const loginUser = async (
       res.status(401).json({
         success: false,
         message: "Invalid credentials",
+       
       });
       return;
     }

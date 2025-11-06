@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -36,7 +37,9 @@ export default function RootLayout({
         className={`${inter.variable} ${playfair.variable} ${outfit.variable} font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300`}
       >
         <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
+        
+            {children}
+        
         </ThemeProvider>
       </body>
     </html>
