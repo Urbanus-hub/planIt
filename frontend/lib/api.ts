@@ -1,5 +1,6 @@
 import axios from "axios";
 import { User } from "./types";
+import { toast } from "sonner";
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -23,7 +24,6 @@ api.interceptors.response.use(
       switch (status) {
         case 401:
           // Unauthorized - token expired or invalid
-          console.error("Unauthorized:", message);
           // Redirect to login only if not already on auth pages
           if (typeof window !== "undefined") {
             const currentPath = window.location.pathname;
@@ -31,31 +31,53 @@ api.interceptors.response.use(
               !currentPath.includes("/login") &&
               !currentPath.includes("/register")
             ) {
+              toast.error("Session expired", {
+                description: "Please log in again to continue",
+              });
               window.location.href = "/login";
             }
           }
           break;
         case 403:
           // Forbidden - insufficient permissions
-          console.error("Forbidden:", message);
+          toast.error("Access denied", {
+            description:
+              message || "You don't have permission to access this resource",
+          });
           break;
         case 404:
           // Not found
-          console.error("Not found:", message);
+          toast.error("Not found", {
+            description: message || "The requested resource was not found",
+          });
           break;
         case 500:
           // Server error
-          console.error("Server error:", message);
+          toast.error("Server error", {
+            description:
+              message ||
+              "Something went wrong on our end. Please try again later.",
+          });
           break;
         default:
-          console.error("Error:", message);
+          // Other errors
+          if (status >= 400) {
+            toast.error("Error", {
+              description: message,
+            });
+          }
       }
     } else if (error.request) {
       // Request made but no response received
-      console.error("Network error: No response from server");
+      toast.error("Network error", {
+        description:
+          "Unable to connect to the server. Please check your internet connection.",
+      });
     } else {
       // Something else happened
-      console.error("Error:", error.message);
+      toast.error("Error", {
+        description: error.message || "An unexpected error occurred",
+      });
     }
 
     return Promise.reject(error);

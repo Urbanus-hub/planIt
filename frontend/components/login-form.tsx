@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { authAPI } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function LoginForm({
   className,
@@ -17,38 +18,44 @@ export function LoginForm({
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  
+
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
     setIsLoading(true);
 
     try {
-      const user = await authAPI.login({ email, password });
-      if(user){
-        console.log(user);
-         // Redirect based on user role
-      switch (user?.data.data.role) {
-        case "admin":
-          router.push("/admin");
-          break;
-        case "vendor":
-          router.push("/vendor");
-          break;
-        case "client":
-          router.push("/client");
-          break;
-        default:
-          router.push("/");
+      const response = await authAPI.login({ email, password });
+
+      if (response.data.success) {
+        const user = response.data.data;
+
+        toast.success("Welcome back!", {
+          description: `You're now logged in as ${user.name}`,
+        });
+
+        // Redirect based on user role
+        switch (user.role) {
+          case "admin":
+            router.push("/admin");
+            break;
+          case "vendor":
+            router.push("/vendor");
+            break;
+          case "client":
+            router.push("/client");
+            break;
+          default:
+            router.push("/");
+        }
       }
-      }
-      
-     
     } catch (err: any) {
-      setError(err.message || "Login failed. Please try again.");
+      toast.error("Login failed", {
+        description:
+          err.response?.data?.message ||
+          "Invalid email or password. Please try again.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -65,12 +72,6 @@ export function LoginForm({
           Sign in to continue to PlanIt
         </p>
       </div>
-
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
-          {error}
-        </div>
-      )}
 
       <form
         className={cn("flex flex-col gap-5", className)}

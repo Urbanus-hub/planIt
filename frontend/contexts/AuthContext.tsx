@@ -9,6 +9,7 @@ import {
 } from "react";
 import { authAPI } from "@/lib/api";
 import { User, LoginData, RegisterData } from "@/lib/types";
+import { toast } from "sonner";
 
 interface AuthContextType {
   user: User | null;
@@ -39,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(response.data.data);
       }
     } catch (err) {
-      console.error("Auth check failed:", err);
+      // Silent fail on initial auth check
       setUser(null);
     } finally {
       setLoading(false);
@@ -88,8 +89,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await authAPI.logout();
       setUser(null);
+      toast.success("Logged out successfully", {
+        description: "You have been signed out of your account",
+      });
     } catch (err) {
-      console.error("Logout failed:", err);
+      toast.error("Logout failed", {
+        description: "There was a problem logging you out. Please try again.",
+      });
     }
   };
 

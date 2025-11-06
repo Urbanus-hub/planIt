@@ -3,7 +3,7 @@ import { Inter, Playfair_Display, Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,9 +37,8 @@ export default function RootLayout({
         className={`${inter.variable} ${playfair.variable} ${outfit.variable} font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300`}
       >
         <ThemeProvider>
-        
-            {children}
-        
+          <AuthProvider>{children}</AuthProvider>
+          <Toaster position="top-right" />
         </ThemeProvider>
       </body>
     </html>

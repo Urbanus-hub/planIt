@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { authAPI } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 type UserRole = "client" | "vendor";
 
@@ -33,8 +34,7 @@ export function SignupForm({
     phone: "",
     businessName: "",
   });
-  const [error, setError] = useState("");
- 
+
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,24 +43,44 @@ export function SignupForm({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
     setIsLoading(true);
 
     try {
-      const user = await  authAPI.register({
+      const response = await authAPI.register({
         ...formData,
         role: selectedRole,
         businessName:
           selectedRole === "vendor" ? formData.businessName : undefined,
       });
 
-      // Redirect based on user role
-      if(user){
-        router.push('/login');
+      if (response.data.success) {
+        const user = response.data.data;
+
+        toast.success("Account created successfully!", {
+          description: `Welcome to PlanIt, ${user.name}! Redirecting to your dashboard...`,
+        });
+
+        // Redirect based on user role
+        switch (user.role) {
+          case "admin":
+            router.push("/admin");
+            break;
+          case "vendor":
+            router.push("/vendors");
+            break;
+          case "client":
+            router.push("/clients");
+            break;
+          default:
+            router.push("/");
+        }
       }
-     
     } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.");
+      toast.error("Registration failed", {
+        description:
+          err.response?.data?.message ||
+          "Unable to create account. Please try again.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -77,12 +97,6 @@ export function SignupForm({
           Join PlanIt and start planning today
         </p>
       </div>
-
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
-          {error}
-        </div>
-      )}
 
       <form
         className={cn("space-y-5", className)}
