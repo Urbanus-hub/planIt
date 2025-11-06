@@ -1,28 +1,25 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconUsers,
-} from "@tabler/icons-react"
+  Calendar,
+  LayoutDashboard,
+  Users,
+  Briefcase,
+  Settings,
+  HelpCircle,
+  Heart,
+  Package,
+  DollarSign,
+  Star,
+  BarChart3,
+  Bell,
+  LogOut,
+} from "lucide-react";
 
-import { NavDocuments } from "@/components/nav-documents"
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavSecondary } from "@/components/nav-secondary";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -31,151 +28,98 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
-    },
-    {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
-  ],
-}
+} from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user, logout } = useAuth();
+
+  // Role-based navigation
+  const getNavigation = () => {
+    const role = user?.role;
+
+    if (role === "admin") {
+      return {
+        main: [
+          { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
+          { title: "Users", url: "/admin/users", icon: Users },
+          { title: "Vendors", url: "/admin/vendors", icon: Briefcase },
+          { title: "Bookings", url: "/admin/bookings", icon: Calendar },
+          { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
+        ],
+      };
+    }
+
+    if (role === "client") {
+      return {
+        main: [
+          { title: "Dashboard", url: "/client", icon: LayoutDashboard },
+          { title: "Browse Vendors", url: "/client/vendors", icon: Briefcase },
+          { title: "My Bookings", url: "/client/bookings", icon: Calendar },
+          { title: "Favorites", url: "/client/favorites", icon: Heart },
+          { title: "Payments", url: "/client/payments", icon: DollarSign },
+        ],
+      };
+    }
+
+    if (role === "vendor") {
+      return {
+        main: [
+          { title: "Dashboard", url: "/vendor", icon: LayoutDashboard },
+          { title: "Bookings", url: "/vendor/bookings", icon: Calendar },
+          { title: "Services", url: "/vendor/services", icon: Package },
+          { title: "Reviews", url: "/vendor/reviews", icon: Star },
+          { title: "Analytics", url: "/vendor/analytics", icon: BarChart3 },
+        ],
+      };
+    }
+
+    return { main: [] };
+  };
+
+  const navigation = getNavigation();
+
+  const secondaryNav = [
+    { title: "Notifications", url: "#", icon: Bell },
+    { title: "Settings", url: "#", icon: Settings },
+    { title: "Help & Support", url: "#", icon: HelpCircle },
+  ];
+
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+    <Sidebar collapsible="icon" variant="sidebar" {...props}>
+      <SidebarHeader className="border-b border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+            <SidebarMenuButton asChild size="lg" className="h-12">
+              <a href="/" className="flex items-center gap-3 px-2">
+                <div className="flex aspect-square size-9 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-green-600 text-white shadow-sm">
+                  <Calendar className="size-5" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-bold text-lg">PlanIt</span>
+                  <span className="truncate text-xs capitalize text-muted-foreground">
+                    {user?.role || "Dashboard"}
+                  </span>
+                </div>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+      <SidebarContent className="gap-0 py-4">
+        <NavMain items={navigation.main} />
+        <div className="flex-1" />
+        <NavSecondary items={secondaryNav} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser
+          user={{
+            name: user?.name || "User",
+            email: user?.email || "",
+            avatar: "/avatars/default.jpg",
+          }}
+        />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
