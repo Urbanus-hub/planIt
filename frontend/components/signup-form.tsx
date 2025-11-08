@@ -58,22 +58,8 @@ export function SignupForm({
 
         toast.success("Account created successfully!", {
           description: `Welcome to PlanIt, ${user.name}! Redirecting to your dashboard...`,
-        });
-
-        // Redirect based on user role
-        switch (user.role) {
-          case "admin":
-            router.push("/admin");
-            break;
-          case "vendor":
-            router.push("/vendors");
-            break;
-          case "client":
-            router.push("/clients");
-            break;
-          default:
-            router.push("/");
-        }
+        })
+        router.push('/login');
       }
     } catch (err: any) {
       toast.error("Registration failed", {

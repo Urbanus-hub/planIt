@@ -146,7 +146,6 @@ export default function VendorDashboard() {
                 Welcome back, {user?.name || "Vendor"}! Here's your business
                 performance.
               </p>
-            </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -342,6 +341,7 @@ export default function VendorDashboard() {
             </div>
           </div>
         </div>
+
     </ProtectedRoute>
   );
 }

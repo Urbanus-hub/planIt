@@ -23,10 +23,10 @@ export function useRoleBasedRedirect() {
         router.push("/admin");
         break;
       case "vendor":
-        router.push("/vendors");
+        router.push("/vendor");
         break;
       case "client":
-        router.push("/clients");
+        router.push("/client");
         break;
       default:
         router.push("/");
@@ -44,9 +44,9 @@ export function getDashboardPath(role: "client" | "vendor" | "admin"): string {
     case "admin":
       return "/admin";
     case "vendor":
-      return "/vendors";
+      return "/vendor";
     case "client":
-      return "/clients";
+      return "/client";
     default:
       return "/";
   }

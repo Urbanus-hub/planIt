@@ -37,10 +37,10 @@ export function ProtectedRoute({
             router.replace("/admin");
             break;
           case "vendor":
-            router.replace("/vendors");
+            router.replace("/vendor");
             break;
           case "client":
-            router.replace("/clients");
+            router.replace("/client");
             break;
           default:
             router.replace("/");
