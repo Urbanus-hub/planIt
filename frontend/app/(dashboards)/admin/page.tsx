@@ -1,7 +1,9 @@
 "use client";
 
+import { useState,useEffect } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import {
   Users,
   Briefcase,
@@ -23,14 +25,34 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {authAPI} from "@/lib/api";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
+  const [users,setUsers]=useState([]);
+  useEffect(()=>{
+   (async()=>{
+      try{
+        const response=await authAPI.getAllUser();
+        if(response.data.success){
+          console.log(response.data);
+          setUsers(response.data.data);
+        }
+      }catch(err){
+        console.error("Failed to fetch users:",err);
+      }
+})();
+  },[])
+
+console.log("users",users)
+
+ 
+  
 
   const stats = [
     {
       title: "Total Users",
-      value: "2,450",
+      value: users.length.toString(),
       change: "+12.5%",
       trend: "up",
       icon: Users,
@@ -39,7 +61,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Total Vendors",
-      value: "856",
+      value: users.filter((u:any)=>u.role==="vendor").length.toString(),
       change: "+8.2%",
       trend: "up",
       icon: Briefcase,
@@ -95,29 +117,60 @@ export default function AdminDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
-      <div className="flex-1 min-h-screen bg-linear-to-br from-gray-50 via-green-50/20 to-emerald-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="flex-1 min-h-screen bg-background transition-colors duration-300">
         <div className="max-w-7xl mx-auto p-4 lg:p-8 space-y-8">
-          {/* Animated Welcome Message */}
-          <div className="relative overflow-hidden rounded-2xl bg-linear-to-r from-green-500 via-emerald-500 to-teal-500 p-8 shadow-xl">
-            <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px]" />
-            <div className="relative flex items-center gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center animate-pulse">
-                  <Sparkles className="w-8 h-8 text-white" />
+          {/* Welcome Banner with background image and overlay */}
+          <div className="relative overflow-hidden rounded-2xl shadow-xl">
+            {/* Background image (remote Unsplash) */}
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "url('https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=1600&q=80&auto=format&fit=crop')",
+                filter: "saturate(0.75) contrast(0.9) blur(0px)",
+              }}
+            />
+
+            {/* Softer overlay to avoid very-deep blacks in dark mode */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-slate-800/18 to-transparent dark:from-slate-900/45 dark:via-slate-800/28" />
+
+            <div className="relative z-10 p-4 md:p-6 lg:p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
+              <div className="flex-1 text-white">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">
+                  Hey{" "}
+                  <span className="underline decoration-emerald-300/60 decoration-2 rounded-sm">
+                    {user?.name || "Admin"}
+                  </span>
+                  , welcome back!
+                </h2>
+                <p className="mt-2 text-sm sm:text-base text-white/85 max-w-3xl">
+                  Quick snapshot: your platform activity, trending vendors, and
+                  the controls you need. Everything's responsive and a little
+                  more delightful today ✨
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <button className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/90 hover:bg-emerald-500 text-white rounded-lg shadow-sm transform transition hover:-translate-y-0.5">
+                    <Sparkles className="w-4 h-4" />
+                    Boost Engagement
+                  </button>
+                  <button className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg shadow-sm">
+                    View Analytics
+                  </button>
                 </div>
               </div>
-              <div className="flex-1">
-                <h2 className="text-3xl font-bold text-white mb-2">
-                  Welcome back, {user?.name || "Admin"}! 👋
-                </h2>
-                <p className="text-green-50 text-lg">
-                  You're doing amazing! Here's what's happening with PlanIt
-                  today.
-                </p>
-              </div>
-              <div className="hidden lg:flex items-center gap-2">
-                <Rocket className="w-6 h-6 text-white animate-bounce" />
-                <Zap className="w-6 h-6 text-yellow-300 animate-pulse" />
+
+              <div className="flex items-center gap-3 self-stretch md:self-auto">
+                <div className="rounded-lg bg-white/8 dark:bg-white/6 p-2 backdrop-blur-sm">
+                  <ThemeToggle />
+                </div>
+                <div className="hidden sm:flex items-center gap-2 text-sm text-white/85">
+                  <Rocket className="w-5 h-5 animate-bounce text-amber-200/90" />
+                  <span className="opacity-95">
+                    Make today count — try a quick report
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -129,27 +182,22 @@ export default function AdminDashboard() {
               return (
                 <Card
                   key={index}
-                  className="group relative overflow-hidden border-2 hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-500 hover:-translate-y-2 hover:scale-105 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 cursor-pointer"
-                  style={{
-                    animationDelay: `${index * 100}ms`,
-                  }}
+                  className="group relative overflow-hidden border bg-white dark:bg-gray-800 transition-shadow duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer"
+                  style={{ animationDelay: `${index * 120}ms` }}
                 >
-                  {/* Animated background gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-400/0 via-green-400/5 to-green-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
                   <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
                     <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-400">
                       {stat.title}
                     </CardDescription>
                     <div
-                      className={`p-3 rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${
+                      className={`p-3 rounded-xl transition-transform duration-300 will-change-transform group-hover:scale-105 flex items-center justify-center ${
                         stat.color === "green"
-                          ? "bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40"
+                          ? "bg-green-50 dark:bg-green-900/20"
                           : stat.color === "blue"
-                          ? "bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40"
+                          ? "bg-blue-50 dark:bg-blue-900/20"
                           : stat.color === "purple"
-                          ? "bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40"
-                          : "bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600"
+                          ? "bg-purple-50 dark:bg-purple-900/20"
+                          : "bg-gray-50 dark:bg-gray-700"
                       }`}
                     >
                       <Icon
@@ -168,12 +216,12 @@ export default function AdminDashboard() {
                   <CardContent className="relative z-10">
                     <div className="space-y-3">
                       <div className="flex items-baseline justify-between">
-                        <p className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                        <p className="text-4xl font-bold text-gray-900 dark:text-white">
                           {stat.value}
                         </p>
                         <Badge
                           variant="outline"
-                          className="border-green-500 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 animate-pulse"
+                          className="border-green-500 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20"
                         >
                           <TrendingUp className="w-3 h-3 mr-1" />
                           {stat.change}

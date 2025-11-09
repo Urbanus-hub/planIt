@@ -102,6 +102,10 @@ export const authAPI = {
 
   getCurrentUser: () => api.get("/users/me"),
 
+  getAllUser:()=>api.get("/users"),
+
+  getUserById: (id: string) => api.get(`/users/${id}`),
+
   updateProfile: (data: any) => api.put("/users/profile", data),
 
   changePassword: (data: { currentPassword: string; newPassword: string }) =>

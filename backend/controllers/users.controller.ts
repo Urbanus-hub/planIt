@@ -121,7 +121,6 @@ export const loginUser = async (
       res.status(401).json({
         success: false,
         message: "Invalid credentials",
-       
       });
       return;
     }
@@ -234,9 +233,7 @@ export const getUsers = async (
     if (role) filter.role = role;
     if (isActive !== undefined) filter.isActive = isActive === "true";
 
-    const users = await User.find(filter)
-      .select("-password")
-      .sort({ createdAt: -1 });
+    const users = await User.find().select("-password").sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
