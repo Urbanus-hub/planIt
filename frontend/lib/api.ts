@@ -109,6 +109,8 @@ export const authAPI = {
   updateProfile: (data: any) => api.patch("/users/profile", data),
   deleteUser: (id: string) => api.delete(`/users/${id}`),
   toggleUserActiveness: (id: string,active: any) => api.patch(`/users/${id}/toggle-active`,active),
+  verifyVendor: (id: string,verify: any) => api.patch(`/users/${id}/verify-vendor`,verify),
+
 
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.put("/users/password", data),

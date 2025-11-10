@@ -399,3 +399,46 @@ export const toggleUserActive = async (
     next(error);
   }
 };
+
+// verify vendors
+export const verifyVendor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const user = await User.findById(req.params.id);
+    const{verify}=req.body;
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "Vendor not found",
+      });
+      return;
+    }
+
+    if (user.role !== "vendor") {
+      res.status(400).json({
+        success: false,
+        message: "User is not a vendor",
+      });
+      return;
+    }
+
+    // Mark as verified
+    user.isVerified = verify;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Vendor verified successfully",
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Change password
+

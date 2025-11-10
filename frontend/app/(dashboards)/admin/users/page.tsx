@@ -108,7 +108,7 @@ const UsersPage: React.FC = () => {
     } else if (activeTab === "vendors") {
       filteredUsers = users.filter((u) => u.role === "vendor");
     } else if (activeTab === "customers") {
-      filteredUsers = users.filter((u) => u.role === "customer");
+      filteredUsers = users.filter((u) => u.role === "client");
     }
 
     // Filter by search query
@@ -126,12 +126,20 @@ const UsersPage: React.FC = () => {
   const toggleActive = async (id: string, current: boolean | undefined) => {
     const next = !current;
     // optimistic update
-    setUsers((prev) =>
-      prev.map((u) => (u._id === id ? { ...u, isActive: next } : u))
-    );
+
     try {
-      await api.patch(`/users/${id}`, { isActive: next });
-      toast.success(next ? "User activated" : "User deactivated");
+      const toggledUser = await authAPI.toggleUserActiveness(id, {
+        active: next,
+      });
+      if (!toggledUser.data?.success) {
+        toast.error("Failed to change user status", {
+          description: "Server did not confirm the change.",
+        });
+        return;
+      }
+      if (toggledUser.data?.success) {
+        toast.success(next ? "User activated" : "User deactivated");
+      }
     } catch (err: any) {
       // rollback on error
       setUsers((prev) =>

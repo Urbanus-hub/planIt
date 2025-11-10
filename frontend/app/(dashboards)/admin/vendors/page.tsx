@@ -57,7 +57,6 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 
-
 type Vendor = {
   _id: string;
   name?: string;
@@ -114,20 +113,23 @@ const VendorsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    (async()=> {
-
-    await fetchVendors();
-  }
-  )()
+    (async () => {
+      await fetchVendors();
+    })();
   }, []);
 
-  const verifyVendor = async (id: string) => {
+  const verifyVendorUser = async (id: string, isVerified: boolean) => {
     if (typeof window !== "undefined") {
       const ok = window.confirm("Verify this vendor?");
       if (!ok) return;
     }
     try {
-      await api.patch(`/users/${id}`, { isVerified: true });
+     const verifyStatus= await authAPI.verifyVendor(id, { verify: isVerified });
+     if(!(verifyStatus?.data?.success)){
+          toast.error("Failed to verify vendor", { description: verifyStatus?.data?.message });
+          return;
+     }
+    
       setVendors((prev) =>
         prev.map((v) => (v._id === id ? { ...v, isVerified: true } : v))
       );
@@ -139,7 +141,7 @@ const VendorsPage: React.FC = () => {
 
   const toggleActive = async (id: string, current = false) => {
     try {
-      await authAPI.toggleUserActiveness(id as string, {active:!current});
+      await authAPI.toggleUserActiveness(id as string, { active: !current });
       console.log("Toggled active status for user", id, !current);
       setVendors((prev) =>
         prev.map((v) => (v._id === id ? { ...v, isActive: !current } : v))
@@ -575,7 +577,9 @@ const VendorsPage: React.FC = () => {
                                     <>
                                       <DropdownMenuSeparator />
                                       <DropdownMenuItem
-                                        onClick={() => verifyVendor(v._id)}
+                                        onClick={() =>
+                                          verifyVendorUser(v._id, !v.isVerified)
+                                        }
                                         className="cursor-pointer"
                                       >
                                         <CheckCircle className="mr-2 h-4 w-4" />
@@ -669,7 +673,11 @@ const VendorsPage: React.FC = () => {
                   {!selectedVendor.isVerified && (
                     <Button
                       onClick={() =>
-                        selectedVendor && verifyVendor(selectedVendor._id)
+                        selectedVendor &&
+                        verifyVendorUser(
+                          selectedVendor._id,
+                          !selectedVendor.isVerified
+                        )
                       }
                     >
                       Verify
