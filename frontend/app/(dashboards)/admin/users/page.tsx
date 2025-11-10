@@ -53,6 +53,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
 
 type UserItem = {
   _id: string;
@@ -152,20 +153,26 @@ const UsersPage: React.FC = () => {
   };
 
   const removeUser = async (id: string) => {
-    if (typeof window !== "undefined") {
-      const ok = window.confirm(
-        "Delete (deactivate) this user? This is a soft-delete."
-      );
-      if (!ok) return;
-    } else {
-      return;
-    }
+    // open confirm dialog instead
+    setPendingRemoveId(id)
+    setRemoveOpen(true)
+  };
+
+  // Confirm dialog state for removal
+  const [removeOpen, setRemoveOpen] = useState(false);
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
+
+  const performRemoveUser = async () => {
+    if (!pendingRemoveId) return;
     try {
-      await api.delete(`/users/${id}`);
-      setUsers((prev) => prev.filter((u) => u._id !== id));
+      await api.delete(`/users/${pendingRemoveId}`);
+      setUsers((prev) => prev.filter((u) => u._id !== pendingRemoveId));
       toast.success("User removed");
     } catch (err: any) {
       toast.error("Failed to remove user", { description: err?.message });
+    } finally {
+      setRemoveOpen(false);
+      setPendingRemoveId(null);
     }
   };
 
@@ -183,6 +190,16 @@ const UsersPage: React.FC = () => {
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
+          <ConfirmDialog
+            open={removeOpen}
+            onOpenChange={setRemoveOpen}
+            title="Delete user"
+            description="Delete (deactivate) this user? This is a soft-delete."
+            confirmLabel="Delete"
+            cancelLabel="Cancel"
+            confirmVariant="destructive"
+            onConfirm={performRemoveUser}
+          />
             <h1 className="text-3xl font-bold text-green-800 dark:text-green-100">
               User Management
             </h1>

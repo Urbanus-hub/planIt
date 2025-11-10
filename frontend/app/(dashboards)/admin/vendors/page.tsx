@@ -56,6 +56,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
 
 type Vendor = {
   _id: string;
@@ -119,23 +120,32 @@ const VendorsPage: React.FC = () => {
   }, []);
 
   const verifyVendorUser = async (id: string, isVerified: boolean) => {
-    if (typeof window !== "undefined") {
-      const ok = window.confirm("Verify this vendor?");
-      if (!ok) return;
-    }
+    // open verify confirm dialog
+    setPendingVerifyId(id);
+    setPendingVerifyValue(isVerified);
+    setVerifyOpen(true);
+  };
+
+  // Confirm dialog state for verify
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [pendingVerifyId, setPendingVerifyId] = useState<string | null>(null);
+  const [pendingVerifyValue, setPendingVerifyValue] = useState<boolean>(true);
+
+  const performVerifyVendor = async () => {
+    if (!pendingVerifyId) return;
     try {
-     const verifyStatus= await authAPI.verifyVendor(id, { verify: isVerified });
-     if(!(verifyStatus?.data?.success)){
-          toast.error("Failed to verify vendor", { description: verifyStatus?.data?.message });
-          return;
-     }
-    
-      setVendors((prev) =>
-        prev.map((v) => (v._id === id ? { ...v, isVerified: true } : v))
-      );
+      const verifyStatus = await authAPI.verifyVendor(pendingVerifyId, { verify: pendingVerifyValue });
+      if (!(verifyStatus?.data?.success)) {
+        toast.error("Failed to verify vendor", { description: verifyStatus?.data?.message });
+        return;
+      }
+      setVendors((prev) => prev.map((v) => (v._id === pendingVerifyId ? { ...v, isVerified: true } : v)));
       toast.success("Vendor verified");
     } catch (err: any) {
       toast.error("Failed to verify vendor", { description: err?.message });
+    } finally {
+      setVerifyOpen(false);
+      setPendingVerifyId(null);
     }
   };
 
@@ -153,16 +163,24 @@ const VendorsPage: React.FC = () => {
   };
 
   const removeVendor = async (id: string) => {
-    if (typeof window !== "undefined") {
-      const ok = window.confirm("Remove vendor (soft-delete)?");
-      if (!ok) return;
-    }
+    setPendingRemoveId(id);
+    setRemoveOpen(true);
+  };
+
+  const [removeOpen, setRemoveOpen] = useState(false);
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
+
+  const performRemoveVendor = async () => {
+    if (!pendingRemoveId) return;
     try {
-      await authAPI.deleteUser(id as string);
-      setVendors((prev) => prev.filter((v) => v._id !== id));
+      await authAPI.deleteUser(pendingRemoveId as string);
+      setVendors((prev) => prev.filter((v) => v._id !== pendingRemoveId));
       toast.success("Vendor removed");
     } catch (err: any) {
       toast.error("Failed to remove vendor", { description: err?.message });
+    } finally {
+      setRemoveOpen(false);
+      setPendingRemoveId(null);
     }
   };
 
