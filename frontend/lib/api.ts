@@ -102,7 +102,7 @@ export const authAPI = {
 
   getCurrentUser: () => api.get("/users/me"),
 
-  getAllUser:()=>api.get("/users"),
+  getAllUser: () => api.get("/users"),
 
   getUserById: (id: string) => api.get(`/users/${id}`),
 
@@ -111,11 +111,14 @@ export const authAPI = {
   toggleUserActiveness: (id: string, active: any) => {
     // backend expects the raw boolean in the body (req.body === true/false)
     // callers sometimes pass an object like { active: boolean } — normalize here
-    const body = active && typeof active === "object" && "active" in active ? active.active : active;
+    const body =
+      active && typeof active === "object" && "active" in active
+        ? active.active
+        : active;
     return api.patch(`/users/${id}/toggle-active`, body);
   },
-  verifyVendor: (id: string,verify: any) => api.patch(`/users/${id}/verify-vendor`,verify),
-
+  verifyVendor: (id: string, verify: any) =>
+    api.patch(`/users/${id}/verify-vendor`, verify),
 
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.put("/users/password", data),

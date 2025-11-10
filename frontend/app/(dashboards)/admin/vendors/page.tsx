@@ -723,7 +723,8 @@ const VendorsPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+
+      {/* Confirm dialogs placed inside the top-level container */}
       <ConfirmDialog
         open={verifyOpen}
         onOpenChange={setVerifyOpen}
@@ -745,6 +746,7 @@ const VendorsPage: React.FC = () => {
         confirmVariant="destructive"
         onConfirm={performRemoveVendor}
       />
+    </div>
   );
 };
 
