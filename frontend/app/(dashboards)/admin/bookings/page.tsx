@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
 
 type Booking = {
   _id: string;
@@ -44,6 +45,8 @@ export default function AdminBookingsPage() {
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [selected, setSelected] = useState<Booking | null>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -67,11 +70,7 @@ export default function AdminBookingsPage() {
     fetchBookings();
   }, []);
 
-  const cancelBooking = async (id: string) => {
-    if (typeof window !== "undefined") {
-      const ok = window.confirm("Cancel this booking?");
-      if (!ok) return;
-    }
+  const performCancelBooking = async (id: string) => {
     try {
       await bookingsAPI.cancel(id);
       setBookings((prev) =>
@@ -81,6 +80,11 @@ export default function AdminBookingsPage() {
     } catch (err: any) {
       toast.error("Failed to cancel booking", { description: err?.message });
     }
+  };
+
+  const requestCancelBooking = (id: string) => {
+    setPendingCancelId(id);
+    setCancelOpen(true);
   };
 
   const filtered = useMemo(() => {
@@ -272,7 +276,7 @@ export default function AdminBookingsPage() {
                                 {b.status !== "cancelled" && (
                                   <Button
                                     variant="destructive"
-                                    onClick={() => cancelBooking(b._id)}
+                                    onClick={() => requestCancelBooking(b._id)}
                                   >
                                     <X className="h-4 w-4" />
                                   </Button>
@@ -341,7 +345,9 @@ export default function AdminBookingsPage() {
                     <Button
                       variant="destructive"
                       onClick={() => {
-                        cancelBooking(selected._id);
+                        // open confirm modal for the selected booking
+                        setPendingCancelId(selected._id);
+                        setCancelOpen(true);
                         setSelected(null);
                       }}
                     >
@@ -351,6 +357,23 @@ export default function AdminBookingsPage() {
                   <Button onClick={() => setSelected(null)}>Close</Button>
                 </div>
               </div>
+              {/* Confirm dialog for cancelling bookings */}
+              <ConfirmDialog
+                open={cancelOpen}
+                onOpenChange={(o) => {
+                  setCancelOpen(o);
+                  if (!o) setPendingCancelId(null);
+                }}
+                title="Cancel booking"
+                description="Are you sure you want to cancel this booking? This action can be reverted by the vendor or admin."
+                confirmLabel="Yes, cancel"
+                cancelLabel="No, keep"
+                confirmVariant="destructive"
+                onConfirm={async () => {
+                  if (!pendingCancelId) return;
+                  await performCancelBooking(pendingCancelId);
+                }}
+              />
             </div>
           </div>
         )}

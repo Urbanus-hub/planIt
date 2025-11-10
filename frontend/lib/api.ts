@@ -108,7 +108,12 @@ export const authAPI = {
 
   updateProfile: (data: any) => api.patch("/users/profile", data),
   deleteUser: (id: string) => api.delete(`/users/${id}`),
-  toggleUserActiveness: (id: string,active: any) => api.patch(`/users/${id}/toggle-active`,active),
+  toggleUserActiveness: (id: string, active: any) => {
+    // backend expects the raw boolean in the body (req.body === true/false)
+    // callers sometimes pass an object like { active: boolean } — normalize here
+    const body = active && typeof active === "object" && "active" in active ? active.active : active;
+    return api.patch(`/users/${id}/toggle-active`, body);
+  },
   verifyVendor: (id: string,verify: any) => api.patch(`/users/${id}/verify-vendor`,verify),
 
 

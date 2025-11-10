@@ -154,8 +154,8 @@ const UsersPage: React.FC = () => {
 
   const removeUser = async (id: string) => {
     // open confirm dialog instead
-    setPendingRemoveId(id)
-    setRemoveOpen(true)
+    setPendingRemoveId(id);
+    setRemoveOpen(true);
   };
 
   // Confirm dialog state for removal
@@ -190,16 +190,16 @@ const UsersPage: React.FC = () => {
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-          <ConfirmDialog
-            open={removeOpen}
-            onOpenChange={setRemoveOpen}
-            title="Delete user"
-            description="Delete (deactivate) this user? This is a soft-delete."
-            confirmLabel="Delete"
-            cancelLabel="Cancel"
-            confirmVariant="destructive"
-            onConfirm={performRemoveUser}
-          />
+            <ConfirmDialog
+              open={removeOpen}
+              onOpenChange={setRemoveOpen}
+              title="Delete user"
+              description="Delete (deactivate) this user? This is a soft-delete."
+              confirmLabel="Delete"
+              cancelLabel="Cancel"
+              confirmVariant="destructive"
+              onConfirm={performRemoveUser}
+            />
             <h1 className="text-3xl font-bold text-green-800 dark:text-green-100">
               User Management
             </h1>

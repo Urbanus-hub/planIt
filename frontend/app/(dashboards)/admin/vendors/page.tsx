@@ -724,6 +724,27 @@ const VendorsPage: React.FC = () => {
         </div>
       )}
     </div>
+      <ConfirmDialog
+        open={verifyOpen}
+        onOpenChange={setVerifyOpen}
+        title="Verify vendor"
+        description="Are you sure you want to verify this vendor?"
+        confirmLabel="Verify"
+        cancelLabel="Cancel"
+        confirmVariant="default"
+        onConfirm={performVerifyVendor}
+      />
+
+      <ConfirmDialog
+        open={removeOpen}
+        onOpenChange={setRemoveOpen}
+        title="Remove vendor"
+        description="Remove this vendor (soft-delete)?"
+        confirmLabel="Remove"
+        cancelLabel="Cancel"
+        confirmVariant="destructive"
+        onConfirm={performRemoveVendor}
+      />
   );
 };
 
