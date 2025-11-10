@@ -8,6 +8,7 @@ import {
   updateUser,
   deleteUser,
   getCurrentUser,
+  toggleUserActive
 } from "../controllers/users.controller.js";
 import authorize from "../middlewares/authorize.middleware.js";
 import { authorizeRole } from "../middlewares/roleBasedAccess.middleware";
@@ -51,6 +52,16 @@ router.delete(
   authorize,
   verifyUserOwnership,
   deleteUser
+);
+
+// deactivate or activate user
+
+
+router.patch(
+  "/:id/toggle-active",
+  authorize,
+  authorizeRole("admin"),
+  toggleUserActive
 );
 
 export default router;

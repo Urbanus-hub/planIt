@@ -57,6 +57,7 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 
+
 type Vendor = {
   _id: string;
   name?: string;
@@ -113,7 +114,11 @@ const VendorsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchVendors();
+    (async()=> {
+
+    await fetchVendors();
+  }
+  )()
   }, []);
 
   const verifyVendor = async (id: string) => {
@@ -134,7 +139,8 @@ const VendorsPage: React.FC = () => {
 
   const toggleActive = async (id: string, current = false) => {
     try {
-      await api.patch(`/users/${id}`, { isActive: !current });
+      await authAPI.toggleUserActiveness(id as string, {active:!current});
+      console.log("Toggled active status for user", id, !current);
       setVendors((prev) =>
         prev.map((v) => (v._id === id ? { ...v, isActive: !current } : v))
       );
@@ -150,7 +156,7 @@ const VendorsPage: React.FC = () => {
       if (!ok) return;
     }
     try {
-      await api.delete(`/users/${id}`);
+      await authAPI.deleteUser(id as string);
       setVendors((prev) => prev.filter((v) => v._id !== id));
       toast.success("Vendor removed");
     } catch (err: any) {

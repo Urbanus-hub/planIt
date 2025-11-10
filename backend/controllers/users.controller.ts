@@ -319,14 +319,56 @@ export const updateUser = async (
     next(error);
   }
 };
+export const deleteUser=async(
+  req: Request,
+  res: Response,
+  next: NextFunction
+):Promise<void>=>{
+ try{
+  
+   
+    if((req.user as AuthUser).role!=="admin"){
+      res.status(403).json({
+        success:false,
+        message:"Only admin can delete users"
+      })
+      return;
+      
+    }
+    const user=await User.findById(req.params.id);
 
-export const deleteUser = async (
+    if(!user){
+      res.status(404).json({
+        success:false,
+        message:"User not found"
+      })
+      return;
+    } 
+    if(user.role==="admin"){
+      res.status(400).json({
+        success:false,
+        message:"Cannot delete admin user"
+      })
+      return;
+    }
+    await user.deleteOne();
+    res.status(200).json({
+      success:true,
+      message:"User deleted successfully"
+    })
+
+ }catch(err){
+   next(err)
+ }
+}
+export const toggleUserActive = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
     const user = await User.findById(req.params.id);
+    const {active}=req.body;
 
     if (!user) {
       res.status(404).json({
@@ -345,12 +387,13 @@ export const deleteUser = async (
     }
 
     // Soft delete - deactivate account
-    user.isActive = false;
+    user.isActive = active;
     await user.save();
 
     res.status(200).json({
       success: true,
       message: "User deleted successfully",
+      data:user,
     });
   } catch (error) {
     next(error);
