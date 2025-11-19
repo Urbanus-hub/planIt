@@ -142,7 +142,7 @@ export const bookingsAPI = {
   getAll: (params?: any) => api.get("/bookings", { params }),
 
   getById: (id: string) => api.get(`/bookings/${id}`),
-
+  getForVendor: (id: string) => api.get(`/bookings/provider/${id}/bookings`),
   create: (data: any) => api.post("/bookings", data),
 
   update: (id: string, data: any) => api.put(`/bookings/${id}`, data),

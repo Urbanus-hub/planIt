@@ -12,7 +12,7 @@ import CTA from "@/components/layout/CTA";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
       <Navbar />
       <HeroSection />
       <CategoryShowcase />
@@ -21,7 +21,11 @@ export default function Home() {
       <WhyChoosePlanIt />
       <Testimonials />
       <CTA />
-      <Footer />
+
+      {/* Ensure footer area uses same solid background */}
+      <div className="bg-slate-50 dark:bg-slate-900">
+        <Footer />
+      </div>
     </main>
   );
 }

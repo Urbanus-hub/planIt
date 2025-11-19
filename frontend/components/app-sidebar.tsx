@@ -66,8 +66,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       return {
         main: [
           { title: "Dashboard", url: "/vendor", icon: LayoutDashboard },
-          { title: "Bookings", url: "/vendor/bookings", icon: Calendar },
           { title: "Services", url: "/vendor/services", icon: Package },
+          { title: "Bookings", url: "/vendor/bookings", icon: Calendar },
+          {title:'Messages', url:'/vendor/messages', icon: Users},
           { title: "Reviews", url: "/vendor/reviews", icon: Star },
           { title: "Analytics", url: "/vendor/analytics", icon: BarChart3 },
         ],
@@ -86,7 +87,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   ];
 
   return (
-    <Sidebar collapsible="icon" variant="sidebar" {...props}>
+    <Sidebar collapsible="icon" variant="sidebar" {...props} className="bg-dark-green">
       <SidebarHeader className="border-b border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>

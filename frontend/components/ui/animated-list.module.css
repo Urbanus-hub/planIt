@@ -1,0 +1,26 @@
+.animatedListTopGradient {
+  opacity: var(--top-opacity, 0);
+}
+
+.animatedListBottomGradient {
+  opacity: var(--bottom-opacity, 1);
+}
+
+/* Animation states for opacity */
+@keyframes fadeInGradient {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOutGradient {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

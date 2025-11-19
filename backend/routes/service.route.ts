@@ -27,7 +27,7 @@ router.post(
   authorizeRole("vendor", "admin"),
   createService
 );
-router.get('/provider/:providerId', authorize, authorizeRole('vendor', 'admin'), getProviderServices);
+router.get('/provider/:providerId/bookings', authorize, authorizeRole('vendor', 'admin'), getProviderServices);
 
 // Update service (service owner or admin)
 router.patch(

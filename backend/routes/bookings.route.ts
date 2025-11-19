@@ -42,7 +42,7 @@ router.get(
 
 // Get provider's bookings (provider themselves or admin)
 router.get(
-  "/provider/:providerId",
+  "/provider/:providerId/bookings",
   authorize,
   authorizeRole("vendor", "admin"),
   getProviderBookings

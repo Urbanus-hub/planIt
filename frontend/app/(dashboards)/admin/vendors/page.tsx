@@ -134,12 +134,20 @@ const VendorsPage: React.FC = () => {
   const performVerifyVendor = async () => {
     if (!pendingVerifyId) return;
     try {
-      const verifyStatus = await authAPI.verifyVendor(pendingVerifyId, { verify: pendingVerifyValue });
-      if (!(verifyStatus?.data?.success)) {
-        toast.error("Failed to verify vendor", { description: verifyStatus?.data?.message });
+      const verifyStatus = await authAPI.verifyVendor(pendingVerifyId, {
+        verify: pendingVerifyValue,
+      });
+      if (!verifyStatus?.data?.success) {
+        toast.error("Failed to verify vendor", {
+          description: verifyStatus?.data?.message,
+        });
         return;
       }
-      setVendors((prev) => prev.map((v) => (v._id === pendingVerifyId ? { ...v, isVerified: true } : v)));
+      setVendors((prev) =>
+        prev.map((v) =>
+          v._id === pendingVerifyId ? { ...v, isVerified: true } : v
+        )
+      );
       toast.success("Vendor verified");
     } catch (err: any) {
       toast.error("Failed to verify vendor", { description: err?.message });
