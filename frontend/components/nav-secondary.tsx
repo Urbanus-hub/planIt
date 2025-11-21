@@ -40,7 +40,7 @@ export function NavSecondary({
                   className={cn(
                     "h-11 px-4 text-base",
                     isActive
-                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
+                      ? "bg-green-500 text-white dark:bg-green-900/20 dark:text-white"
                       : ""
                   )}
                 >

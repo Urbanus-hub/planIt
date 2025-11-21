@@ -27,7 +27,7 @@ export function NavMain({
   return (
     <SidebarGroup>
       <SidebarGroupContent className="px-2 py-2">
-        <SidebarMenu className="gap-2">
+        <SidebarMenu className="gap-1.5">
           {items.map((item) => {
             // Consider a route active when the current pathname starts with the item's url
             // so `/admin/users` keeps `/admin` highlighted.
@@ -39,15 +39,15 @@ export function NavMain({
                   tooltip={item.title}
                   isActive={isActive}
                   className={cn(
-                    "h-11 px-4 text-base font-medium",
+                    "h-10 px-4 text-md font-medium rounded-lg transition-all duration-200",
                     isActive
-                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
-                      : ""
+                      ? "bg-green-400 text-white border border-green-400 font-semibold"
+                      : "text-slate-200 hover:bg-green-400 hover:text-white hover:border hover:border-green-400"
                   )}
                 >
                   <Link href={item.url}>
-                    {item.icon && <item.icon className="h-5 w-5 mr-1" />}
-                    <span>{item.title}</span>
+                    {item.icon && <item.icon className="h-5 w-5 mr-2" />}
+                    <span className="text-white">{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

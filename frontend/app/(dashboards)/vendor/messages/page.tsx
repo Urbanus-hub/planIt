@@ -95,7 +95,6 @@ export default function MessagesPage() {
       status: "active",
       messageCount: 12,
       isOnline: true,
-      priority: "high",
     },
     {
       _id: "2",
@@ -108,7 +107,6 @@ export default function MessagesPage() {
       status: "active",
       messageCount: 8,
       isOnline: true,
-      priority: "medium",
     },
     {
       _id: "3",
@@ -122,7 +120,6 @@ export default function MessagesPage() {
       status: "active",
       messageCount: 24,
       isOnline: false,
-      priority: "low",
     },
     {
       _id: "4",
@@ -137,7 +134,6 @@ export default function MessagesPage() {
       status: "closed",
       messageCount: 6,
       isOnline: false,
-      priority: "low",
     },
   ];
 
@@ -312,107 +308,57 @@ export default function MessagesPage() {
   };
 
   const animatedListItems = filtered.map((message) => (
-    <div key={message._id} className="w-full">
-      <motion.div
-        className="p-4 bg-white rounded-lg border border-gray-200 hover:border-indigo-500 transition-all cursor-pointer shadow-sm hover:shadow-md"
-        onClick={() => setSelectedMessage(message)}
-        whileHover={{ y: -2 }}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start gap-3 mb-2">
-              <div className="relative">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-400 to-blue-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                  {message.clientName?.[0]?.toUpperCase() || "U"}
-                </div>
-                {message.isOnline && (
-                  <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-white" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="text-gray-900 font-semibold text-sm">
-                    {message.clientName}
-                  </h4>
-                  {message.priority === "high" && (
-                    <Badge className="bg-red-100 text-red-800 text-xs border-red-200">
-                      🔥 Urgent
-                    </Badge>
-                  )}
-                  {message.unreadCount! > 0 && (
-                    <Badge className="bg-indigo-100 text-indigo-800 text-xs border-indigo-200">
-                      {message.unreadCount} new
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 font-medium">
-                  {message.messageCount} messages
-                </p>
-              </div>
-            </div>
-
-            <p className="text-sm text-gray-700 line-clamp-2 mb-2">
-              {message.lastMessage}
-            </p>
-
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">
-                {new Date(message.lastMessageTime || "").toLocaleTimeString(
-                  [],
-                  {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  }
-                )}
-              </span>
-              <div className="flex items-center gap-1">
-                {message.status === "closed" && (
-                  <Badge className="bg-gray-100 text-gray-800 text-xs">
-                    Closed
-                  </Badge>
-                )}
-              </div>
-            </div>
+    <motion.button
+      key={message._id}
+      onClick={() => setSelectedMessage(message)}
+      className={`w-full text-left px-3 py-2.5 rounded-lg transition-all duration-200 mb-1.5 border ${
+        selectedMessage?._id === message._id
+          ? "bg-green-50 border-green-200"
+          : "hover:bg-gray-50 border-transparent"
+      }`}
+      whileHover={{ x: 4 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <div className="flex items-center gap-3">
+        <div className="relative flex-shrink-0">
+          <div
+            className={`h-12 w-12 rounded-full flex items-center justify-center text-sm font-semibold ${
+              selectedMessage?._id === message._id
+                ? "bg-emerald-600 text-white"
+                : "bg-gradient-to-br from-emerald-500 to-teal-600 text-white"
+            }`}
+          >
+            {message.clientName?.[0]?.toUpperCase() || "U"}
           </div>
-
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedMessage(message);
-              }}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 text-gray-500 hover:text-orange-600 hover:bg-orange-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                archiveConversation(message._id);
-              }}
-            >
-              <Archive className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteConversation(message._id);
-              }}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          {message.isOnline && (
+            <div className="absolute bottom-0 right-0 h-3 w-3 bg-emerald-500 rounded-full border-2 border-white shadow-md" />
+          )}
         </div>
-      </motion.div>
-    </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <h4 className="font-medium text-sm text-gray-900 truncate">
+              {message.clientName}
+            </h4>
+            <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
+              {new Date(message.lastMessageTime || "").toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          </div>
+          <p className="text-xs text-gray-600 truncate">
+            {message.lastMessage}
+          </p>
+        </div>
+        {message.unreadCount! > 0 && (
+          <div className="flex-shrink-0 ml-2">
+            <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-emerald-500 text-white text-xs font-bold">
+              {message.unreadCount}
+            </span>
+          </div>
+        )}
+      </div>
+    </motion.button>
   ));
 
   return (
@@ -426,7 +372,7 @@ export default function MessagesPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
+              <h1 className="text-4xl md:text-5xl font-bold   mb-2">
                 Messages & Conversations
               </h1>
               <p className="text-gray-600 text-lg">
@@ -448,7 +394,7 @@ export default function MessagesPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"
+          className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8"
         >
           {[
             {
@@ -471,13 +417,6 @@ export default function MessagesPage() {
               icon: User,
               color: "text-green-600",
               bg: "from-green-50 to-green-100",
-            },
-            {
-              label: "High Priority",
-              value: stats.highPriorityCount,
-              icon: Zap,
-              color: "text-orange-600",
-              bg: "from-orange-50 to-orange-100",
             },
           ].map((stat, i) => {
             const Icon = stat.icon;
@@ -552,30 +491,30 @@ export default function MessagesPage() {
             className="lg:col-span-1"
           >
             <Card className="bg-white border border-gray-200 shadow-sm overflow-hidden h-[600px] flex flex-col">
-              <CardHeader className="border-b border-gray-200">
+              <CardHeader className="border-b border-gray-100 bg-white">
                 <div>
-                  <CardTitle className="text-gray-900 flex items-center gap-2">
-                    <MessageCircle className="h-5 w-5 text-indigo-600" />
-                    Conversations
+                  <CardTitle className="text-gray-900 flex items-center gap-2 text-lg">
+                    <MessageCircle className="h-5 w-5 text-emerald-600" />
+                    Messages
                   </CardTitle>
-                  <CardDescription className="text-gray-500 mt-1">
+                  <CardDescription className="text-gray-600 mt-1">
                     {filtered.length} conversation
                     {filtered.length !== 1 ? "s" : ""}
                   </CardDescription>
                 </div>
               </CardHeader>
-              <CardContent className="p-4 flex-1 overflow-y-auto">
+              <CardContent className="p-3 flex-1 overflow-y-auto">
                 <Tabs
                   value={activeTab}
                   onValueChange={setActiveTab}
                   className="w-full"
                 >
-                  <TabsList className="grid w-full grid-cols-3 bg-gray-100 border border-gray-200 p-1 mb-4">
+                  <TabsList className="grid w-full grid-cols-3 bg-gray-100 border border-gray-200 p-1 mb-3">
                     {["active", "archived", "closed"].map((tab) => (
                       <TabsTrigger
                         key={tab}
                         value={tab}
-                        className="data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm text-xs md:text-sm text-gray-600"
+                        className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-xs text-gray-600"
                       >
                         {tab.charAt(0).toUpperCase() + tab.slice(1)}
                       </TabsTrigger>
@@ -589,7 +528,7 @@ export default function MessagesPage() {
                         animate={{ opacity: 1 }}
                         className="text-center py-8"
                       >
-                        <div className="animate-spin h-8 w-8 border-4 border-gray-200 border-t-indigo-600 rounded-full mx-auto mb-2" />
+                        <div className="animate-spin h-8 w-8 border-4 border-gray-200 border-t-slate-500 rounded-full mx-auto mb-2" />
                         <p className="text-gray-500 text-sm font-medium">
                           Loading...
                         </p>
@@ -615,12 +554,7 @@ export default function MessagesPage() {
                         </p>
                       </motion.div>
                     ) : (
-                      <AnimatedList
-                        items={animatedListItems}
-                        className="w-full space-y-2"
-                        itemClassName="w-full"
-                        displayScrollbar={false}
-                      />
+                      <div className="space-y-2">{animatedListItems}</div>
                     )}
                   </TabsContent>
                 </Tabs>
@@ -637,75 +571,133 @@ export default function MessagesPage() {
           >
             {selectedMessage ? (
               <Card className="bg-white border border-gray-200 shadow-sm overflow-hidden h-[600px] flex flex-col">
-                <CardHeader className="border-b border-gray-200">
+                <CardHeader className="border-b border-gray-100 bg-white">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <motion.button
+                      onClick={() => setSelectedMessage(null)}
+                      className="inline-flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
                       <div className="relative">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-400 to-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                        <div className="h-10 w-10 rounded-full bg-emerald-200 flex items-center justify-center text-sm font-bold text-emerald-800">
                           {selectedMessage.clientName?.[0]?.toUpperCase() ||
                             "U"}
                         </div>
                         {selectedMessage.isOnline && (
-                          <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-white" />
+                          <div className="absolute bottom-0 right-0 h-2.5 w-2.5 bg-emerald-500 rounded-full border-2 border-white shadow-md" />
                         )}
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">
+                      <div className="text-left">
+                        <h3 className="font-semibold text-gray-900 text-base">
                           {selectedMessage.clientName}
                         </h3>
                         <p className="text-xs text-gray-500">
-                          {selectedMessage.isOnline ? "Online" : "Offline"}
+                          {selectedMessage.isOnline ? "Active now" : "Away"}
                         </p>
                       </div>
-                    </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                    </motion.button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedMessage(null)}
+                      className="h-9 w-9 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full"
+                    >
+                      ✕
                     </Button>
                   </div>
                 </CardHeader>
 
-                <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {conversations[selectedMessage._id]?.messages.map((msg) => (
-                    <motion.div
-                      key={msg._id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex ${
-                        msg.senderId === "vendor"
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                    >
-                      <div
-                        className={`max-w-xs px-3 py-2 rounded-lg ${
-                          msg.senderId === "vendor"
-                            ? "bg-indigo-600 text-white"
-                            : "bg-gray-100 text-gray-900"
-                        }`}
-                      >
-                        <p className="text-sm">{msg.content}</p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            msg.senderId === "vendor"
-                              ? "text-indigo-100"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          {new Date(msg.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
+                <CardContent className="flex-1 overflow-y-auto p-6 space-y-4 bg-white">
+                  <div className="flex flex-col gap-4">
+                    {conversations[selectedMessage._id]?.messages.map(
+                      (msg, idx) => {
+                        const isVendor = msg.senderId === "vendor";
+                        const prevMsg =
+                          idx > 0
+                            ? conversations[selectedMessage._id]?.messages[
+                                idx - 1
+                              ]
+                            : null;
+                        const sameAsPrev = prevMsg?.senderId === msg.senderId;
+
+                        return (
+                          <motion.div
+                            key={msg._id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className={`flex ${
+                              isVendor ? "justify-end" : "justify-start"
+                            } ${sameAsPrev ? "mt-1" : "mt-4"}`}
+                          >
+                            <div
+                              className={`flex gap-2 max-w-sm ${
+                                isVendor ? "flex-row-reverse" : "flex-row"
+                              }`}
+                            >
+                              {!sameAsPrev && !isVendor && (
+                                <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-700 flex-shrink-0">
+                                  {selectedMessage.clientName?.[0]?.toUpperCase()}
+                                </div>
+                              )}
+                              {!sameAsPrev && isVendor && (
+                                <div className="w-8 h-8 rounded-full bg-emerald-300 flex items-center justify-center text-xs font-bold text-emerald-900 flex-shrink-0">
+                                  Y
+                                </div>
+                              )}
+                              {sameAsPrev && (
+                                <div className="w-8 flex-shrink-0" />
+                              )}
+
+                              <div className="flex flex-col gap-1">
+                                <div
+                                  className={`px-3 py-2 rounded-lg max-w-xs word-break ${
+                                    isVendor
+                                      ? "bg-emerald-100 text-emerald-900 rounded-br-none"
+                                      : "bg-gray-100 text-gray-900 rounded-bl-none"
+                                  }`}
+                                >
+                                  <p className="text-sm break-words">
+                                    {msg.content}
+                                  </p>
+                                </div>
+                                {!sameAsPrev && (
+                                  <p
+                                    className={`text-xs px-1 ${
+                                      isVendor ? "text-right" : "text-left"
+                                    } text-gray-500`}
+                                  >
+                                    {new Date(msg.timestamp).toLocaleTimeString(
+                                      [],
+                                      {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      }
+                                    )}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      }
+                    )}
+                  </div>
                   <div ref={messagesEndRef} />
                 </CardContent>
 
-                <div className="border-t border-gray-200 p-4">
-                  <div className="flex gap-2">
+                <div className="border-t border-gray-200 p-4 bg-white">
+                  <div className="flex items-center gap-3">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-10 w-10 p-0 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-full"
+                    >
+                      <Paperclip className="h-5 w-5" />
+                    </Button>
                     <Input
-                      placeholder="Type a message..."
+                      placeholder="Aa"
                       value={newMessageText}
                       onChange={(e) => setNewMessageText(e.target.value)}
                       onKeyPress={(e) => {
@@ -714,24 +706,39 @@ export default function MessagesPage() {
                           handleSendMessage();
                         }
                       }}
-                      className="flex-1 bg-gray-50 border-gray-200 focus:border-indigo-500"
+                      className="flex-1 bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-400 focus:bg-white rounded-2xl px-4 py-2 focus:ring-0"
                     />
-                    <Button
-                      size="sm"
-                      onClick={handleSendMessage}
-                      className="bg-indigo-600 hover:bg-indigo-700"
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      <Send className="h-4 w-4" />
-                    </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleSendMessage}
+                        disabled={!newMessageText.trim()}
+                        className="h-10 w-10 p-0 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </motion.div>
                   </div>
                 </div>
               </Card>
             ) : (
               <Card className="bg-white border border-gray-200 shadow-sm h-[600px] flex items-center justify-center">
                 <div className="text-center">
-                  <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <motion.div
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="mb-4"
+                  >
+                    <MessageCircle className="h-16 w-16 text-green-200 mx-auto" />
+                  </motion.div>
                   <p className="text-gray-500 font-medium">
-                    Select a conversation to start chatting
+                    Select a conversation to start messaging
+                  </p>
+                  <p className="text-gray-400 text-sm mt-2">
+                    Click on any conversation to see the chat
                   </p>
                 </div>
               </Card>

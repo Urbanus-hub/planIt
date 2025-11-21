@@ -15,6 +15,7 @@ import {
   BarChart3,
   Bell,
   LogOut,
+  User,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -30,6 +31,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import styles from "./app-sidebar.module.css";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user, logout } = useAuth();
@@ -45,6 +47,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: "Users", url: "/admin/users", icon: Users },
           { title: "Vendors", url: "/admin/vendors", icon: Briefcase },
           { title: "Bookings", url: "/admin/bookings", icon: Calendar },
+          { title: "Booking", url: "/admin/bookings", icon: Calendar },
           { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
         ],
       };
@@ -68,8 +71,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: "Dashboard", url: "/vendor", icon: LayoutDashboard },
           { title: "Services", url: "/vendor/services", icon: Package },
           { title: "Bookings", url: "/vendor/bookings", icon: Calendar },
-          {title:'Messages', url:'/vendor/messages', icon: Users},
+          { title: "Messages", url: "/vendor/messages", icon: Users },
           { title: "Reviews", url: "/vendor/reviews", icon: Star },
+          { title: "Profile", url: "/vendor/profile", icon: User },
           { title: "Analytics", url: "/vendor/analytics", icon: BarChart3 },
         ],
       };
@@ -80,47 +84,63 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const navigation = getNavigation();
 
-  const secondaryNav = [
-    { title: "Notifications", url: "#", icon: Bell },
-    { title: "Settings", url: "#", icon: Settings },
-    { title: "Help & Support", url: "#", icon: HelpCircle },
-  ];
+  const secondaryNav: any[] = [];
 
   return (
-    <Sidebar collapsible="icon" variant="sidebar" {...props} className="bg-dark-green">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild size="lg" className="h-12">
-              <a href="/" className="flex items-center gap-3 px-2">
-                <div className="flex aspect-square size-9 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-green-600 text-white shadow-sm">
-                  <Calendar className="size-5" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-bold text-lg">PlanIt</span>
-                  <span className="truncate text-xs capitalize text-muted-foreground">
-                    {user?.role || "Dashboard"}
-                  </span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent className="gap-0 py-4">
-        <NavMain items={navigation.main} />
-        <div className="flex-1" />
-        <NavSecondary items={secondaryNav} />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser
-          user={{
-            name: user?.name || "User",
-            email: user?.email || "",
-            avatar: "/avatars/default.jpg",
-          }}
-        />
-      </SidebarFooter>
+    <Sidebar
+      collapsible="icon"
+      variant="sidebar"
+      {...props}
+      className="relative bg-slate-950 overflow-hidden !fixed !left-0 !top-0 !h-screen !border-r"
+    >
+      {/* Background Image */}
+      <div className={styles.sidebarBackground} />
+      {/* Green & White Overlay */}
+      <div className="absolute inset-0 z-0 bg-linear-to-b from-green-600  to-white/15" />
+      <div className="absolute inset-0 z-0 bg-linear-to-r from-white/5 to-transparent" />
+
+      {/* Content Wrapper */}
+      <div className="relative z-10 flex flex-col h-full overflow-y-auto">
+        <SidebarHeader className="sticky top-0 z-20">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                size="lg"
+                className="h-12 "
+              >
+                <a href="/" className="flex items-center gap-3 px-2">
+                  <div className="flex aspect-square size-9 items-center justify-center rounded-lg bg-linear-to-br from-emerald-400 to-emerald-600 text-white shadow-lg">
+                    <Calendar className="size-5" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-bold text-lg text-white">
+                      PlanIt
+                    </span>
+                    <span className="truncate text-xs capitalize text-emerald-200">
+                      {user?.role || "Dashboard"}
+                    </span>
+                  </div>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent className="gap-0 py-4 flex-1">
+          <NavMain items={navigation.main} />
+          <div className="flex-1" />
+          <NavSecondary items={secondaryNav} />
+        </SidebarContent>
+        <SidebarFooter className="  sticky bottom-0 z-20">
+          <NavUser
+            user={{
+              name: user?.name || "User",
+              email: user?.email || "",
+              avatar: "/avatars/default.jpg",
+            }}
+          />
+        </SidebarFooter>
+      </div>
     </Sidebar>
   );
 }

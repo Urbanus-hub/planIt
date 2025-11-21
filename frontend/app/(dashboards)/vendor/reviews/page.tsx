@@ -212,16 +212,16 @@ export default function ReviewsPage() {
   };
 
   const animatedListItems = filtered.map((review) => (
-    <div key={review._id} className="w-full">
+    <div className="w-full">
       <motion.div
-        className="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-500 transition-all cursor-pointer shadow-sm hover:shadow-md"
+        className="p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-400 transition-all cursor-pointer shadow-sm hover:shadow-md"
         onClick={() => setSelectedReview(review)}
         whileHover={{ y: -2 }}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-start gap-3 mb-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                 {review.clientName?.[0]?.toUpperCase() || "U"}
               </div>
               <div className="flex-1 min-w-0">
@@ -235,7 +235,7 @@ export default function ReviewsPage() {
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-blue-600 font-medium">
+                <p className="text-xs text-emerald-600 font-medium">
                   {review.serviceTitle}
                 </p>
               </div>
@@ -285,7 +285,7 @@ export default function ReviewsPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+              className="h-8 w-8 p-0 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50"
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedReview(review);
@@ -329,10 +329,10 @@ export default function ReviewsPage() {
         </span>
         <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
           <motion.div
-            className="h-full bg-gradient-to-r from-yellow-400 to-yellow-500"
+            className="h-full bg-emerald-500"
             initial={{ width: 0 }}
             animate={{ width: `${percentage}%` }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
           />
         </div>
       </div>
@@ -350,10 +350,10 @@ export default function ReviewsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-2">
+              <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-2">
                 Reviews & Ratings
               </h1>
-              <p className="text-gray-600 text-lg">
+              <p className="text-slate-600 text-lg">
                 Build trust and credibility with client feedback
               </p>
             </div>
@@ -361,9 +361,9 @@ export default function ReviewsPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring" }}
-              className="hidden md:block p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200"
+              className="hidden md:block p-4 bg-emerald-50 rounded-lg border border-emerald-200"
             >
-              <Trophy className="h-8 w-8 text-purple-600" />
+              <Trophy className="h-8 w-8 text-emerald-600" />
             </motion.div>
           </div>
         </motion.div>
@@ -380,36 +380,36 @@ export default function ReviewsPage() {
               value: stats.averageRating.toFixed(1),
               icon: Star,
               color: "text-yellow-600",
-              bg: "from-yellow-50 to-yellow-100",
+              bg: "bg-yellow-50",
               suffix: "/5",
             },
             {
               label: "Total Reviews",
               value: stats.totalReviews,
               icon: MessageCircle,
-              color: "text-blue-600",
-              bg: "from-blue-50 to-blue-100",
+              color: "text-emerald-600",
+              bg: "bg-emerald-50",
             },
             {
               label: "Verified",
               value: stats.verifiedCount,
               icon: Award,
-              color: "text-green-600",
-              bg: "from-green-50 to-green-100",
+              color: "text-emerald-600",
+              bg: "bg-emerald-50",
             },
             {
               label: "5-Star Rating",
               value: stats.fiveStarCount,
               icon: Flame,
-              color: "text-red-600",
-              bg: "from-red-50 to-red-100",
+              color: "text-emerald-600",
+              bg: "bg-emerald-50",
             },
             {
               label: "Trending Score",
               value: Math.round((stats.averageRating / 5) * 100),
               icon: TrendingUp,
-              color: "text-purple-600",
-              bg: "from-purple-50 to-purple-100",
+              color: "text-emerald-600",
+              bg: "bg-emerald-50",
               suffix: "%",
             },
           ].map((stat, i) => {
@@ -433,9 +433,7 @@ export default function ReviewsPage() {
                           {stat.suffix}
                         </p>
                       </div>
-                      <div
-                        className={`bg-gradient-to-br ${stat.bg} p-2 rounded-lg`}
-                      >
+                      <div className={`${stat.bg} p-2 rounded-lg`}>
                         <Icon className={`h-4 w-4 ${stat.color}`} />
                       </div>
                     </div>
@@ -494,7 +492,7 @@ export default function ReviewsPage() {
                     placeholder="Search reviews by client name or content..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-purple-500"
+                    className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500"
                   />
                 </div>
                 <Button
@@ -521,7 +519,7 @@ export default function ReviewsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-gray-900 flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-purple-600" />
+                    <Sparkles className="h-5 w-5 text-emerald-600" />
                     All Reviews
                   </CardTitle>
                   <CardDescription className="text-gray-500 mt-1">
@@ -542,7 +540,7 @@ export default function ReviewsPage() {
                     <TabsTrigger
                       key={tab}
                       value={tab}
-                      className="data-[state=active]:bg-white data-[state=active]:text-purple-600 data-[state=active]:shadow-sm text-xs md:text-sm text-gray-600"
+                      className="data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-sm text-xs md:text-sm text-gray-600"
                     >
                       {tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </TabsTrigger>
@@ -556,7 +554,7 @@ export default function ReviewsPage() {
                       animate={{ opacity: 1 }}
                       className="text-center py-16"
                     >
-                      <div className="animate-spin h-10 w-10 border-4 border-gray-200 border-t-purple-600 rounded-full mx-auto mb-4" />
+                      <div className="animate-spin h-10 w-10 border-4 border-gray-200 border-t-emerald-600 rounded-full mx-auto mb-4" />
                       <p className="text-gray-500 font-medium">
                         Loading reviews...
                       </p>
@@ -571,7 +569,7 @@ export default function ReviewsPage() {
                       <p className="text-gray-500 mb-4">{error}</p>
                       <Button
                         onClick={fetchReviews}
-                        className="bg-purple-600 hover:bg-purple-700"
+                        className="bg-emerald-600 hover:bg-emerald-700"
                       >
                         Try Again
                       </Button>
@@ -598,6 +596,7 @@ export default function ReviewsPage() {
                       displayScrollbar={true}
                       enableArrowNavigation={true}
                       showGradients={true}
+                   
                     />
                   )}
                 </TabsContent>
@@ -626,7 +625,7 @@ export default function ReviewsPage() {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {selectedReview.clientName?.[0]?.toUpperCase() || "U"}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -700,7 +699,7 @@ export default function ReviewsPage() {
                 >
                   Close
                 </Button>
-                <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
+                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Respond
                 </Button>

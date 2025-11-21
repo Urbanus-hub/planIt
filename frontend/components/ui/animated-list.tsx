@@ -143,11 +143,7 @@ const AnimatedList = ({
     <div className={`relative w-full ${className}`}>
       <div
         ref={listRef}
-        className={`max-h-[500px] overflow-y-auto p-4 ${
-          displayScrollbar
-            ? "[&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:bg-slate-900 [&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:hover:bg-slate-600"
-            : "scrollbar-hide"
-        }`}
+        className={`max-h-[500px] overflow-y-auto p-4`}
         onScroll={handleScroll}
       >
         {items.map((item, index) => (
@@ -164,10 +160,10 @@ const AnimatedList = ({
             }}
           >
             <div
-              className={`p-4 bg-slate-800 rounded-lg border transition-all ${
+              className={`p-4  rounded-lg border transition-all ${
                 selectedIndex === index
-                  ? "border-emerald-500 bg-slate-700 shadow-lg shadow-emerald-900/50"
-                  : "border-slate-700 hover:border-slate-600"
+                  ? "border-emerald-50"
+                  : "border-slate-700 "
               } ${itemClassName}`}
             >
               {item}
@@ -175,20 +171,7 @@ const AnimatedList = ({
           </AnimatedItem>
         ))}
       </div>
-      {showGradients && (
-        <>
-          <motion.div
-            className="absolute top-0 left-0 right-0 h-[50px] bg-gradient-to-b from-slate-900 to-transparent pointer-events-none"
-            animate={{ opacity: topGradientOpacity }}
-            transition={{ duration: 0.3 }}
-          />
-          <motion.div
-            className="absolute bottom-0 left-0 right-0 h-[100px] bg-gradient-to-t from-slate-900 to-transparent pointer-events-none"
-            animate={{ opacity: bottomGradientOpacity }}
-            transition={{ duration: 0.3 }}
-          />
-        </>
-      )}
+      
     </div>
   );
 };
