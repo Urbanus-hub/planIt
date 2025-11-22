@@ -43,7 +43,6 @@ import {
   Phone,
   MapPin,
   MessageCircle,
-  Zap,
   Shield,
   Sparkles,
   Crown,
@@ -56,8 +55,7 @@ import {
   Target,
   Heart,
   Smile,
-  Zap as ZapIcon,
-  TrendingUpIcon,
+  Zap,
 } from "lucide-react";
 import AnimatedList from "@/components/ui/animated-list";
 import ConfirmDialog from "@/components/ui/confirm-dialog";
@@ -103,7 +101,6 @@ export default function VendorBookingsPage() {
   const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
 
   const { user } = useAuth();
-  console.log(user);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -204,20 +201,20 @@ export default function VendorBookingsPage() {
   const animatedListItems = filtered.map((booking) => (
     <div key={booking._id} className="w-full">
       <div
-        className="p-4 bg-white rounded-lg border border-gray-200 hover:border-green-500 transition-all cursor-pointer shadow-sm hover:shadow-md"
+        className="p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 transition-all cursor-pointer shadow-sm hover:shadow-md"
         onClick={() => setSelectedBooking(booking)}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                 {booking.clientName?.[0]?.toUpperCase() || "U"}
               </div>
               <div className="min-w-0 flex-1">
                 <h4 className="text-gray-900 font-semibold truncate text-sm">
                   {booking.clientName || "Unknown"}
                 </h4>
-                <p className="text-xs text-green-600 truncate font-medium">
+                <p className="text-emerald-600 truncate font-medium text-xs">
                   {booking.serviceTitle}
                 </p>
               </div>
@@ -225,7 +222,7 @@ export default function VendorBookingsPage() {
 
             <div className="grid grid-cols-4 gap-2 text-xs text-gray-600 mb-3">
               <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                <Calendar className="h-3 w-3 text-blue-600" />
+                <Calendar className="h-3 w-3 text-emerald-600" />
                 <span className="truncate">
                   {booking.date
                     ? new Date(booking.date).toLocaleDateString()
@@ -233,17 +230,17 @@ export default function VendorBookingsPage() {
                 </span>
               </div>
               <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                <Clock className="h-3 w-3 text-blue-600" />
+                <Clock className="h-3 w-3 text-emerald-600" />
                 <span className="truncate">{booking.time || "—"}</span>
               </div>
               <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                <DollarSign className="h-3 w-3 text-green-600" />
+                <DollarSign className="h-3 w-3 text-emerald-600" />
                 <span className="truncate font-medium">
                   KSh {(booking.amount || 0) / 1000}K
                 </span>
               </div>
               <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                <Users className="h-3 w-3 text-yellow-600" />
+                <Users className="h-3 w-3 text-emerald-600" />
                 <span className="truncate">{booking.guestCount || "—"}</span>
               </div>
             </div>
@@ -252,9 +249,9 @@ export default function VendorBookingsPage() {
               <Badge
                 className={`text-xs font-semibold ${
                   booking.status === "confirmed"
-                    ? "bg-green-100 text-green-800 border border-green-200"
+                    ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
                     : booking.status === "pending"
-                    ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
+                    ? "bg-amber-100 text-amber-800 border border-amber-200"
                     : booking.status === "completed"
                     ? "bg-blue-100 text-blue-800 border border-blue-200"
                     : "bg-red-100 text-red-800 border border-red-200"
@@ -281,7 +278,7 @@ export default function VendorBookingsPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+              className="h-8 w-8 p-0 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50"
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedBooking(booking);
@@ -309,8 +306,8 @@ export default function VendorBookingsPage() {
         "Early bird advantage",
       ],
       duration: "7 days",
-      color: "text-green-600",
-      bgColor: "from-green-50 to-green-100",
+      color: "text-emerald-600",
+      bgColor: "from-emerald-50 to-emerald-100",
       badge: "Popular",
     },
     {
@@ -327,8 +324,8 @@ export default function VendorBookingsPage() {
         "Social media promotion",
       ],
       duration: "30 days",
-      color: "text-blue-600",
-      bgColor: "from-blue-50 to-blue-100",
+      color: "text-emerald-600",
+      bgColor: "from-emerald-50 to-emerald-100",
       badge: "Best Value",
     },
     {
@@ -345,14 +342,14 @@ export default function VendorBookingsPage() {
         "Client testimonials featured",
       ],
       duration: "15 days",
-      color: "text-indigo-600",
-      bgColor: "from-indigo-50 to-indigo-100",
+      color: "text-emerald-600",
+      bgColor: "from-emerald-50 to-emerald-100",
       badge: "Hot",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-emerald-50">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Hero Section */}
         <motion.div
@@ -363,7 +360,7 @@ export default function VendorBookingsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent mb-2">
                 Bookings Hub
               </h1>
               <p className="text-gray-600 text-lg">
@@ -374,9 +371,9 @@ export default function VendorBookingsPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring" }}
-              className="hidden md:block p-4 bg-gradient-to-br from-green-50 to-blue-50 rounded-lg border border-green-200"
+              className="hidden md:block p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200"
             >
-              <Rocket className="h-8 w-8 text-green-600" />
+              <Rocket className="h-8 w-8 text-emerald-600" />
             </motion.div>
           </div>
         </motion.div>
@@ -393,15 +390,15 @@ export default function VendorBookingsPage() {
               label: "Pending",
               value: stats.pending,
               icon: AlertCircle,
-              color: "text-yellow-600",
-              bg: "from-yellow-50 to-yellow-100",
+              color: "text-amber-600",
+              bg: "from-amber-50 to-amber-100",
             },
             {
               label: "Confirmed",
               value: stats.confirmed,
               icon: CheckCircle,
-              color: "text-green-600",
-              bg: "from-green-50 to-green-100",
+              color: "text-emerald-600",
+              bg: "from-emerald-50 to-emerald-100",
             },
             {
               label: "Completed",
@@ -414,15 +411,15 @@ export default function VendorBookingsPage() {
               label: "Revenue",
               value: `KSh ${(stats.totalRevenue / 1000).toFixed(0)}K`,
               icon: TrendingUp,
-              color: "text-green-600",
-              bg: "from-green-50 to-green-100",
+              color: "text-emerald-600",
+              bg: "from-emerald-50 to-emerald-100",
             },
             {
               label: "Conversion",
               value: `${stats.conversionRate}%`,
               icon: BarChart3,
-              color: "text-indigo-600",
-              bg: "from-indigo-50 to-indigo-100",
+              color: "text-emerald-600",
+              bg: "from-emerald-50 to-emerald-100",
             },
           ].map((stat, i) => {
             const Icon = stat.icon;
@@ -433,7 +430,7 @@ export default function VendorBookingsPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.06 }}
               >
-                <Card className="bg-white hover:shadow-md transition-all border border-gray-200">
+                <Card className="bg-white hover:shadow-md transition-all border-0 shadow-sm">
                   <CardContent className="pt-5 pb-4">
                     <div className="flex items-start justify-between">
                       <div>
@@ -464,7 +461,7 @@ export default function VendorBookingsPage() {
           transition={{ duration: 0.4, delay: 0.2 }}
           className="mb-8"
         >
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-white border-0 shadow-sm">
             <CardContent className="p-4">
               <div className="flex flex-col md:flex-row gap-3">
                 <div className="flex-1 relative">
@@ -473,7 +470,7 @@ export default function VendorBookingsPage() {
                     placeholder="Search by client, service, or email..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-green-500"
+                    className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500"
                   />
                 </div>
                 <Button
@@ -496,17 +493,17 @@ export default function VendorBookingsPage() {
           transition={{ duration: 0.4, delay: 0.3 }}
           className="mb-10"
         >
-          <Card className="bg-white border border-gray-200 shadow-sm overflow-hidden">
-            <CardHeader className="border-b border-gray-200">
+          <Card className="bg-white border-0 shadow-sm overflow-hidden">
+            <CardHeader className="border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-gray-900 flex items-center gap-2">
-                    <Heart className="h-5 w-5 text-green-600" />
+                    <Heart className="h-5 w-5 text-emerald-600" />
                     Your Bookings
                   </CardTitle>
                   <CardDescription className="text-gray-500 mt-1">
-                    {filtered.length} booking{filtered.length !== 1 ? "s" : ""}{" "}
-                    • Click to view details
+                    {filtered.length} booking{filtered.length !== 1 ? "s" : ""} •
+                    Click to view details
                   </CardDescription>
                 </div>
               </div>
@@ -528,7 +525,7 @@ export default function VendorBookingsPage() {
                     <TabsTrigger
                       key={tab}
                       value={tab}
-                      className="data-[state=active]:bg-white data-[state=active]:text-green-600 data-[state=active]:shadow-sm text-xs md:text-sm text-gray-600"
+                      className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-xs md:text-sm text-gray-600"
                     >
                       {tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </TabsTrigger>
@@ -542,7 +539,7 @@ export default function VendorBookingsPage() {
                       animate={{ opacity: 1 }}
                       className="text-center py-16"
                     >
-                      <div className="animate-spin h-10 w-10 border-4 border-gray-200 border-t-green-600 rounded-full mx-auto mb-4" />
+                      <div className="animate-spin h-10 w-10 border-4 border-gray-200 border-t-emerald-600 rounded-full mx-auto mb-4" />
                       <p className="text-gray-500 font-medium">
                         Loading your bookings...
                       </p>
@@ -557,7 +554,7 @@ export default function VendorBookingsPage() {
                       <p className="text-gray-500 mb-4">{error}</p>
                       <Button
                         onClick={fetchBookings}
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-emerald-600 hover:bg-emerald-700"
                       >
                         Try Again
                       </Button>
@@ -603,11 +600,11 @@ export default function VendorBookingsPage() {
         >
           <div className="mb-6">
             <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-              <ZapIcon className="h-8 w-8 text-green-600" />
+              <Zap className="h-8 w-8 text-emerald-600" />
               Boost Your Visibility
             </h2>
             <p className="text-gray-600 flex items-center gap-2">
-              <TrendingUpIcon className="h-4 w-4" />
+              <TrendingUp className="h-4 w-4" />
               Stand out and get more qualified bookings
             </p>
           </div>
@@ -621,9 +618,9 @@ export default function VendorBookingsPage() {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card
-                  className={`bg-white border border-gray-200 hover:shadow-lg transition-all relative overflow-hidden group`}
+                  className="bg-white border-0 shadow-sm hover:shadow-lg transition-all relative overflow-hidden group"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                   <CardHeader className="relative z-10">
                     <div className="flex items-start justify-between mb-4">
@@ -659,7 +656,7 @@ export default function VendorBookingsPage() {
                     <div className="space-y-2">
                       {feature.benefits.map((benefit, i) => (
                         <div key={i} className="flex items-start gap-2 text-sm">
-                          <Star className="h-4 w-4 mt-0.5 text-green-600 flex-shrink-0" />
+                          <Star className="h-4 w-4 mt-0.5 text-emerald-600 flex-shrink-0" />
                           <span className="text-gray-700">{benefit}</span>
                         </div>
                       ))}
@@ -671,7 +668,7 @@ export default function VendorBookingsPage() {
                           description: "Proceeding to payment...",
                         });
                       }}
-                      className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold transition-all"
+                      className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold transition-all"
                     >
                       Get Started
                       <ArrowRight className="h-4 w-4 ml-2" />
@@ -691,13 +688,13 @@ export default function VendorBookingsPage() {
           className="grid md:grid-cols-2 gap-6 mb-10"
         >
           {/* Verification Card */}
-          <Card className="bg-white border border-gray-200 hover:shadow-md transition-all">
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-all">
             <CardHeader>
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 rounded-lg bg-green-50 border border-green-200">
-                  <Shield className="h-6 w-6 text-green-600" />
+                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                  <Shield className="h-6 w-6 text-emerald-600" />
                 </div>
-                <Badge className="bg-green-100 text-green-800 border border-green-200">
+                <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-200">
                   Priority
                 </Badge>
               </div>
@@ -709,7 +706,7 @@ export default function VendorBookingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <Award className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <Award className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-semibold text-gray-900">
                       Verified Badge
@@ -720,7 +717,7 @@ export default function VendorBookingsPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Target className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <Target className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-semibold text-gray-900">
                       Boost Conversions
@@ -736,7 +733,7 @@ export default function VendorBookingsPage() {
                 5 of 8 requirements completed
               </p>
               <Button
-                className="w-full border-green-600 text-green-600 hover:bg-green-50"
+                className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50"
                 variant="outline"
               >
                 Apply Now
@@ -746,13 +743,13 @@ export default function VendorBookingsPage() {
           </Card>
 
           {/* Analytics Card */}
-          <Card className="bg-white border border-gray-200 hover:shadow-md transition-all">
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-all">
             <CardHeader>
               <div className="flex items-start justify-between mb-4">
-                <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
-                  <BarChart3 className="h-6 w-6 text-blue-600" />
+                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                  <BarChart3 className="h-6 w-6 text-emerald-600" />
                 </div>
-                <Badge className="bg-blue-100 text-blue-800 border border-blue-200">
+                <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-200">
                   Premium
                 </Badge>
               </div>
@@ -768,27 +765,27 @@ export default function VendorBookingsPage() {
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-700">Response Rate</span>
-                    <span className="text-blue-600 font-semibold">92%</span>
+                    <span className="text-emerald-600 font-semibold">92%</span>
                   </div>
                   <Progress value={92} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-700">Booking Rate</span>
-                    <span className="text-blue-600 font-semibold">78%</span>
+                    <span className="text-emerald-600 font-semibold">78%</span>
                   </div>
                   <Progress value={78} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-700">Client Satisfaction</span>
-                    <span className="text-blue-600 font-semibold">95%</span>
+                    <span className="text-emerald-600 font-semibold">95%</span>
                   </div>
                   <Progress value={95} className="h-2" />
                 </div>
               </div>
               <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                 disabled
               >
                 <TrendingUp className="h-4 w-4 mr-2" />
@@ -805,8 +802,8 @@ export default function VendorBookingsPage() {
           transition={{ duration: 0.4, delay: 0.6 }}
           className="mb-10"
         >
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-yellow-500" />
+          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <Sparkles className="h-6 w-6 text-emerald-600" />
             Success Stories
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
@@ -816,28 +813,28 @@ export default function VendorBookingsPage() {
                 stat: "+145%",
                 detail: "Booking growth",
                 icon: TrendingUp,
-                color: "text-green-600",
+                color: "text-emerald-600",
               },
               {
                 vendor: "Photography Pro",
                 stat: "4.9★",
                 detail: "Average rating",
                 icon: Star,
-                color: "text-yellow-500",
+                color: "text-emerald-600",
               },
               {
                 vendor: "Elite Services",
                 stat: "+89%",
                 detail: "Revenue boost",
-                icon: TrendingUpIcon,
-                color: "text-green-600",
+                icon: TrendingUp,
+                color: "text-emerald-600",
               },
             ].map((story, i) => {
               const Icon = story.icon;
               return (
                 <Card
                   key={i}
-                  className="bg-white border border-gray-200 hover:shadow-md transition-all"
+                  className="bg-white border-0 shadow-sm hover:shadow-md transition-all"
                 >
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between">
@@ -852,7 +849,7 @@ export default function VendorBookingsPage() {
                           {story.detail}
                         </p>
                       </div>
-                      <div className="p-2 rounded-lg bg-gray-50 border border-gray-200">
+                      <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200">
                         <Icon className={`h-5 w-5 ${story.color}`} />
                       </div>
                     </div>
@@ -870,12 +867,12 @@ export default function VendorBookingsPage() {
           transition={{ duration: 0.4, delay: 0.7 }}
           className="mb-10"
         >
-          <Card className="bg-gradient-to-r from-green-50 via-blue-50 to-indigo-50 border border-green-200 hover:border-green-300 transition-all">
+          <Card className="bg-gradient-to-r from-emerald-50 via-emerald-100 to-emerald-50 border border-emerald-200 hover:border-emerald-300 transition-all">
             <CardContent className="p-8">
               <div className="flex items-center justify-between gap-6">
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                    <Rocket className="h-6 w-6 text-green-600" />
+                  <h3 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                    <Rocket className="h-6 w-6 text-emerald-600" />
                     Ready to boost your bookings?
                   </h3>
                   <p className="text-gray-600">
@@ -883,7 +880,7 @@ export default function VendorBookingsPage() {
                   </p>
                 </div>
                 <div className="flex gap-3 flex-shrink-0">
-                  <Button className="bg-green-600 hover:bg-green-700 text-white">
+                  <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
                     Explore Plans
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
@@ -917,7 +914,7 @@ export default function VendorBookingsPage() {
               initial={{ x: 500 }}
               animate={{ x: 0 }}
               exit={{ x: 500 }}
-              className="w-full max-w-md bg-white shadow-2xl flex flex-col border-l border-gray-200"
+              className="w-full max-w-md bg-white shadow-2xl flex flex-col border-l border-emerald-200"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6 border-b border-gray-200 flex items-start justify-between">
@@ -931,7 +928,6 @@ export default function VendorBookingsPage() {
                 </div>
                 <Button
                   variant="ghost"
-                  size="sm"
                   onClick={() => setSelectedBooking(null)}
                   className="text-gray-500 hover:text-gray-900 hover:bg-gray-100"
                 >
@@ -942,7 +938,7 @@ export default function VendorBookingsPage() {
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 <div>
                   <h3 className="text-gray-700 font-semibold mb-3 flex items-center gap-2">
-                    <User className="h-4 w-4 text-green-600" />
+                    <User className="h-4 w-4 text-emerald-600" />
                     Client Info
                   </h3>
                   <div className="space-y-2 text-sm">
@@ -966,7 +962,7 @@ export default function VendorBookingsPage() {
 
                 <div>
                   <h3 className="text-gray-700 font-semibold mb-3 flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-blue-600" />
+                    <Calendar className="h-4 w-4 text-emerald-600" />
                     Booking Info
                   </h3>
                   <div className="space-y-2 text-sm bg-gray-50 p-3 rounded-lg">
@@ -1004,12 +1000,12 @@ export default function VendorBookingsPage() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg">
+                <div className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 rounded-lg">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-700 font-medium">
                       Total Amount
                     </span>
-                    <span className="text-3xl font-bold text-green-600">
+                    <span className="text-3xl font-bold text-emerald-600">
                       KSh {selectedBooking.amount?.toLocaleString() || "0"}
                     </span>
                   </div>
@@ -1018,7 +1014,7 @@ export default function VendorBookingsPage() {
                 {selectedBooking.notes && (
                   <div>
                     <h3 className="text-gray-700 font-semibold mb-2 flex items-center gap-2">
-                      <MessageCircle className="h-4 w-4 text-yellow-500" />
+                      <MessageCircle className="h-4 w-4 text-emerald-600" />
                       Notes
                     </h3>
                     <p className="text-gray-600 text-sm bg-gray-50 p-3 rounded-lg">
@@ -1035,7 +1031,7 @@ export default function VendorBookingsPage() {
                       handleStatusChange(selectedBooking._id, "confirmed");
                       setSelectedBooking(null);
                     }}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Confirm Booking

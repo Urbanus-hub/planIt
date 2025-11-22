@@ -51,10 +51,10 @@ export function NavMain({
                   tooltip={item.title}
                   isActive={isActive}
                   className={cn(
-                    "h-10 px-4 text-md font-medium rounded-lg transition-all duration-300 relative overflow-hidden group",
+                    "h-10 px-4 text-md font-medium rounded-lg transition-all duration-500 relative overflow-visible group bg-transparent! hover:bg-transparent! active:bg-transparent!",
                     isActive
                       ? "bg-linear-to-r from-green-500 to-green-600 text-white shadow-xl shadow-green-500/50 border border-green-300/60 font-semibold"
-                      : "text-slate-200 border border-transparent hover:text-white hover:bg-linear-to-r hover:from-green-500 hover:to-green-600 hover:border-green-300/60 hover:shadow-lg hover:shadow-green-500/50"
+                      : "text-slate-200 border border-transparent hover:text-white hover:bg-linear-to-r hover:from-green-500/60 hover:to-green-600/60 hover:border-green-400/40 hover:shadow-lg hover:shadow-green-500/30"
                   )}
                 >
                   <Link
@@ -78,6 +78,11 @@ export function NavMain({
                     )}
                     {state !== "collapsed" && (
                       <span className="text-white whitespace-nowrap font-medium">
+                        {item.title}
+                      </span>
+                    )}
+                    {state === "collapsed" && (
+                      <span className="absolute left-12 bg-green-500/80 text-white px-2 py-1 rounded-md text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none whitespace-nowrap">
                         {item.title}
                       </span>
                     )}

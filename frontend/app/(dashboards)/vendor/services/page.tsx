@@ -15,11 +15,30 @@ import {
   Calendar,
   Users,
   TrendingUp,
-  ArrowUpRight,
   MoreHorizontal,
   Check,
   X,
-  Info,
+  Filter,
+  Grid3x3,
+  List,
+  Package,
+  Clock,
+  MapPin,
+  Tag,
+  BarChart3,
+  Award,
+  Copy,
+  Share2,
+  Download,
+  ChevronDown,
+  ArrowUp,
+  ArrowDown,
+  Activity,
+  Target,
+  Zap,
+  Camera,
+  Video,
+
 } from "lucide-react";
 
 import {
@@ -53,6 +72,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ConfirmDialog from "@/components/ui/confirm-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 type Service = {
   _id: string;
@@ -67,6 +88,18 @@ type Service = {
   createdAt?: string;
   updatedAt?: string;
   image?: string;
+  tags?: string[];
+  location?: string;
+  duration?: number;
+  capacity?: number;
+  minAdvanceBooking?: number;
+  maxAdvanceBooking?: number;
+  cancellationPolicy?: string;
+  depositRequired?: boolean;
+  depositPercentage?: number;
+  featured?: boolean;
+  views?: number;
+  inquiries?: number;
 };
 
 export default function VendorServicesPage() {
@@ -75,6 +108,9 @@ export default function VendorServicesPage() {
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [viewMode, setViewMode] = useState<"grid" | "table">("table");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // Modal/drawer state
   const [showForm, setShowForm] = useState(false);
@@ -134,15 +170,15 @@ export default function VendorServicesPage() {
         category: service.category || "",
         price: service.price?.toString() || "",
         pricingType: "fixed",
-        location: "",
-        duration: "",
-        capacity: "",
-        minAdvanceBooking: "1",
-        maxAdvanceBooking: "365",
-        cancellationPolicy: "",
-        depositRequired: false,
-        depositPercentage: "",
-        tags: "",
+        location: service.location || "",
+        duration: service.duration?.toString() || "",
+        capacity: service.capacity?.toString() || "",
+        minAdvanceBooking: service.minAdvanceBooking?.toString() || "1",
+        maxAdvanceBooking: service.maxAdvanceBooking?.toString() || "365",
+        cancellationPolicy: service.cancellationPolicy || "",
+        depositRequired: service.depositRequired || false,
+        depositPercentage: service.depositPercentage?.toString() || "",
+        tags: service.tags?.join(", ") || "",
       });
     } else {
       setEditingService(null);
@@ -209,6 +245,15 @@ export default function VendorServicesPage() {
                   description: formData.description,
                   category: formData.category,
                   price: Number(formData.price),
+                  location: formData.location,
+                  duration: Number(formData.duration),
+                  capacity: Number(formData.capacity),
+                  minAdvanceBooking: Number(formData.minAdvanceBooking),
+                  maxAdvanceBooking: Number(formData.maxAdvanceBooking),
+                  cancellationPolicy: formData.cancellationPolicy,
+                  depositRequired: formData.depositRequired,
+                  depositPercentage: Number(formData.depositPercentage),
+                  tags: formData.tags.split(",").map((tag) => tag.trim()),
                 }
               : s
           )
@@ -233,6 +278,20 @@ export default function VendorServicesPage() {
         prev.map((s) => (s._id === id ? { ...s, isActive: !current } : s))
       );
       toast.success(current ? "Service deactivated" : "Service activated");
+    } catch (err: any) {
+      toast.error("Failed to update service", { description: err?.message });
+    }
+  };
+
+  const handleToggleFeatured = async (id: string, current: boolean) => {
+    try {
+      await servicesAPI.update(id, { featured: !current });
+      setServices((prev) =>
+        prev.map((s) => (s._id === id ? { ...s, featured: !current } : s))
+      );
+      toast.success(
+        current ? "Service removed from featured" : "Service added to featured"
+      );
     } catch (err: any) {
       toast.error("Failed to update service", { description: err?.message });
     }
@@ -265,6 +324,8 @@ export default function VendorServicesPage() {
       filtered = services.filter((s) => s.isActive);
     } else if (activeTab === "inactive") {
       filtered = services.filter((s) => !s.isActive);
+    } else if (activeTab === "featured") {
+      filtered = services.filter((s) => s.featured);
     }
 
     if (!q) return filtered;
@@ -272,14 +333,40 @@ export default function VendorServicesPage() {
       return (
         (s.title || "").toLowerCase().includes(q) ||
         (s.category || "").toLowerCase().includes(q) ||
-        (s.description || "").toLowerCase().includes(q)
+        (s.description || "").toLowerCase().includes(q) ||
+        (s.tags || []).some((tag) => tag.toLowerCase().includes(q))
       );
     });
   }, [services, query, activeTab]);
 
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      let aValue: any = a[sortBy as keyof Service];
+      let bValue: any = b[sortBy as keyof Service];
+
+      if (sortBy === "price") {
+        aValue = a.price || 0;
+        bValue = b.price || 0;
+      } else if (sortBy === "rating") {
+        aValue = a.rating || 0;
+        bValue = b.rating || 0;
+      } else if (sortBy === "bookingsCount") {
+        aValue = a.bookingsCount || 0;
+        bValue = b.bookingsCount || 0;
+      }
+
+      if (sortOrder === "asc") {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+  }, [filtered, sortBy, sortOrder]);
+
   const stats = useMemo(() => {
     const total = services.length;
     const active = services.filter((s) => s.isActive).length;
+    const featured = services.filter((s) => s.featured).length;
     const avgRating = services.length
       ? (
           services.reduce((sum, s) => sum + (s.rating || 0), 0) /
@@ -290,6 +377,11 @@ export default function VendorServicesPage() {
       (sum, s) => sum + (s.bookingsCount || 0),
       0
     );
+    const totalViews = services.reduce((sum, s) => sum + (s.views || 0), 0);
+    const totalInquiries = services.reduce(
+      (sum, s) => sum + (s.inquiries || 0),
+      0
+    );
     const avgPrice =
       services.length > 0
         ? (
@@ -298,157 +390,321 @@ export default function VendorServicesPage() {
           ).toFixed(2)
         : "—";
 
-    return { total, active, avgRating, totalBookings, avgPrice };
+    return {
+      total,
+      active,
+      featured,
+      avgRating,
+      totalBookings,
+      totalViews,
+      totalInquiries,
+      avgPrice,
+    };
   }, [services]);
 
-  return (
-    <div className="min-h-screen bg-white dark:bg-slate-900">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        {/* Header */}
-        <div className="flex flex-col gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-              Services
-            </h1>
-            <p className="text-slate-600 dark:text-slate-300 mt-1">
-              Manage and showcase your service offerings
-            </p>
-          </div>
+  const getCategoryIcon = (category?: string) => {
+    switch (category?.toLowerCase()) {
+      case "photography":
+        return <Camera className="h-4 w-4" />;
+      case "videography":
+        return <Video className="h-4 w-4" />;
+      case "catering":
+        return <Package className="h-4 w-4" />;
+      case "decoration":
+        return <Award className="h-4 w-4" />;
+      case "entertainment":
+        return <Zap className="h-4 w-4" />;
+      case "venue":
+        return <MapPin className="h-4 w-4" />;
+      default:
+        return <Package className="h-4 w-4" />;
+    }
+  };
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex gap-2">
+  const getCategoryColor = (category?: string) => {
+    switch (category?.toLowerCase()) {
+      case "photography":
+        return "bg-violet-100 text-violet-800 border-violet-200";
+      case "videography":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "catering":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "decoration":
+        return "bg-pink-100 text-pink-800 border-pink-200";
+      case "entertainment":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "venue":
+        return "bg-indigo-100 text-indigo-800 border-indigo-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 py-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Services</h1>
+              <p className="text-gray-600 mt-1">
+                Manage your service offerings
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={fetchServices}
+                className="border-gray-300 hover:bg-gray-50"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
               <Button
                 onClick={() => handleOpenForm()}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="h-4 w-4 mr-2" />
                 Add Service
-              </Button>
-              <Button variant="outline" onClick={fetchServices}>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh
               </Button>
             </div>
           </div>
         </div>
+      </div>
 
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">
-                Total
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                {stats.total}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Services
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                    {stats.total}
+                  </p>
+                  <div className="flex items-center mt-2 text-sm text-gray-600">
+                    <span className="text-green-600 font-medium">
+                      {stats.active} active
+                    </span>
+                    <span className="mx-2">•</span>
+                    <span className="text-amber-600 font-medium">
+                      {stats.featured} featured
+                    </span>
+                  </div>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <Package className="h-6 w-6 text-blue-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">
-                Active
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-emerald-600">
-                {stats.active}
+
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Average Rating
+                  </p>
+                  <div className="flex items-center mt-2">
+                    <Star className="h-6 w-6 text-amber-400 fill-amber-400" />
+                    <p className="text-3xl font-bold text-gray-900 ml-2">
+                      {stats.avgRating}
+                    </p>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">
+                    Customer satisfaction
+                  </p>
+                </div>
+                <div className="p-3 bg-amber-100 rounded-lg">
+                  <Award className="h-6 w-6 text-amber-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">
-                Avg Rating
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-amber-400" />
-                <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  {stats.avgRating}
-                </span>
+
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Bookings
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                    {stats.totalBookings}
+                  </p>
+                  <div className="flex items-center mt-2 text-sm text-green-600">
+                    <TrendingUp className="h-4 w-4 mr-1" />
+                    <span className="font-medium">12% increase</span>
+                  </div>
+                </div>
+                <div className="p-3 bg-green-100 rounded-lg">
+                  <Calendar className="h-6 w-6 text-green-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">
-                Bookings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-1">
-                <TrendingUp className="h-4 w-4 text-blue-500" />
-                <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  {stats.totalBookings}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium text-slate-700 dark:text-slate-300 uppercase">
-                Avg Price
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-1">
-                <DollarSign className="h-4 w-4 text-green-500" />
-                <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  {stats.avgPrice}
-                </span>
+
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Views
+                  </p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                    {stats.totalViews}
+                  </p>
+                  <div className="flex items-center mt-2 text-sm text-green-600">
+                    <TrendingUp className="h-4 w-4 mr-1" />
+                    <span className="font-medium">18% increase</span>
+                  </div>
+                </div>
+                <div className="p-3 bg-purple-100 rounded-lg">
+                  <Eye className="h-6 w-6 text-purple-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Search */}
-        <Card className="mb-6">
+        {/* Search and Filters */}
+        <Card className="border-0 shadow-sm mb-6">
           <CardContent className="p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by title, category, or description"
-                className="pl-10 border-slate-200 focus:border-slate-400 focus:ring-slate-400"
-              />
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search services..."
+                  className="pl-10 border-gray-200 focus:border-blue-500"
+                />
+              </div>
+              <div className="flex gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="border-gray-300 hover:bg-gray-50"
+                    >
+                      <Filter className="h-4 w-4 mr-2" />
+                      Sort by: {sortBy}
+                      <ChevronDown className="h-4 w-4 ml-2" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => setSortBy("createdAt")}>
+                      Created Date
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy("title")}>
+                      Name
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy("price")}>
+                      Price
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortBy("rating")}>
+                      Rating
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setSortBy("bookingsCount")}
+                    >
+                      Bookings
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                  }
+                  className="border-gray-300 hover:bg-gray-50"
+                >
+                  {sortOrder === "asc" ? (
+                    <ArrowUp className="h-4 w-4" />
+                  ) : (
+                    <ArrowDown className="h-4 w-4" />
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setViewMode(viewMode === "table" ? "grid" : "table")
+                  }
+                  className="border-gray-300 hover:bg-gray-50"
+                >
+                  {viewMode === "table" ? (
+                    <Grid3x3 className="h-4 w-4" />
+                  ) : (
+                    <List className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Services Table */}
-        <Card className="overflow-hidden">
-          <CardHeader className="bg-slate-50 dark:bg-slate-800/30">
-            <CardTitle className="text-slate-900 dark:text-slate-100">
-              Service Directory
-            </CardTitle>
-            <CardDescription className="text-slate-500 dark:text-slate-300">
-              Manage your service catalog
-            </CardDescription>
+        {/* Services Table/Grid */}
+        <Card className="border-0 shadow-sm overflow-hidden">
+          <CardHeader className="bg-gray-50 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-gray-900">
+                  Service Directory
+                </CardTitle>
+                <CardDescription className="text-gray-600">
+                  {sorted.length} service{sorted.length !== 1 ? "s" : ""}
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 hover:bg-gray-50"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+                <Button
+                  onClick={() => handleOpenForm()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Service
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <div className="px-4 pt-4">
-                <TabsList className="grid w-full grid-cols-3 bg-slate-50 dark:bg-slate-800/20">
+                <TabsList className="grid w-full grid-cols-4 bg-gray-100 border border-gray-200 p-1">
                   <TabsTrigger
                     value="all"
-                    className="data-[state=active]:bg-slate-900 data-[state=active]:text-white"
+                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm text-gray-600"
                   >
                     All
                   </TabsTrigger>
                   <TabsTrigger
                     value="active"
-                    className="data-[state=active]:bg-slate-900 data-[state=active]:text-white"
+                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm text-gray-600"
                   >
                     Active
                   </TabsTrigger>
                   <TabsTrigger
+                    value="featured"
+                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm text-gray-600"
+                  >
+                    Featured
+                  </TabsTrigger>
+                  <TabsTrigger
                     value="inactive"
-                    className="data-[state=active]:bg-slate-900 data-[state=active]:text-white"
+                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm text-gray-600"
                   >
                     Inactive
                   </TabsTrigger>
@@ -466,99 +722,111 @@ export default function VendorServicesPage() {
                   <Alert variant="destructive" className="m-4">
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
-                ) : filtered.length === 0 ? (
+                ) : sorted.length === 0 ? (
                   <div className="p-8 text-center">
-                    <div className="mx-auto w-16 h-16 bg-slate-100 dark:bg-slate-800/30 rounded-full flex items-center justify-center mb-4">
-                      <Search className="h-8 w-8 text-slate-400" />
+                    <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                      <Package className="h-8 w-8 text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-slate-800 dark:text-slate-100 mb-2">
+                    <h3 className="text-lg font-medium text-gray-800 mb-2">
                       No services found
                     </h3>
-                    <p className="text-slate-600 dark:text-slate-300">
+                    <p className="text-gray-600 mb-4">
                       {query
-                        ? "Try adjusting your search"
+                        ? "Try adjusting your search or filters"
                         : "Create your first service to get started"}
                     </p>
+                    <Button
+                      onClick={() => handleOpenForm()}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Service
+                    </Button>
                   </div>
-                ) : (
+                ) : viewMode === "table" ? (
                   <div className="overflow-x-auto">
                     <Table>
-                      <TableHeader className="bg-slate-50 dark:bg-slate-800/20">
+                      <TableHeader className="bg-gray-50">
                         <TableRow>
-                          <TableHead className="text-slate-800 dark:text-slate-100">
+                          <TableHead className="text-gray-700 font-medium">
                             Service
                           </TableHead>
-                          <TableHead className="text-slate-800 dark:text-slate-100 hidden md:table-cell">
+                          <TableHead className="text-gray-700 font-medium hidden md:table-cell">
                             Category
                           </TableHead>
-                          <TableHead className="text-slate-800 dark:text-slate-100 hidden lg:table-cell">
+                          <TableHead className="text-gray-700 font-medium hidden lg:table-cell">
                             Rating
                           </TableHead>
-                          <TableHead className="text-slate-800 dark:text-slate-100">
+                          <TableHead className="text-gray-700 font-medium">
                             Price
                           </TableHead>
-                          <TableHead className="text-slate-800 dark:text-slate-100 hidden sm:table-cell">
+                          <TableHead className="text-gray-700 font-medium hidden sm:table-cell">
                             Bookings
                           </TableHead>
-                          <TableHead className="text-slate-800 dark:text-slate-100">
+                          <TableHead className="text-gray-700 font-medium">
                             Status
                           </TableHead>
-                          <TableHead className="text-right text-slate-800 dark:text-slate-100">
+                          <TableHead className="text-right text-gray-700 font-medium">
                             Actions
                           </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filtered.map((service) => (
+                        {sorted.map((service) => (
                           <TableRow
                             key={service._id}
-                            className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors"
+                            className="hover:bg-gray-50 transition-colors"
                           >
                             <TableCell className="font-medium">
                               <div className="flex items-start gap-3">
-                                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold flex-shrink-0">
+                                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold flex-shrink-0">
                                   {service.title?.[0]?.toUpperCase() || "S"}
                                 </div>
                                 <div>
-                                  <div className="font-medium text-slate-900 dark:text-slate-100">
-                                    {service.title || "—"}
+                                  <div className="font-medium text-gray-900 flex items-center gap-2">
+                                    {service.title}
+                                    {service.featured && (
+                                      <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-xs">
+                                        <Star className="h-3 w-3 mr-1 fill-amber-400 text-amber-400" />
+                                        Featured
+                                      </Badge>
+                                    )}
                                   </div>
-                                  <div className="text-xs text-slate-500 dark:text-slate-400">
-                                    {service.description
-                                      ? service.description.substring(0, 40) +
-                                        (service.description.length > 40
-                                          ? "..."
-                                          : "")
-                                      : "—"}
+                                  <div className="text-sm text-gray-500 line-clamp-1">
+                                    {service.description?.substring(0, 30).concat("...") || "No description"}
                                   </div>
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="hidden md:table-cell text-sm text-slate-700 dark:text-slate-300">
+                            <TableCell className="hidden md:table-cell">
                               <Badge
                                 variant="outline"
-                                className="border-slate-300 dark:border-slate-600"
+                                className={cn(
+                                  "flex items-center gap-1",
+                                  getCategoryColor(service.category)
+                                )}
                               >
+                                {getCategoryIcon(service.category)}
                                 {service.category || "Uncategorized"}
                               </Badge>
                             </TableCell>
                             <TableCell className="hidden lg:table-cell">
                               <div className="flex items-center gap-2">
-                                <Star className="h-4 w-4 text-amber-400" />
-                                <span className="font-medium text-slate-900 dark:text-slate-100">
+                                <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+                                <span className="font-medium text-gray-900">
                                   {(service.rating ?? 0).toFixed(1)}
                                 </span>
-                                <span className="text-xs text-slate-500">
+                                <span className="text-sm text-gray-500">
                                   ({service.reviewsCount || 0})
                                 </span>
                               </div>
                             </TableCell>
-                            <TableCell className="font-semibold text-emerald-600 dark:text-emerald-400">
+                            <TableCell className="font-semibold text-green-600">
                               ${service.price?.toFixed(2) || "0.00"}
                             </TableCell>
-                            <TableCell className="hidden sm:table-cell text-sm text-slate-700 dark:text-slate-300">
+                            <TableCell className="hidden sm:table-cell">
                               <div className="flex items-center gap-1">
-                                <TrendingUp className="h-3 w-3 text-blue-500" />
+                                <Calendar className="h-4 w-4 text-gray-400" />
                                 {service.bookingsCount || 0}
                               </div>
                             </TableCell>
@@ -569,19 +837,19 @@ export default function VendorServicesPage() {
                                 }
                                 className={
                                   service.isActive
-                                    ? "bg-emerald-600 text-white"
-                                    : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
+                                    ? "bg-green-100 text-green-800 border-green-200"
+                                    : "bg-gray-100 text-gray-800 border-gray-200"
                                 }
                               >
                                 {service.isActive ? (
                                   <>
                                     <Check className="h-3 w-3 mr-1" />
-                                    Published
+                                    Active
                                   </>
                                 ) : (
                                   <>
                                     <X className="h-3 w-3 mr-1" />
-                                    Draft
+                                    Inactive
                                   </>
                                 )}
                               </Badge>
@@ -591,7 +859,7 @@ export default function VendorServicesPage() {
                                 <DropdownMenuTrigger asChild>
                                   <Button
                                     variant="ghost"
-                                    className="h-8 w-8 p-0 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                    className="h-8 w-8 p-0 hover:bg-gray-100"
                                   >
                                     <span className="sr-only">Open menu</span>
                                     <MoreHorizontal className="h-4 w-4" />
@@ -629,12 +897,33 @@ export default function VendorServicesPage() {
                                     {service.isActive ? (
                                       <>
                                         <X className="mr-2 h-4 w-4" />
-                                        Unpublish
+                                        Deactivate
                                       </>
                                     ) : (
                                       <>
                                         <Check className="mr-2 h-4 w-4" />
-                                        Publish
+                                        Activate
+                                      </>
+                                    )}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleToggleFeatured(
+                                        service._id,
+                                        service.featured || false
+                                      )
+                                    }
+                                    className="cursor-pointer"
+                                  >
+                                    {service.featured ? (
+                                      <>
+                                        <X className="mr-2 h-4 w-4" />
+                                        Remove from Featured
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Star className="mr-2 h-4 w-4" />
+                                        Add to Featured
                                       </>
                                     )}
                                   </DropdownMenuItem>
@@ -656,6 +945,168 @@ export default function VendorServicesPage() {
                       </TableBody>
                     </Table>
                   </div>
+                ) : (
+                  <div className="p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {sorted.map((service) => (
+                        <Card
+                          key={service._id}
+                          className="hover:shadow-md transition-shadow"
+                        >
+                          <CardHeader className="pb-3">
+                            <div className="flex items-start justify-between">
+                              <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold">
+                                {service.title?.[0]?.toUpperCase() || "S"}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {service.featured && (
+                                  <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-xs">
+                                    <Star className="h-3 w-3 mr-1 fill-amber-400 text-amber-400" />
+                                    Featured
+                                  </Badge>
+                                )}
+                                <Badge
+                                  variant={
+                                    service.isActive ? "default" : "secondary"
+                                  }
+                                  className={
+                                    service.isActive
+                                      ? "bg-green-100 text-green-800 border-green-200"
+                                      : "bg-gray-100 text-gray-800 border-gray-200"
+                                  }
+                                >
+                                  {service.isActive ? "Active" : "Inactive"}
+                                </Badge>
+                              </div>
+                            </div>
+                            <CardTitle className="text-lg font-semibold text-gray-900 line-clamp-1">
+                              {service.title}
+                            </CardTitle>
+                            <CardDescription className="text-sm text-gray-600 line-clamp-2">
+                              {service.description}
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1">
+                                  <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+                                  <span className="font-medium text-gray-900">
+                                    {(service.rating ?? 0).toFixed(1)}
+                                  </span>
+                                  <span className="text-sm text-gray-500">
+                                    ({service.reviewsCount || 0})
+                                  </span>
+                                </div>
+                                <div className="text-lg font-bold text-green-600">
+                                  ${service.price?.toFixed(2) || "0.00"}
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between text-sm">
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    "flex items-center gap-1",
+                                    getCategoryColor(service.category)
+                                  )}
+                                >
+                                  {getCategoryIcon(service.category)}
+                                  {service.category || "Uncategorized"}
+                                </Badge>
+                                <div className="flex items-center gap-1 text-gray-500">
+                                  <Calendar className="h-3 w-3" />
+                                  {service.bookingsCount || 0}
+                                </div>
+                              </div>
+                              <div className="flex gap-2 pt-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1"
+                                  onClick={() => setSelectedService(service)}
+                                >
+                                  <Eye className="h-3 w-3 mr-1" />
+                                  View
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="p-0 h-8 w-8"
+                                    >
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                      onClick={() => handleOpenForm(service)}
+                                      className="cursor-pointer"
+                                    >
+                                      <Edit className="mr-2 h-4 w-4" />
+                                      Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleToggleActive(
+                                          service._id,
+                                          service.isActive || false
+                                        )
+                                      }
+                                      className="cursor-pointer"
+                                    >
+                                      {service.isActive ? (
+                                        <>
+                                          <X className="mr-2 h-4 w-4" />
+                                          Deactivate
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Check className="mr-2 h-4 w-4" />
+                                          Activate
+                                        </>
+                                      )}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleToggleFeatured(
+                                          service._id,
+                                          service.featured || false
+                                        )
+                                      }
+                                      className="cursor-pointer"
+                                    >
+                                      {service.featured ? (
+                                        <>
+                                          <X className="mr-2 h-4 w-4" />
+                                          Remove from Featured
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Star className="mr-2 h-4 w-4" />
+                                          Add to Featured
+                                        </>
+                                      )}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        requestDeleteService(service._id)
+                                      }
+                                      className="cursor-pointer text-red-600 focus:text-red-600"
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </TabsContent>
             </Tabs>
@@ -666,9 +1117,9 @@ export default function VendorServicesPage() {
       {/* Service Form Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-8">
-          <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-lg shadow-lg p-8">
+          <div className="w-full max-w-2xl bg-white rounded-lg shadow-xl p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+              <h2 className="text-2xl font-semibold text-gray-900">
                 {editingService ? "Edit Service" : "Create Service"}
               </h2>
               <Button
@@ -684,7 +1135,7 @@ export default function VendorServicesPage() {
               {/* Title & Category Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <label className="text-sm font-medium text-gray-700">
                     Title *
                   </label>
                   <Input
@@ -698,21 +1149,22 @@ export default function VendorServicesPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <label className="text-sm font-medium text-gray-700">
                     Category *
                   </label>
                   <select
-                  title="select-category"
+                  title="text"
                     value={formData.category}
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="w-full mt-1 p-2 border rounded-md text-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                    className="w-full mt-1 p-2 border rounded-md text-sm border-gray-200 bg-white text-gray-900"
                   >
                     <option value="">Select category</option>
                     <option value="Photography">Photography</option>
+                    <option value="Videography">Videography</option>
                     <option value="Catering">Catering</option>
-                    <option value="Decor">Decor</option>
+                    <option value="Decoration">Decoration</option>
                     <option value="Entertainment">Entertainment</option>
                     <option value="Venue">Venue</option>
                     <option value="Other">Other</option>
@@ -722,7 +1174,7 @@ export default function VendorServicesPage() {
 
               {/* Description */}
               <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="text-sm font-medium text-gray-700">
                   Description *
                 </label>
                 <textarea
@@ -731,7 +1183,7 @@ export default function VendorServicesPage() {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   placeholder="Describe your service in detail..."
-                  className="w-full mt-1 p-3 border rounded-md text-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                  className="w-full mt-1 p-3 border rounded-md text-sm border-gray-200 bg-white text-gray-900"
                   rows={4}
                 />
               </div>
@@ -739,7 +1191,7 @@ export default function VendorServicesPage() {
               {/* Location & Tags Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <label className="text-sm font-medium text-gray-700">
                     Location *
                   </label>
                   <Input
@@ -753,7 +1205,7 @@ export default function VendorServicesPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <label className="text-sm font-medium text-gray-700">
                     Tags (comma-separated)
                   </label>
                   <Input
@@ -770,7 +1222,7 @@ export default function VendorServicesPage() {
               {/* Price & Pricing Type Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <label className="text-sm font-medium text-gray-700">
                     Price *
                   </label>
                   <Input
@@ -786,16 +1238,16 @@ export default function VendorServicesPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <label className="text-sm font-medium text-gray-700">
                     Pricing Type
                   </label>
                   <select
-                    title='select-price'
+                    title="text"
                     value={formData.pricingType}
                     onChange={(e) =>
                       setFormData({ ...formData, pricingType: e.target.value })
                     }
-                    className="w-full mt-1 p-2 border rounded-md text-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                    className="w-full mt-1 p-2 border rounded-md text-sm border-gray-200 bg-white text-gray-900"
                   >
                     <option value="fixed">Fixed</option>
                     <option value="per-hour">Per Hour</option>
@@ -808,7 +1260,7 @@ export default function VendorServicesPage() {
               {/* Duration & Capacity Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <label className="text-sm font-medium text-gray-700">
                     Duration (minutes)
                   </label>
                   <Input
@@ -823,7 +1275,7 @@ export default function VendorServicesPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <label className="text-sm font-medium text-gray-700">
                     Capacity (max bookings)
                   </label>
                   <Input
@@ -841,7 +1293,7 @@ export default function VendorServicesPage() {
               {/* Advance Booking Window */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <label className="text-sm font-medium text-gray-700">
                     Min Advance Booking (days)
                   </label>
                   <Input
@@ -858,7 +1310,7 @@ export default function VendorServicesPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <label className="text-sm font-medium text-gray-700">
                     Max Advance Booking (days)
                   </label>
                   <Input
@@ -877,7 +1329,7 @@ export default function VendorServicesPage() {
 
               {/* Cancellation Policy */}
               <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="text-sm font-medium text-gray-700">
                   Cancellation Policy
                 </label>
                 <textarea
@@ -889,13 +1341,13 @@ export default function VendorServicesPage() {
                     })
                   }
                   placeholder="Describe your cancellation policy..."
-                  className="w-full mt-1 p-2 border rounded-md text-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                  className="w-full mt-1 p-2 border rounded-md text-sm border-gray-200 bg-white text-gray-900"
                   rows={2}
                 />
               </div>
 
               {/* Deposit Section */}
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/20 rounded-lg space-y-4">
+              <div className="p-4 bg-gray-50 rounded-lg space-y-4">
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
@@ -907,11 +1359,11 @@ export default function VendorServicesPage() {
                         depositRequired: e.target.checked,
                       })
                     }
-                    className="h-4 w-4 rounded border-slate-300"
+                    className="h-4 w-4 rounded border-gray-300"
                   />
                   <label
                     htmlFor="depositRequired"
-                    className="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer"
+                    className="text-sm font-medium text-gray-700 cursor-pointer"
                   >
                     Require Deposit
                   </label>
@@ -919,7 +1371,7 @@ export default function VendorServicesPage() {
 
                 {formData.depositRequired && (
                   <div>
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <label className="text-sm font-medium text-gray-700">
                       Deposit Percentage (%)
                     </label>
                     <Input
@@ -942,7 +1394,7 @@ export default function VendorServicesPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-6 border-t border-slate-200 dark:border-slate-700 mt-6">
+            <div className="flex gap-3 pt-6 border-t border-gray-200 mt-6">
               <Button
                 variant="outline"
                 onClick={handleCloseForm}
@@ -952,7 +1404,7 @@ export default function VendorServicesPage() {
               </Button>
               <Button
                 onClick={handleSaveService}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {editingService ? "Update Service" : "Create Service"}
               </Button>
@@ -961,23 +1413,14 @@ export default function VendorServicesPage() {
         </div>
       )}
 
-      {/* Service Details Drawer */}
+      {/* Service Details Modal */}
       {selectedService && (
-        <div className="fixed inset-0 z-50 flex">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setSelectedService(null)}
-          />
-          <div className="ml-auto w-full max-w-md bg-white dark:bg-slate-900 h-full shadow-xl p-6 overflow-auto">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                  {selectedService.title}
-                </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {selectedService.category}
-                </p>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-8">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {selectedService.title}
+              </h3>
               <Button
                 variant="ghost"
                 onClick={() => setSelectedService(null)}
@@ -988,59 +1431,61 @@ export default function VendorServicesPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
-                <p className="text-sm text-slate-600 dark:text-slate-300">
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600">
                   {selectedService.description || "No description"}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-xs font-semibold text-slate-500 uppercase">
+                  <div className="text-xs font-semibold text-gray-500 uppercase">
                     Price
                   </div>
-                  <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                  <div className="text-2xl font-bold text-green-600">
                     ${selectedService.price?.toFixed(2) || "0.00"}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-slate-500 uppercase">
+                  <div className="text-xs font-semibold text-gray-500 uppercase">
                     Rating
                   </div>
                   <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-amber-400" />
-                    <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                    <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+                    <span className="text-2xl font-bold text-gray-900">
                       {(selectedService.rating ?? 0).toFixed(1)}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
-                <div className="text-xs font-semibold text-slate-500 uppercase mb-2">
+              <div className="pt-4 border-t border-gray-200">
+                <div className="text-xs font-semibold text-gray-500 uppercase mb-2">
                   Performance
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-600 dark:text-slate-400">
-                      Bookings
-                    </span>
-                    <span className="font-semibold text-slate-900 dark:text-slate-100">
+                    <span className="text-gray-600">Bookings</span>
+                    <span className="font-semibold text-gray-900">
                       {selectedService.bookingsCount || 0}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-600 dark:text-slate-400">
-                      Reviews
-                    </span>
-                    <span className="font-semibold text-slate-900 dark:text-slate-100">
+                    <span className="text-gray-600">Reviews</span>
+                    <span className="font-semibold text-gray-900">
                       {selectedService.reviewsCount || 0}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Views</span>
+                    <span className="font-semibold text-gray-900">
+                      {selectedService.views || 0}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex gap-2">
+              <div className="pt-4 border-t border-gray-200 flex gap-2">
                 <Button
                   variant="outline"
                   className="flex-1"

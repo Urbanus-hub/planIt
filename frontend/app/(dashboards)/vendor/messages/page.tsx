@@ -84,100 +84,11 @@ export default function MessagesPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const mockMessages: Message[] = [
-    {
-      _id: "1",
-      clientName: "Sarah Johnson",
-      clientId: "client1",
-      lastMessage:
-        "Hi! I would like to book your photography services for my wedding.",
-      lastMessageTime: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-      unreadCount: 2,
-      status: "active",
-      messageCount: 12,
-      isOnline: true,
-    },
-    {
-      _id: "2",
-      clientName: "James Anderson",
-      clientId: "client2",
-      lastMessage:
-        "Thanks for the quote! Can we discuss customization options?",
-      lastMessageTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      unreadCount: 1,
-      status: "active",
-      messageCount: 8,
-      isOnline: true,
-    },
-    {
-      _id: "3",
-      clientName: "Emily Davis",
-      clientId: "client3",
-      lastMessage: "Perfect! Looking forward to working with you on the event.",
-      lastMessageTime: new Date(
-        Date.now() - 1 * 24 * 60 * 60 * 1000
-      ).toISOString(),
-      unreadCount: 0,
-      status: "active",
-      messageCount: 24,
-      isOnline: false,
-    },
-    {
-      _id: "4",
-      clientName: "Michael Brown",
-      clientId: "client4",
-      lastMessage:
-        "Thank you so much! We were very satisfied with the service.",
-      lastMessageTime: new Date(
-        Date.now() - 3 * 24 * 60 * 60 * 1000
-      ).toISOString(),
-      unreadCount: 0,
-      status: "closed",
-      messageCount: 6,
-      isOnline: false,
-    },
+    
   ];
 
   const mockConversations: { [key: string]: Conversation } = {
-    "1": {
-      _id: "1",
-      messages: [
-        {
-          _id: "m1",
-          senderId: "client1",
-          senderName: "Sarah Johnson",
-          content:
-            "Hi! I would like to book your photography services for my wedding.",
-          timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-          read: true,
-        },
-        {
-          _id: "m2",
-          senderId: "vendor",
-          senderName: "You",
-          content:
-            "Hello Sarah! Thank you for reaching out. I'd be happy to help with your wedding photography. What's your event date?",
-          timestamp: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-          read: true,
-        },
-        {
-          _id: "m3",
-          senderId: "client1",
-          senderName: "Sarah Johnson",
-          content:
-            "The wedding is on June 15th. We're expecting around 150 guests.",
-          timestamp: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-          read: true,
-        },
-        {
-          _id: "m4",
-          senderId: "client1",
-          senderName: "Sarah Johnson",
-          content: "Could you send me your pricing information?",
-          timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-          read: false,
-        },
-      ],
-    },
+    
   };
 
   const fetchMessages = async () => {
