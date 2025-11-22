@@ -11,6 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 export function NavMain({
@@ -23,11 +24,22 @@ export function NavMain({
   }[];
 }) {
   const pathname = usePathname();
+  const { state } = useSidebar();
 
   return (
     <SidebarGroup>
-      <SidebarGroupContent className="px-2 py-2">
-        <SidebarMenu className="gap-1.5">
+      <SidebarGroupContent
+        className={cn(
+          "py-3 transition-all",
+          state === "collapsed" ? "px-1" : "px-2"
+        )}
+      >
+        <SidebarMenu
+          className={cn(
+            "gap-2 transition-all",
+            state === "collapsed" ? "gap-3" : "gap-1.5"
+          )}
+        >
           {items.map((item) => {
             // Consider a route active when the current pathname starts with the item's url
             // so `/admin/users` keeps `/admin` highlighted.
@@ -39,15 +51,36 @@ export function NavMain({
                   tooltip={item.title}
                   isActive={isActive}
                   className={cn(
-                    "h-10 px-4 text-md font-medium rounded-lg transition-all duration-200",
+                    "h-10 px-4 text-md font-medium rounded-lg transition-all duration-300 relative overflow-hidden group",
                     isActive
-                      ? "bg-green-400 text-white border border-green-400 font-semibold"
-                      : "text-slate-200 hover:bg-green-400 hover:text-white hover:border hover:border-green-400"
+                      ? "bg-linear-to-r from-green-500 to-green-600 text-white shadow-xl shadow-green-500/50 border border-green-300/60 font-semibold"
+                      : "text-slate-200 border border-transparent hover:text-white hover:bg-linear-to-r hover:from-green-500 hover:to-green-600 hover:border-green-300/60 hover:shadow-lg hover:shadow-green-500/50"
                   )}
                 >
-                  <Link href={item.url}>
-                    {item.icon && <item.icon className="h-5 w-5 mr-2" />}
-                    <span className="text-white">{item.title}</span>
+                  <Link
+                    href={item.url}
+                    className={cn(
+                      "flex items-center w-full transition-all",
+                      state === "collapsed"
+                        ? "justify-center px-0 py-1"
+                        : "justify-start px-0 gap-3"
+                    )}
+                  >
+                    {item.icon && (
+                      <item.icon
+                        className={cn(
+                          "h-5 w-5 shrink-0 transition-all duration-300 font-bold",
+                          isActive
+                            ? "text-white drop-shadow-lg"
+                            : "text-white group-hover:text-white group-hover:drop-shadow-md"
+                        )}
+                      />
+                    )}
+                    {state !== "collapsed" && (
+                      <span className="text-white whitespace-nowrap font-medium">
+                        {item.title}
+                      </span>
+                    )}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

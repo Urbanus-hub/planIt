@@ -29,12 +29,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 import styles from "./app-sidebar.module.css";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user, logout } = useAuth();
+  const { state } = useSidebar();
 
   // Role-based navigation
   const getNavigation = () => {
@@ -91,13 +94,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       collapsible="icon"
       variant="sidebar"
       {...props}
-      className="relative bg-slate-950 overflow-hidden !fixed !left-0 !top-0 !h-screen !border-r"
+      className="relative bg-slate-950 overflow-hidden !fixed !left-0 !top-0 !h-screen !border-r border-green-500/30 shadow-2xl shadow-black/50"
     >
       {/* Background Image */}
       <div className={styles.sidebarBackground} />
-      {/* Green & White Overlay */}
-      <div className="absolute inset-0 z-0 bg-linear-to-b from-green-600  to-white/15" />
-      <div className="absolute inset-0 z-0 bg-linear-to-r from-white/5 to-transparent" />
+      {/* Gradient Overlay - Lighter to show bg image */}
+      <div className="absolute inset-0 z-0 bg-linear-to-br from-slate-900/60 via-slate-950/70 to-black/65" />
+      {/* Green accent glow */}
+      <div className="absolute inset-0 z-0 bg-linear-to-r from-green-600/15 via-green-500/5 to-transparent" />
+      {/* Bottom green fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-40 z-0 bg-linear-to-t from-green-500/20 via-green-500/5 to-transparent" />
 
       {/* Content Wrapper */}
       <div className="relative z-10 flex flex-col h-full overflow-y-auto">
@@ -107,20 +113,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuButton
                 asChild
                 size="lg"
-                className="h-12 "
+                className="h-12 rounded-lg border border-green-500/20 hover:border-green-500/50 hover:bg-green-500/5 transition-all duration-300"
               >
-                <a href="/" className="flex items-center gap-3 px-2">
+                <a
+                  href="/"
+                  className={cn(
+                    "flex items-center transition-all",
+                    state === "collapsed"
+                      ? "justify-center px-2"
+                      : "justify-start gap-3 px-2"
+                  )}
+                >
                   <div className="flex aspect-square size-9 items-center justify-center rounded-lg bg-linear-to-br from-emerald-400 to-emerald-600 text-white shadow-lg">
                     <Calendar className="size-5" />
                   </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-bold text-lg text-white">
-                      PlanIt
-                    </span>
-                    <span className="truncate text-xs capitalize text-emerald-200">
-                      {user?.role || "Dashboard"}
-                    </span>
-                  </div>
+                  {state !== "collapsed" && (
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-bold text-lg text-white">
+                        PlanIt
+                      </span>
+                      <span className="truncate text-xs capitalize text-green-300 font-medium">
+                        {user?.role || "Dashboard"}
+                      </span>
+                    </div>
+                  )}
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>

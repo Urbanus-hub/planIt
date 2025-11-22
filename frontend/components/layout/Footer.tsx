@@ -220,7 +220,7 @@ export default function Footer() {
               </div>
 
               {/* Social Links */}
-              <div>
+              <div className=" ">
                 <p className="text-sm font-semibold text-white mb-3 ">
                   Follow Us
                 </p>
@@ -231,10 +231,10 @@ export default function Footer() {
                       href={social.href}
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       whileTap={{ scale: 0.9 }}
-                      className={`social-icon w-11 h-11 bg-white/10 ${social.color} rounded-xl flex items-center justify-center transition-all duration-300 hover:shadow-lg group backdrop-blur-sm border-2 border-white/20 hover:border-white/40`}
+                      className={`social-icon w-11 h-11  ${social.color} rounded-xl flex items-center justify-center transition-all duration-300 hover:shadow-lg group backdrop-blur-sm border-2 border-green-400 hover:border-white/40`}
                       aria-label={social.name}
                     >
-                      <social.icon className="w-5 h-5 text-white group-hover:text-white" />
+                      <social.icon className="w-5 h-5 text-white group-hover:text-white " />
                     </motion.a>
                   ))}
                 </div>
