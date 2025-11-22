@@ -27,12 +27,11 @@ export default function DashboardLayout({
     if (pathname === "/client") return "My Dashboard";
     if (pathname === "/vendor") return "Vendor Dashboard";
     if (pathname.includes("/admin/"))
-      return pathname.split("/").pop()?.replace("-", " ") || "Admin";
+      return pathname.split("/").pop()?.replaceAll("-", " ") || "Admin";
     if (pathname.includes("/client/"))
-      return pathname.split("/").pop()?.replace("-", " ") || "Client";
+      return pathname.split("/").pop()?.replaceAll("-", " ") || "Client";
     if (pathname.includes("/vendor/"))
-      return pathname.split("/").pop()?.replace("-", " ") || "Vendor";
-    return "Dashboard";
+      return pathname.split("/").pop()?.replaceAll("-", " ") || "Vendor";    return "Dashboard";
   };
 
   const handleNotifications = () => {

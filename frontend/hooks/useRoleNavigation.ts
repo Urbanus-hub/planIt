@@ -13,11 +13,12 @@ export function useRoleBasedRedirect() {
   const router = useRouter();
 
   const redirectToDashboard = () => {
+    if (loading) return;
+    
     if (!user) {
       router.push("/login");
       return;
     }
-
     switch (user.role) {
       case "admin":
         router.push("/admin");
