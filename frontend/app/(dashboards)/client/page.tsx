@@ -13,7 +13,21 @@ import {
   TrendingUp,
   PartyPopper,
   Sparkles,
+  Camera,
+  Music,
+  Utensils,
+  Palette,
+  Eye,
+  Filter,
+  Play,
+  ChevronRight,
+  Grid3X3,
+  Film,
+  Image as ImageIcon,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -22,9 +36,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function ClientDashboard() {
   const { user } = useAuth();
+  const [galleryFilter, setGalleryFilter] = useState("all");
 
   const stats = [
     {
@@ -32,7 +49,7 @@ export default function ClientDashboard() {
       value: "8",
       change: "+2 this month",
       icon: Calendar,
-      color: "green",
+      colorClass: "text-green-500",
       description: "Active bookings",
     },
     {
@@ -40,7 +57,7 @@ export default function ClientDashboard() {
       value: "3",
       change: "Next: Dec 15",
       icon: Clock,
-      color: "blue",
+      colorClass: "text-blue-500",
       description: "Scheduled events",
     },
     {
@@ -48,7 +65,7 @@ export default function ClientDashboard() {
       value: "24",
       change: "+5 recently",
       icon: Heart,
-      color: "red",
+      colorClass: "text-red-500",
       description: "Favorited",
     },
     {
@@ -56,7 +73,7 @@ export default function ClientDashboard() {
       value: "KSh 180K",
       change: "+15% this year",
       icon: TrendingUp,
-      color: "purple",
+      colorClass: "text-purple-500",
       description: "All time",
     },
   ];
@@ -88,241 +105,524 @@ export default function ClientDashboard() {
     },
   ];
 
-  const favoriteVendors = [
+  // Featured vendors with their recent work
+  const featuredVendors = [
     {
+      id: 1,
       name: "Sarah's Catering",
       category: "Catering",
       rating: 4.9,
       reviews: 234,
+      image:
+        "https://images.unsplash.com/photo-1555939594-58d7cb561522?w=400&h=300&fit=crop",
+      recentWork: {
+        title: "Elegant Wedding Reception",
+        image:
+          "https://images.unsplash.com/photo-1555939594-58d7cb561522?w=400&h=300&fit=crop",
+        date: "Nov 28, 2025",
+      },
+      icon: Utensils,
     },
     {
+      id: 2,
       name: "Elite Photographers",
       category: "Photography",
       rating: 4.8,
       reviews: 189,
+      image:
+        "https://images.unsplash.com/photo-1606011334315-76b8191da5f3?w=400&h=300&fit=crop",
+      recentWork: {
+        title: "Corporate Gala",
+        image:
+          "https://images.unsplash.com/photo-1606011334315-76b8191da5f3?w=400&h=300&fit=crop",
+        date: "Nov 15, 2025",
+      },
+      icon: Camera,
     },
     {
+      id: 3,
       name: "Sound Masters Pro",
       category: "Sound & DJ",
       rating: 4.7,
       reviews: 156,
+      image:
+        "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=300&fit=crop",
+      recentWork: {
+        title: "Birthday Celebration",
+        image:
+          "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=300&fit=crop",
+        date: "Nov 5, 2025",
+      },
+      icon: Music,
     },
     {
+      id: 4,
       name: "Floral Dreams",
       category: "Decoration",
       rating: 4.9,
       reviews: 201,
+      image:
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop",
+      recentWork: {
+        title: "Garden Party Setup",
+        image:
+          "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop",
+        date: "Oct 20, 2025",
+      },
+      icon: Palette,
     },
   ];
 
+  // Gallery items for successful events
+  const galleryItems = [
+    {
+      id: 1,
+      title: "Luxury Wedding at Serena Hotel",
+      category: "wedding",
+      type: "image",
+      thumbnail:
+        "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop",
+      vendor: "Elite Photographers",
+      date: "Oct 15, 2025",
+      description:
+        "A breathtaking wedding ceremony with elegant decorations and gourmet catering.",
+    },
+    {
+      id: 2,
+      title: "Corporate Product Launch",
+      category: "corporate",
+      type: "video",
+      thumbnail:
+        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&h=400&fit=crop",
+      vendor: "Sound Masters Pro",
+      date: "Sep 28, 2025",
+      description:
+        "A high-energy product launch event with professional sound and lighting.",
+      videoUrl: "#",
+    },
+    {
+      id: 3,
+      title: "Birthday Extravaganza",
+      category: "birthday",
+      type: "image",
+      thumbnail:
+        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&h=400&fit=crop",
+      vendor: "Floral Dreams",
+      date: "Sep 10, 2025",
+      description:
+        "A vibrant birthday celebration with stunning floral arrangements.",
+    },
+    {
+      id: 4,
+      title: "Beach Wedding Ceremony",
+      category: "wedding",
+      type: "video",
+      thumbnail:
+        "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop",
+      vendor: "Sarah's Catering",
+      date: "Aug 22, 2025",
+      description:
+        "A romantic beach wedding with exquisite catering and ocean views.",
+      videoUrl: "#",
+    },
+    {
+      id: 5,
+      title: "Annual Charity Gala",
+      category: "corporate",
+      type: "image",
+      thumbnail:
+        "https://images.unsplash.com/photo-1540575467063-178f50002c4b?w=600&h=400&fit=crop",
+      vendor: "Elite Photographers",
+      date: "Jul 30, 2025",
+      description:
+        "An elegant charity gala that raised funds for community development.",
+    },
+    {
+      id: 6,
+      title: "Sweet 16 Celebration",
+      category: "birthday",
+      type: "video",
+      thumbnail:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop",
+      vendor: "Sound Masters Pro",
+      date: "Jul 15, 2025",
+      description:
+        "A memorable Sweet 16 party with DJ, dancing, and entertainment.",
+      videoUrl: "#",
+    },
+  ];
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "Catering":
+        return <Utensils className="h-4 w-4" />;
+      case "Photography":
+        return <Camera className="h-4 w-4" />;
+      case "Sound & DJ":
+        return <Music className="h-4 w-4" />;
+      case "Decoration":
+        return <Palette className="h-4 w-4" />;
+      default:
+        return <Sparkles className="h-4 w-4" />;
+    }
+  };
+
+  const filteredGalleryItems = galleryItems.filter(
+    (item) => galleryFilter === "all" || item.category === galleryFilter
+  );
+
   return (
     <ProtectedRoute allowedRoles={["client"]}>
-      <div className="flex-1 min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/20 dark:from-gray-900 dark:via-blue-900/10 dark:to-gray-800">
-        <div className="max-w-7xl mx-auto p-4 lg:p-8 space-y-8">
-          {/* Fun Welcome Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-8 shadow-xl">
-            <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px]" />
-            <div className="absolute top-0 right-0 -mt-4 -mr-4">
-              <PartyPopper className="w-24 h-24 text-white/20 animate-bounce" />
+      <div className="flex-1 min-h-screen w-full">
+        {/* Hero Section with Professional Emerald Overlay */}
+        <div className="relative h-[60vh] w-full overflow-hidden rounded-lg">
+          <Image
+            src="/herobg.png"
+            alt="Hero Background"
+            fill
+            className="object-cover rounded-lg"
+          />
+          <div className="absolute inset-0 bg-linear-to-r from-emerald-900/85 to-teal-800/75" />
+
+          <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
+              Welcome back, {user?.name || "Guest"}!
+            </h1>
+            <p className="text-xl text-white/90 max-w-2xl mb-8">
+              Your dream event is just a click away. Let's create something
+              memorable together.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button
+                size="lg"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-8 py-3 shadow-lg font-semibold transition-all"
+              >
+                Explore Vendors
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white text-white bg-transparent hover:bg-white hover:text-emerald-900 rounded-full px-8 py-3 font-semibold transition-all"
+              >
+                Plan My Event
+              </Button>
             </div>
-            <div className="relative flex items-center gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                  <Sparkles className="w-8 h-8 text-white animate-spin-slow" />
-                </div>
-              </div>
-              <div className="flex-1">
-                <h2 className="text-3xl font-bold text-white mb-2">
-                  Let's Plan Something Amazing! 🎉
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+          {/* Stats Section */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {stats.map((stat, index) => (
+              <Card
+                key={index}
+                className="shadow-md hover:shadow-xl transition-all border-l-4 border-emerald-500 hover:border-emerald-600 bg-linear-to-br from-white to-emerald-50 dark:from-gray-800 dark:to-emerald-900/20"
+              >
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {stat.title}
+                  </CardTitle>
+                  <stat.icon className={`h-5 w-5 ${stat.colorClass}`} />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {stat.value}
+                  </div>
+                  <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 font-medium mt-1">
+                    {stat.change}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    {stat.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Featured Vendors Section */}
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  Featured Vendors
                 </h2>
-                <p className="text-blue-50 text-lg">
-                  Welcome back, {user?.name || "Guest"}! Your dream event is
-                  just a click away.
+                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                  Discover amazing services for your event
                 </p>
               </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                >
+                  <Filter className="h-4 w-4" />
+                  Filter
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                >
+                  View All
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredVendors.map((vendor) => (
+                <Card
+                  key={vendor.id}
+                  className="overflow-hidden shadow-md hover:shadow-xl transition-all border-0 bg-white dark:bg-gray-800 hover:border-emerald-300 dark:hover:border-emerald-600"
+                >
+                  <div className="relative h-48 overflow-hidden bg-gray-200 dark:bg-gray-700">
+                    <Image
+                      src={vendor.recentWork.image}
+                      alt={vendor.recentWork.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                      {getCategoryIcon(vendor.category)}
+                    </div>
+                  </div>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge
+                        variant="secondary"
+                        className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 text-xs"
+                      >
+                        {vendor.category}
+                      </Badge>
+                      <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded-full">
+                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {vendor.rating}
+                        </span>
+                      </div>
+                    </div>
+                    <CardTitle className="text-lg text-gray-900 dark:text-white">
+                      {vendor.name}
+                    </CardTitle>
+                    <CardDescription className="text-sm text-gray-600 dark:text-gray-400">
+                      {vendor.recentWork.title}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="flex items-center justify-between mb-4 text-xs text-gray-500 dark:text-gray-400">
+                      <span>{vendor.recentWork.date}</span>
+                      <span>{vendor.reviews} reviews</span>
+                    </div>
+                    <Link href={`/vendors/${vendor.id}`}>
+                      <Button
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-all"
+                        size="sm"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Profile
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
+          {/* Gallery Section */}
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  Event Gallery
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                  Get inspired by our successful events
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                >
+                  <Grid3X3 className="h-4 w-4 mr-2" />
+                  View All
+                </Button>
+              </div>
+            </div>
+
+            {/* Gallery Filter Tabs */}
+            <Tabs
+              value={galleryFilter}
+              onValueChange={setGalleryFilter}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-4 mb-6 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+                <TabsTrigger
+                  value="all"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md"
+                >
+                  All Events
+                </TabsTrigger>
+                <TabsTrigger
+                  value="wedding"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md"
+                >
+                  Weddings
+                </TabsTrigger>
+                <TabsTrigger
+                  value="corporate"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md"
+                >
+                  Corporate
+                </TabsTrigger>
+                <TabsTrigger
+                  value="birthday"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md"
+                >
+                  Birthdays
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value={galleryFilter} className="mt-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredGalleryItems.map((item) => (
+                    <Card
+                      key={item.id}
+                      className="overflow-hidden shadow-md hover:shadow-xl transition-all group bg-white dark:bg-gray-800"
+                    >
+                      <div className="relative h-64 overflow-hidden">
+                        <Image
+                          src={item.thumbnail}
+                          alt={item.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+
+                        {/* Overlay for media type indicator */}
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        {/* Media type indicator */}
+                        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                          {item.type === "video" ? (
+                            <Film className="h-4 w-4 text-emerald-600" />
+                          ) : (
+                            <ImageIcon className="h-4 w-4 text-emerald-600" />
+                          )}
+                        </div>
+
+                        {/* Play button for videos */}
+                        {item.type === "video" && (
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="bg-emerald-600/90 backdrop-blur-sm rounded-full p-4 shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                              <Play className="h-8 w-8 text-white ml-1" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge
+                            variant="secondary"
+                            className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 text-xs capitalize"
+                          >
+                            {item.category}
+                          </Badge>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            {item.date}
+                          </span>
+                        </div>
+                        <CardTitle className="text-lg text-gray-900 dark:text-white">
+                          {item.title}
+                        </CardTitle>
+                        <CardDescription className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                          {item.vendor}
+                        </CardDescription>
+                      </CardHeader>
+
+                      <CardContent className="pt-0">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                          {item.description}
+                        </p>
+                        <Button
+                          variant="outline"
+                          className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                        >
+                          View Details
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Upcoming Events Section */}
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Your Upcoming Events
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                Stay on top of your upcoming bookings
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingEvents.map((event, index) => (
                 <Card
                   key={index}
-                  className="border-2 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white dark:bg-gray-800"
+                  className="shadow-md hover:shadow-xl transition-all bg-white dark:bg-gray-800 border-l-4 border-emerald-500 hover:border-emerald-600"
                 >
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      {stat.title}
-                    </CardDescription>
-                    <div
-                      className={`p-2 rounded-full ${
-                        stat.color === "green"
-                          ? "bg-green-100 dark:bg-green-900/20"
-                          : stat.color === "blue"
-                          ? "bg-blue-100 dark:bg-blue-900/20"
-                          : stat.color === "red"
-                          ? "bg-red-100 dark:bg-red-900/20"
-                          : "bg-purple-100 dark:bg-purple-900/20"
-                      }`}
-                    >
-                      <Icon
-                        className={`w-5 h-5 ${
-                          stat.color === "green"
-                            ? "text-green-600 dark:text-green-400"
-                            : stat.color === "blue"
-                            ? "text-blue-600 dark:text-blue-400"
-                            : stat.color === "red"
-                            ? "text-red-600 dark:text-red-400"
-                            : "text-purple-600 dark:text-purple-400"
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge
+                        variant={
+                          event.status === "confirmed" ? "default" : "outline"
+                        }
+                        className={`${
+                          event.status === "confirmed"
+                            ? "bg-emerald-600 hover:bg-emerald-700"
+                            : "border-amber-500 text-amber-700 dark:text-amber-400"
                         }`}
-                      />
+                      >
+                        {event.status === "confirmed" ? (
+                          <>
+                            <CheckCircle className="h-3 w-3 mr-1" /> Confirmed
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle className="h-3 w-3 mr-1" /> Pending
+                          </>
+                        )}
+                      </Badge>
+                      <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                        {event.time}
+                      </span>
                     </div>
+                    <CardTitle className="text-xl text-gray-900 dark:text-white">
+                      {event.name}
+                    </CardTitle>
+                    <CardDescription className="text-emerald-600 dark:text-emerald-400 font-medium">
+                      {event.vendor}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2">
-                      <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                        {stat.value}
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {stat.change}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-500">
-                        {stat.description}
-                      </p>
+                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 mb-3">
+                      <Calendar className="h-4 w-4 text-emerald-600" />
+                      <span className="font-medium">{event.date}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
+                      <MapPin className="h-4 w-4 text-emerald-600" />
+                      <span className="font-medium">{event.location}</span>
                     </div>
                   </CardContent>
                 </Card>
-              );
-            })}
-          </div>
-
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Upcoming Events */}
-            <Card className="xl:col-span-2 border-2 bg-white dark:bg-gray-800">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
-                      Upcoming Events
-                    </CardTitle>
-                    <CardDescription className="text-gray-600 dark:text-gray-400">
-                      Your scheduled bookings
-                    </CardDescription>
-                  </div>
-                  <Calendar className="w-5 h-5 text-green-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {upcomingEvents.map((event, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-4 p-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500 transition-all bg-white dark:bg-gray-800"
-                    >
-                      <div className="flex-shrink-0">
-                        <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex flex-col items-center justify-center text-white">
-                          <span className="text-xs font-medium">
-                            {event.date.split(" ")[0]}
-                          </span>
-                          <span className="text-2xl font-bold">
-                            {event.date.split(" ")[1].replace(",", "")}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                              {event.name}
-                            </h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                              {event.vendor}
-                            </p>
-                          </div>
-                          <Badge
-                            variant="outline"
-                            className={`${
-                              event.status === "confirmed"
-                                ? "border-green-500 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20"
-                                : "border-yellow-500 text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20"
-                            }`}
-                          >
-                            {event.status === "confirmed" ? (
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                            ) : (
-                              <Clock className="w-3 h-3 mr-1" />
-                            )}
-                            {event.status}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-4 mt-3 text-sm text-gray-600 dark:text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {event.time}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            {event.location}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <button className="w-full mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors">
-                  View All Bookings
-                </button>
-              </CardContent>
-            </Card>
-
-            {/* Favorite Vendors */}
-            <Card className="border-2 bg-white dark:bg-gray-800">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
-                      Favorite Vendors
-                    </CardTitle>
-                    <CardDescription className="text-gray-600 dark:text-gray-400">
-                      Your saved vendors
-                    </CardDescription>
-                  </div>
-                  <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {favoriteVendors.map((vendor, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-                  >
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold">
-                      {vendor.name.charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                        {vendor.name}
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        {vendor.category}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs">
-                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        {vendor.rating}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                <button className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors">
-                  Browse Vendors
-                </button>
-              </CardContent>
-            </Card>
+              ))}
+            </div>
           </div>
         </div>
       </div>

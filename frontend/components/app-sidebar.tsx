@@ -15,6 +15,7 @@ import {
   BarChart3,
   Bell,
   LogOut,
+  MessageCircle,
   User,
 } from "lucide-react";
 
@@ -50,7 +51,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: "Users", url: "/admin/users", icon: Users },
           { title: "Vendors", url: "/admin/vendors", icon: Briefcase },
           { title: "Bookings", url: "/admin/bookings", icon: Calendar },
-          { title: "Booking", url: "/admin/bookings", icon: Calendar },
+
           { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
         ],
       };
@@ -62,6 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: "Dashboard", url: "/client", icon: LayoutDashboard },
           { title: "Browse Vendors", url: "/client/vendors", icon: Briefcase },
           { title: "My Bookings", url: "/client/bookings", icon: Calendar },
+          { title: "Messages", url: "/client/messages", icon: MessageCircle },
           { title: "Favorites", url: "/client/favorites", icon: Heart },
           { title: "Payments", url: "/client/payments", icon: DollarSign },
         ],
