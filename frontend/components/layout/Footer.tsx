@@ -14,6 +14,7 @@ import {
   Heart,
   Sparkles,
   CheckCircle2,
+  Github,
 } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -95,6 +96,7 @@ export default function Footer() {
         { name: "Blog", href: "#blog", icon: "→" },
         { name: "Event Planning Guide", href: "#guide", icon: "→" },
         { name: "FAQs", href: "#faq", icon: "→" },
+        { name: "GitHub Marketplace", href: "https://github.com/marketplace", icon: "→" },
       ],
     },
   ];
@@ -123,6 +125,12 @@ export default function Footer() {
       href: "#linkedin",
       name: "LinkedIn",
       color: "hover:bg-blue-700",
+    },
+    {
+      icon: Github,
+      href: "https://github.com/marketplace",
+      name: "GitHub Marketplace",
+      color: "hover:bg-gray-700",
     },
   ];
 
