@@ -512,31 +512,31 @@ export default function ClientDashboard() {
               </div>
 
               {/* Vendor Filter and Search */}
-              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center">
+                <div className="relative flex-1 sm:flex-none">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <Input
                     placeholder="Search vendors..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4 py-3 w-full sm:w-64 border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500"
+                    className="pl-10 pr-10 py-2.5 w-full sm:w-64 border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-lg"
                   />
                   {searchQuery && (
                     <button
-                    title="Clear search"
+                      title="Clear search"
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                      <X className="w-5 h-5" />
+                      <X className="w-4 h-4" />
                     </button>
                   )}
                 </div>
 
                 <select
-                title='select filter'
+                  title="Select category filter"
                   value={vendorFilter}
                   onChange={(e) => setVendorFilter(e.target.value)}
-                  className="px-4 py-3 border border-emerald-200 rounded-lg bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="px-4 py-2.5 border border-emerald-200 rounded-lg bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-sm transition-all"
                 >
                   <option value="all">All Categories</option>
                   <option value="Catering">Catering</option>
@@ -547,10 +547,10 @@ export default function ClientDashboard() {
 
                 <Button
                   variant="outline"
-                  size="default"
-                  className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-6"
+                  size="sm"
+                  className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 whitespace-nowrap"
                 >
-                  <Filter className="h-5 w-5 mr-2" />
+                  <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
               </div>
