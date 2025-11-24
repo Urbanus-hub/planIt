@@ -66,6 +66,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: "Messages", url: "/client/messages", icon: MessageCircle },
           { title: "Favorites", url: "/client/favorites", icon: Heart },
           { title: "Payments", url: "/client/payments", icon: DollarSign },
+          { title: "Profile", url: "/client/profile", icon: User },
         ],
       };
     }

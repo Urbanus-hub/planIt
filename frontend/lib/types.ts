@@ -17,6 +17,7 @@ export interface User {
   isActive: boolean;
   isVerified: boolean;
   lastLoginAt?: string;
+  avatar?:File;
 }
 
 // Auth Types

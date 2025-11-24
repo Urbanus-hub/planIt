@@ -90,7 +90,7 @@ interface MobileActionSheetProps {
 export default function ClientBookings() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   const [bookings] = useState<Booking[]>([
     {
       id: "1",
@@ -280,30 +280,51 @@ export default function ClientBookings() {
   // Filter bookings based on active tab and search term
   const filteredBookings = bookings.filter((booking: Booking) => {
     const matchesTab = activeTab === "all" || booking.status === activeTab;
-    const matchesSearch = booking.vendor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         booking.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         booking.location.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch =
+      booking.vendor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.location.toLowerCase().includes(searchTerm.toLowerCase());
+
     return matchesTab && matchesSearch;
   });
 
   // Filter options for dropdown
   const filterOptions = [
     { value: "all", label: "All Bookings", count: bookings.length },
-    { value: "confirmed", label: "Confirmed", count: bookings.filter((b: Booking) => b.status === "confirmed").length },
-    { value: "pending", label: "Pending", count: bookings.filter((b: Booking) => b.status === "pending").length },
-    { value: "completed", label: "Completed", count: bookings.filter((b: Booking) => b.status === "completed").length },
-    { value: "cancelled", label: "Cancelled", count: bookings.filter((b: Booking) => b.status === "cancelled").length },
+    {
+      value: "confirmed",
+      label: "Confirmed",
+      count: bookings.filter((b: Booking) => b.status === "confirmed").length,
+    },
+    {
+      value: "pending",
+      label: "Pending",
+      count: bookings.filter((b: Booking) => b.status === "pending").length,
+    },
+    {
+      value: "completed",
+      label: "Completed",
+      count: bookings.filter((b: Booking) => b.status === "completed").length,
+    },
+    {
+      value: "cancelled",
+      label: "Cancelled",
+      count: bookings.filter((b: Booking) => b.status === "cancelled").length,
+    },
   ];
 
   // Mobile Action Sheet Component with proper typing
   const MobileActionSheet: React.FC<MobileActionSheetProps> = ({ booking }) => (
     <div className="space-y-3">
       <div className="text-center pb-3 border-b">
-        <h3 className="font-semibold text-gray-900 dark:text-white">{booking.vendor}</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{booking.service}</p>
+        <h3 className="font-semibold text-gray-900 dark:text-white">
+          {booking.vendor}
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          {booking.service}
+        </p>
       </div>
-      
+
       <div className="space-y-2">
         <Button
           onClick={() => handleMessage(booking.vendor)}
@@ -377,7 +398,7 @@ export default function ClientBookings() {
 
   return (
     <ProtectedRoute allowedRoles={["client"]}>
-      <div className="flex-1 min-h-screen bg-gradient-to-br from-emerald-50 via-green-50/30 to-teal-50/20 dark:from-gray-900 dark:via-emerald-900/10 dark:to-gray-800">
+      <div className="flex-1 min-h-screen bg-linear-to-br from-emerald-50 via-green-50/30 to-teal-50/20 dark:from-gray-900 dark:via-emerald-900/10 dark:to-gray-800">
         <div className="max-w-7xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
           {/* Header */}
           <div className="flex flex-col gap-4">
@@ -407,7 +428,11 @@ export default function ClientBookings() {
                       Confirmed
                     </p>
                     <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                      {bookings.filter((b: Booking) => b.status === "confirmed").length}
+                      {
+                        bookings.filter(
+                          (b: Booking) => b.status === "confirmed"
+                        ).length
+                      }
                     </p>
                   </div>
                   <div className="p-2 sm:p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex-shrink-0">
@@ -424,7 +449,10 @@ export default function ClientBookings() {
                       Pending
                     </p>
                     <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                      {bookings.filter((b: Booking) => b.status === "pending").length}
+                      {
+                        bookings.filter((b: Booking) => b.status === "pending")
+                          .length
+                      }
                     </p>
                   </div>
                   <div className="p-2 sm:p-3 bg-amber-100 dark:bg-amber-900/20 rounded-full flex-shrink-0">
@@ -441,7 +469,11 @@ export default function ClientBookings() {
                       Completed
                     </p>
                     <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                      {bookings.filter((b: Booking) => b.status === "completed").length}
+                      {
+                        bookings.filter(
+                          (b: Booking) => b.status === "completed"
+                        ).length
+                      }
                     </p>
                   </div>
                   <div className="p-2 sm:p-3 bg-green-100 dark:bg-green-900/20 rounded-full flex-shrink-0">
@@ -458,7 +490,17 @@ export default function ClientBookings() {
                       Total Spent
                     </p>
                     <p className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                      KSh {bookings.reduce((sum, b: Booking) => sum + parseInt(b.amount.replace("KSh ", "").replace(",", "")), 0).toLocaleString()}
+                      KSh{" "}
+                      {bookings
+                        .reduce(
+                          (sum, b: Booking) =>
+                            sum +
+                            parseInt(
+                              b.amount.replace("KSh ", "").replace(",", "")
+                            ),
+                          0
+                        )
+                        .toLocaleString()}
                     </p>
                   </div>
                   <div className="p-2 sm:p-3 bg-teal-100 dark:bg-teal-900/20 rounded-full flex-shrink-0">
@@ -483,7 +525,7 @@ export default function ClientBookings() {
                   />
                   {searchTerm && (
                     <button
-                    title='btn'
+                      title="btn"
                       onClick={() => setSearchTerm("")}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
@@ -493,7 +535,10 @@ export default function ClientBookings() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="border-emerald-200 text-gray-700 dark:text-gray-300 w-full sm:w-auto">
+                    <Button
+                      variant="outline"
+                      className="border-emerald-200 text-gray-700 dark:text-gray-300 w-full sm:w-auto"
+                    >
                       <Filter className="w-4 h-4 mr-2" />
                       <span className="hidden sm:inline">Filter</span>
                       <ChevronDown className="w-4 h-4 sm:ml-2" />
@@ -516,10 +561,15 @@ export default function ClientBookings() {
             <div className="block sm:hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between border-emerald-200 text-gray-700 dark:text-gray-300">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between border-emerald-200 text-gray-700 dark:text-gray-300"
+                  >
                     <span className="flex items-center">
                       <Filter className="w-4 h-4 mr-2" />
-                      {filterOptions.find(option => option.value === activeTab)?.label || "All Bookings"}
+                      {filterOptions.find(
+                        (option) => option.value === activeTab
+                      )?.label || "All Bookings"}
                     </span>
                     <ChevronDown className="w-4 h-4" />
                   </Button>
@@ -530,7 +580,9 @@ export default function ClientBookings() {
                       key={option.value}
                       onClick={() => setActiveTab(option.value)}
                       className={`flex items-center justify-between ${
-                        activeTab === option.value ? "bg-emerald-50 dark:bg-emerald-900/20" : ""
+                        activeTab === option.value
+                          ? "bg-emerald-50 dark:bg-emerald-900/20"
+                          : ""
                       }`}
                     >
                       <span>{option.label}</span>
@@ -558,7 +610,10 @@ export default function ClientBookings() {
                     }`}
                   >
                     {option.label}
-                    <Badge variant="secondary" className="ml-2 bg-white/20 text-white">
+                    <Badge
+                      variant="secondary"
+                      className="ml-2 bg-white/20 text-white"
+                    >
                       {option.count}
                     </Badge>
                   </Button>
@@ -600,10 +655,14 @@ export default function ClientBookings() {
                           </Badge>
                           <Badge
                             variant="outline"
-                            className={`${getPaymentStatusColor(booking.paymentStatus)}`}
+                            className={`${getPaymentStatusColor(
+                              booking.paymentStatus
+                            )}`}
                           >
                             <CreditCard className="w-3 h-3 mr-1" />
-                            <span className="text-xs">{booking.paymentStatus}</span>
+                            <span className="text-xs">
+                              {booking.paymentStatus}
+                            </span>
                           </Badge>
                         </div>
                       </div>
@@ -627,35 +686,51 @@ export default function ClientBookings() {
                       {/* Additional Info - Collapsible on Mobile */}
                       <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-3 space-y-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600 dark:text-gray-400">Event Type:</span>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                            Event Type:
+                          </span>
                           <span className="text-xs font-medium text-gray-900 dark:text-white">
                             {booking.eventDetails.type}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600 dark:text-gray-400">Duration:</span>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                            Duration:
+                          </span>
                           <span className="text-xs font-medium text-gray-900 dark:text-white">
                             {booking.eventDetails.duration}
                           </span>
                         </div>
                         {booking.guests > 0 && (
                           <div className="flex justify-between items-center">
-                            <span className="text-xs text-gray-600 dark:text-gray-400">Guests:</span>
+                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                              Guests:
+                            </span>
                             <span className="text-xs font-medium text-gray-900 dark:text-white">
                               {booking.guests} attendees
                             </span>
                           </div>
                         )}
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600 dark:text-gray-400">Contact:</span>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                            Contact:
+                          </span>
                           <div className="flex items-center gap-2">
                             <span className="text-xs font-medium text-gray-900 dark:text-white">
                               {booking.contact.name}
                             </span>
-                            <a href={`tel:${booking.contact.phone}`} className="text-emerald-600 hover:text-emerald-700">
+                            <a
+                              href={`tel:${booking.contact.phone}`}
+                              className="text-emerald-600 hover:text-emerald-700"
+                              title="Call vendor"
+                            >
                               <Phone className="w-3 h-3" />
                             </a>
-                            <a href={`mailto:${booking.contact.email}`} className="text-emerald-600 hover:text-emerald-700">
+                            <a
+                              href={`mailto:${booking.contact.email}`}
+                              className="text-emerald-600 hover:text-emerald-700"
+                              title="Email vendor"
+                            >
                               <Mail className="w-3 h-3" />
                             </a>
                           </div>
@@ -672,7 +747,7 @@ export default function ClientBookings() {
                             Total Cost
                           </p>
                         </div>
-                        
+
                         {/* Mobile Actions using Sheet */}
                         <Sheet>
                           <SheetTrigger asChild>
@@ -725,7 +800,9 @@ export default function ClientBookings() {
                             </Badge>
                             <Badge
                               variant="outline"
-                              className={`${getPaymentStatusColor(booking.paymentStatus)}`}
+                              className={`${getPaymentStatusColor(
+                                booking.paymentStatus
+                              )}`}
                             >
                               <CreditCard className="w-3 h-3 mr-1" />
                               {booking.paymentStatus}
@@ -752,35 +829,51 @@ export default function ClientBookings() {
                         {/* Additional Info */}
                         <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-4 space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">Event Type:</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              Event Type:
+                            </span>
                             <span className="text-sm font-medium text-gray-900 dark:text-white">
                               {booking.eventDetails.type}
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">Duration:</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              Duration:
+                            </span>
                             <span className="text-sm font-medium text-gray-900 dark:text-white">
                               {booking.eventDetails.duration}
                             </span>
                           </div>
                           {booking.guests > 0 && (
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600 dark:text-gray-400">Guests:</span>
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                Guests:
+                              </span>
                               <span className="text-sm font-medium text-gray-900 dark:text-white">
                                 {booking.guests} attendees
                               </span>
                             </div>
                           )}
                           <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">Contact:</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              Contact:
+                            </span>
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-medium text-gray-900 dark:text-white">
                                 {booking.contact.name}
                               </span>
-                              <a href={`tel:${booking.contact.phone}`} className="text-emerald-600 hover:text-emerald-700">
+                              <a
+                                href={`tel:${booking.contact.phone}`}
+                                className="text-emerald-600 hover:text-emerald-700"
+                                title="Call vendor"
+                              >
                                 <Phone className="w-3 h-3" />
                               </a>
-                              <a href={`mailto:${booking.contact.email}`} className="text-emerald-600 hover:text-emerald-700">
+                              <a
+                                href={`mailto:${booking.contact.email}`}
+                                className="text-emerald-600 hover:text-emerald-700"
+                                title="Email vendor"
+                              >
                                 <Mail className="w-3 h-3" />
                               </a>
                             </div>
@@ -812,40 +905,44 @@ export default function ClientBookings() {
                             Message
                           </Button>
 
-                          {booking.status === "completed" && !booking.reviewed && (
-                            <Button
-                              onClick={() => handleReview(booking.id)}
-                              variant="outline"
-                              size="sm"
-                              className="border-amber-600 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 w-full"
-                            >
-                              <Star className="w-4 h-4 mr-2" />
-                              Leave Review
-                            </Button>
-                          )}
+                          {booking.status === "completed" &&
+                            !booking.reviewed && (
+                              <Button
+                                onClick={() => handleReview(booking.id)}
+                                variant="outline"
+                                size="sm"
+                                className="border-amber-600 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 w-full"
+                              >
+                                <Star className="w-4 h-4 mr-2" />
+                                Leave Review
+                              </Button>
+                            )}
 
-                          {booking.status !== "completed" && booking.status !== "cancelled" && (
-                            <>
-                              <Button
-                                onClick={() => handleReschedule(booking.id)}
-                                variant="outline"
-                                size="sm"
-                                className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 w-full"
-                              >
-                                <Edit className="w-4 h-4 mr-2" />
-                                Reschedule
-                              </Button>
-                              <Button
-                                onClick={() => handleCancelBooking(booking.id)}
-                                variant="outline"
-                                size="sm"
-                                className="border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
-                              >
-                                <X className="w-4 h-4 mr-2" />
-                                Cancel
-                              </Button>
-                            </>
-                          )}
+                          {booking.status !== "completed" &&
+                            booking.status !== "cancelled" && (
+                              <>
+                                <Button
+                                  onClick={() => handleReschedule(booking.id)}
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 w-full"
+                                >
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  Reschedule
+                                </Button>
+                                <Button
+                                  onClick={() =>
+                                    handleCancelBooking(booking.id)
+                                  }
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
+                                >
+                                  <X className="w-4 h-4 mr-2" />
+                                  Cancel
+                                </Button>
+                              </>
+                            )}
 
                           {booking.paymentStatus === "partial" && (
                             <Button
@@ -881,7 +978,9 @@ export default function ClientBookings() {
                   No bookings found
                 </h3>
                 <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">
-                  {searchTerm ? "Try adjusting your search terms" : "You don't have any bookings in this category"}
+                  {searchTerm
+                    ? "Try adjusting your search terms"
+                    : "You don't have any bookings in this category"}
                 </p>
                 <Button
                   onClick={() => {

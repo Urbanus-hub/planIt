@@ -106,7 +106,7 @@ export const authAPI = {
 
   getUserById: (id: string) => api.get(`/users/${id}`),
 
-  updateProfile: (data: any) => api.patch("/users/profile", data),
+  updateProfile: (id:string,data: any) => api.patch(`/users/${id}`, data),
   deleteUser: (id: string) => api.delete(`/users/${id}`),
   toggleUserActiveness: (id: string, active: any) => {
     // backend expects the raw boolean in the body (req.body === true/false)

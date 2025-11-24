@@ -439,6 +439,7 @@ export const verifyVendor = async (
     next(error);
   }
 };
+//upload profile
 
 // Change password
 
