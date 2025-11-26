@@ -225,7 +225,7 @@ export default function ClientMessages() {
                 />
               </div>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto">
               <div className="p-2">
                 {sortedConversations.map((conv) => (
@@ -280,11 +280,13 @@ export default function ClientMessages() {
           </div>
 
           {/* Chat Area */}
-          <div className={cn(
-            "flex flex-col bg-white dark:bg-gray-800",
-            showChatOnMobile ? "flex" : "hidden md:flex",
-            "flex-1"
-          )}>
+          <div
+            className={cn(
+              "flex flex-col bg-white dark:bg-gray-800",
+              showChatOnMobile ? "flex" : "hidden md:flex",
+              "flex-1"
+            )}
+          >
             {currentConversation ? (
               <>
                 {/* Chat Header */}
@@ -388,13 +390,12 @@ export default function ClientMessages() {
                                 minute: "2-digit",
                               })}
                             </p>
-                            {msg.sender._id === user?._id && (
-                              msg.isRead ? (
+                            {msg.sender._id === user?._id &&
+                              (msg.isRead ? (
                                 <CheckCheck className="w-3 h-3 text-emerald-100" />
                               ) : (
                                 <Check className="w-3 h-3 text-emerald-100" />
-                              )
-                            )}
+                              ))}
                           </div>
                         </div>
                       </div>

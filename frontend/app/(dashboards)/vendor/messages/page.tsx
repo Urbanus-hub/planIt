@@ -113,7 +113,8 @@ export default function MessagesPage() {
       _id: "conv1",
       clientName: "Sarah Johnson",
       clientId: "client1",
-      clientAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+      clientAvatar:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
       lastMessage: "Perfect! Looking forward to working with you.",
       lastMessageTime: new Date(Date.now() - 3600000).toISOString(),
       unreadCount: 0,
@@ -125,7 +126,8 @@ export default function MessagesPage() {
       _id: "conv2",
       clientName: "John Smith",
       clientId: "client2",
-      clientAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+      clientAvatar:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
       lastMessage: "Can you confirm the pricing?",
       lastMessageTime: new Date(Date.now() - 7200000).toISOString(),
       unreadCount: 2,
@@ -137,7 +139,8 @@ export default function MessagesPage() {
       _id: "conv3",
       clientName: "Emily Brown",
       clientId: "client3",
-      clientAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+      clientAvatar:
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
       lastMessage: "Thanks for the great service!",
       lastMessageTime: new Date(Date.now() - 86400000).toISOString(),
       unreadCount: 0,
@@ -725,9 +728,7 @@ export default function MessagesPage() {
                     </Button>
                     <Input
                       placeholder={
-                        isConnected
-                          ? "Type your message..."
-                          : "Connecting..."
+                        isConnected ? "Type your message..." : "Connecting..."
                       }
                       value={newMessageText}
                       onChange={(e) => {
