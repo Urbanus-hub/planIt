@@ -107,71 +107,12 @@ export default function MessagesPage() {
     },
   });
 
-  // Sample messages for display - in production, fetch from API
   const mockMessages: Message[] = [
-    {
-      _id: "conv1",
-      clientName: "Sarah Johnson",
-      clientId: "client1",
-      clientAvatar:
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-      lastMessage: "Perfect! Looking forward to working with you.",
-      lastMessageTime: new Date(Date.now() - 3600000).toISOString(),
-      unreadCount: 0,
-      status: "active",
-      isOnline: true,
-      priority: "high",
-    },
-    {
-      _id: "conv2",
-      clientName: "John Smith",
-      clientId: "client2",
-      clientAvatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-      lastMessage: "Can you confirm the pricing?",
-      lastMessageTime: new Date(Date.now() - 7200000).toISOString(),
-      unreadCount: 2,
-      status: "active",
-      isOnline: true,
-      priority: "medium",
-    },
-    {
-      _id: "conv3",
-      clientName: "Emily Brown",
-      clientId: "client3",
-      clientAvatar:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-      lastMessage: "Thanks for the great service!",
-      lastMessageTime: new Date(Date.now() - 86400000).toISOString(),
-      unreadCount: 0,
-      status: "archived",
-      isOnline: false,
-      priority: "low",
-    },
+   
   ];
 
   const mockConversations: { [key: string]: Conversation } = {
-    conv1: {
-      _id: "conv1",
-      messages: [
-        {
-          _id: "msg1",
-          senderId: "client1",
-          senderName: "Sarah Johnson",
-          content: "Hi! I'm interested in your catering services.",
-          timestamp: new Date(Date.now() - 7200000).toISOString(),
-          read: true,
-        },
-        {
-          _id: "msg2",
-          senderId: "vendor",
-          senderName: "You",
-          content: "Hello Sarah! Yes, we'd love to help with your event.",
-          timestamp: new Date(Date.now() - 6900000).toISOString(),
-          read: true,
-        },
-      ],
-    },
+    
   };
 
   const fetchMessages = async () => {

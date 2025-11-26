@@ -29,9 +29,11 @@ import {
   Plus,
   ArrowLeft,
   Check,
+  Film,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { uploadToCloudinary } from "@/lib/cloudinary";
+import { uploadToCloudinary, batchUploadToCloudinary } from "@/lib/cloudinary";
 import { galleryAPI } from "@/lib/api";
 import { GalleryImage } from "@/lib/types";
 import Link from "next/link";
@@ -48,6 +50,12 @@ export default function VendorGalleryPage() {
   const [imageDescription, setImageDescription] = useState("");
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [showMediaTypeDialog, setShowMediaTypeDialog] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [batchProgress, setBatchProgress] = useState({ uploaded: 0, total: 0 });
+  const [uploadedUrls, setUploadedUrls] = useState<
+    Array<{ url: string; file: File; mediaType: "image" | "video" }>
+  >([]);
 
   // Load gallery images
   useEffect(() => {
@@ -70,77 +78,122 @@ export default function VendorGalleryPage() {
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    // Validate file type - allow images and videos
-    const isImage = file.type.startsWith("image/");
-    const isVideo = file.type.startsWith("video/");
-    
-    if (!isImage && !isVideo) {
-      toast.error("Please select an image or video file");
-      return;
+    // Validate each file
+    const validFiles: File[] = [];
+    for (const file of files) {
+      const isImage = file.type.startsWith("image/");
+      const isVideo = file.type.startsWith("video/");
+
+      if (!isImage && !isVideo) {
+        toast.error(`${file.name} is not a supported file type`);
+        continue;
+      }
+
+      // Validate file size (100MB for videos, 10MB for images)
+      const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error(
+          `${file.name} is too large (max ${isVideo ? "100MB" : "10MB"})`
+        );
+        continue;
+      }
+
+      validFiles.push(file);
     }
 
-    // Validate file size (100MB for videos, 10MB for images)
-    const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-      toast.error(`File size must be less than ${isVideo ? "100MB" : "10MB"}`);
-      return;
-    }
+    if (validFiles.length === 0) return;
 
+    // Store valid files and show upload dialog
+    setSelectedFiles(validFiles);
     setShowUploadModal(true);
-    uploadImage(file);
+    uploadFiles(validFiles);
   };
 
-  const uploadImage = async (file: File) => {
+  const uploadFiles = async (files: File[]) => {
     if (!user?._id) {
       toast.error("User not found");
       return;
     }
 
     setUploading(true);
+    setBatchProgress({ uploaded: 0, total: files.length });
+
     try {
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) return prev;
-          return prev + Math.random() * 30;
-        });
-      }, 200);
+      const urls = await batchUploadToCloudinary(files, (uploaded, total) => {
+        setBatchProgress({ uploaded, total });
+        setUploadProgress((uploaded / total) * 100);
+      });
 
-      const mediaUrl = await uploadToCloudinary(file);
-      clearInterval(progressInterval);
+      // Store uploaded URLs for later use with titles/descriptions
+      const mappedUploadedUrls = urls.map((url, index) => ({
+        url,
+        file: files[index],
+        mediaType: files[index].type.startsWith("video/") ? ("video" as const) : ("image" as const),
+      }));
+
+      // Set state for adding metadata
       setUploadProgress(100);
+      setUploadedUrls(mappedUploadedUrls);
 
-      // Detect media type
-      const mediaType = file.type.startsWith("video/") ? "video" : "image";
-
-      // Add to gallery with metadata
-      const newGalleryItem = await galleryAPI.uploadImage(
-        user._id,
-        mediaUrl,
-        imageTitle || "Untitled",
-        imageDescription || "",
-        mediaType
+      toast.success(
+        `Successfully uploaded ${files.length} file${
+          files.length > 1 ? "s" : ""
+        }! Add titles and descriptions below.`
       );
-
-      // Update local state with new images
-      if (newGalleryItem?.data?.data?.images) {
-        setImages(newGalleryItem.data.data.images);
-      }
-
-      toast.success(`${mediaType === "video" ? "Video" : "Image"} uploaded successfully!`);
-      setImageTitle("");
-      setImageDescription("");
-      setUploadProgress(0);
-      setShowUploadModal(false);
     } catch (error) {
-      toast.error("Failed to upload media");
-      console.error(error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to upload files";
+      toast.error(errorMessage);
+      console.error("Batch upload error:", error);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const finalizeUploads = async () => {
+    if (!user?._id || !uploadedUrls.length) return;
+
+    try {
+      // Add each uploaded file to gallery with metadata
+      const uploadPromises = uploadedUrls.map((item, index) => {
+        const title =
+          imageTitle ||
+          `${item.mediaType === "video" ? "Video" : "Image"} ${index + 1}`;
+        const description = imageDescription || "";
+
+        return galleryAPI.uploadImage(
+          user._id,
+          item.url,
+          title,
+          description,
+          item.mediaType
+        );
+      });
+
+      const results = await Promise.all(uploadPromises);
+
+      // Get the latest images from the last successful upload
+      const lastResult = results[results.length - 1];
+      if (lastResult?.data?.data?.images) {
+        setImages(lastResult.data.data.images);
+      }
+
+      // Reset modal state
+      setShowUploadModal(false);
       setUploadProgress(0);
+      setBatchProgress({ uploaded: 0, total: 0 });
+      setSelectedFiles([]);
+      setUploadedUrls([]);
+      setImageTitle("");
+      setImageDescription("");
+
+      toast.success("All files added to gallery successfully!");
+    } catch (error) {
+      toast.error("Failed to add files to gallery");
+      console.error("Finalize upload error:", error);
     }
   };
 
@@ -233,10 +286,11 @@ export default function VendorGalleryPage() {
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept="image/*,video/*"
+          multiple
           onChange={handleFileSelect}
           className="hidden"
-          title="Upload gallery image"
+          title="Upload gallery images or videos (multiple files supported)"
         />
 
         {/* Stats Card */}
@@ -335,13 +389,36 @@ export default function VendorGalleryPage() {
                 >
                   <Card className="overflow-hidden bg-white border-0 shadow-md hover:shadow-xl transition-all duration-300 h-full">
                     <CardContent className="p-0 relative">
-                      {/* Image */}
+                      {/* Media Container */}
                       <div className="relative w-full h-64 overflow-hidden bg-gray-100">
-                        <img
-                          src={image.url}
-                          alt={image.title || "Gallery image"}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
+                        {image.mediaType === "video" ? (
+                          // Video Player with enhanced styling
+                          <div className="relative w-full h-full bg-black">
+                            <video
+                              src={image.url}
+                              controls
+                              preload="metadata"
+                              className="w-full h-full object-contain"
+                              playsInline
+                              onLoadedMetadata={(e) => {
+                                // Set video to show first frame
+                                e.currentTarget.currentTime = 0.1;
+                              }}
+                            />
+                            {/* Video overlay indicator */}
+                            <div className="absolute top-3 right-3 bg-black/80 text-white px-2 py-1 rounded-md text-xs font-medium backdrop-blur-sm pointer-events-none z-10">
+                              <Film className="h-3 w-3 inline mr-1" />
+                              VIDEO
+                            </div>
+                          </div>
+                        ) : (
+                          // Image
+                          <img
+                            src={image.url}
+                            alt={image.title || "Gallery image"}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        )}
 
                         {/* Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4">
@@ -365,7 +442,7 @@ export default function VendorGalleryPage() {
                                 }
                               }}
                               className="bg-red-500/90 hover:bg-red-600 p-2 rounded-lg transition-all shadow-md"
-                              title="Delete image"
+                              title="Delete media"
                             >
                               <Trash2 className="h-4 w-4 text-white" />
                             </motion.button>
@@ -425,18 +502,46 @@ export default function VendorGalleryPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6"
+              className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6"
             >
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Add Image Details
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {selectedFiles.length > 1
+                  ? `Uploading ${selectedFiles.length} Files`
+                  : "Uploading File"}
               </h2>
+
+              {selectedFiles.length > 0 && (
+                <div className="mb-6">
+                  <p className="text-sm text-gray-600 mb-3">Files to upload:</p>
+                  <div className="max-h-32 overflow-y-auto space-y-2">
+                    {selectedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 text-xs bg-gray-50 p-2 rounded"
+                      >
+                        {file.type.startsWith("video/") ? (
+                          <Film className="h-4 w-4 text-purple-500" />
+                        ) : (
+                          <ImageIcon className="h-4 w-4 text-blue-500" />
+                        )}
+                        <span className="flex-1 truncate">{file.name}</span>
+                        <span className="text-gray-500">
+                          {(file.size / 1024 / 1024).toFixed(1)}MB
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Upload Progress */}
               {uploadProgress > 0 && uploadProgress < 100 && (
                 <motion.div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-sm font-medium text-gray-600">
-                      Uploading...
+                      {selectedFiles.length > 1
+                        ? `Uploading ${batchProgress.uploaded}/${batchProgress.total} files...`
+                        : "Uploading..."}
                     </p>
                     <p className="text-sm font-semibold text-emerald-600">
                       {Math.round(uploadProgress)}%
@@ -446,9 +551,15 @@ export default function VendorGalleryPage() {
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${uploadProgress}%` }}
-                      className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600"
+                      className="h-full bg-linear-to-r from-emerald-500 to-emerald-600"
                     />
                   </div>
+                  {selectedFiles.length > 1 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {batchProgress.uploaded} of {batchProgress.total} files
+                      completed
+                    </p>
+                  )}
                 </motion.div>
               )}
 
@@ -458,74 +569,102 @@ export default function VendorGalleryPage() {
                   animate={{ opacity: 1 }}
                   className="mb-6 p-4 bg-emerald-50 rounded-lg border border-emerald-200 flex items-center gap-3"
                 >
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <div className="flex items-center justify-center h-8 w-8 rounded-full bg-emerald-500">
                       <Check className="h-5 w-5 text-white" />
                     </div>
                   </div>
                   <p className="text-sm font-medium text-emerald-800">
-                    Upload complete!
+                    {selectedFiles.length > 1
+                      ? `All ${selectedFiles.length} files uploaded successfully!`
+                      : "Upload complete!"}
                   </p>
                 </motion.div>
               )}
 
-              {/* Form Fields */}
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Title (optional)
-                  </label>
-                  <Input
-                    placeholder="e.g., Wedding Photography, Event Setup"
-                    value={imageTitle}
-                    onChange={(e) => setImageTitle(e.target.value)}
-                    disabled={uploading}
-                    className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
-                  />
-                </div>
+              {/* Add metadata form after successful upload */}
+              {!uploading &&
+                uploadProgress === 100 &&
+                uploadedUrls.length > 0 && (
+                  <div className="space-y-4 mb-6">
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-sm font-medium text-blue-800 mb-2">
+                        📝 Add details to your uploaded files
+                      </p>
+                      <p className="text-xs text-blue-600">
+                        These details will be applied to all{" "}
+                        {uploadedUrls.length} uploaded file
+                        {uploadedUrls.length > 1 ? "s" : ""}
+                      </p>
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description (optional)
-                  </label>
-                  <Input
-                    placeholder="Tell clients about this work..."
-                    value={imageDescription}
-                    onChange={(e) => setImageDescription(e.target.value)}
-                    disabled={uploading}
-                    className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
-                  />
-                </div>
-              </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Title (optional)
+                      </label>
+                      <Input
+                        placeholder="e.g., Wedding Photography, Event Setup"
+                        value={imageTitle}
+                        onChange={(e) => setImageTitle(e.target.value)}
+                        className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                      />
+                    </div>
 
-              {/* Buttons */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Description (optional)
+                      </label>
+                      <Input
+                        placeholder="Tell clients about this work..."
+                        value={imageDescription}
+                        onChange={(e) => setImageDescription(e.target.value)}
+                        className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+                )}
+
+              {/* Action Buttons */}
               <div className="flex gap-3">
+                {/* Cancel Button - show while uploading or after upload */}
                 <Button
                   onClick={() => {
-                    setShowUploadModal(false);
-                    setUploadProgress(0);
-                    setImageTitle("");
-                    setImageDescription("");
+                    if (uploadedUrls.length > 0) {
+                      // If files are uploaded but not finalized, finalize without metadata
+                      finalizeUploads();
+                    } else {
+                      // Cancel upload
+                      setShowUploadModal(false);
+                      setUploadProgress(0);
+                      setBatchProgress({ uploaded: 0, total: 0 });
+                      setSelectedFiles([]);
+                      setUploadedUrls([]);
+                      setImageTitle("");
+                      setImageDescription("");
+                      setUploading(false);
+                    }
                   }}
                   disabled={uploading}
                   className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800"
                 >
-                  Cancel
+                  {uploadedUrls.length > 0
+                    ? "Skip Details"
+                    : uploading
+                    ? "Cancel Upload"
+                    : "Cancel"}
                 </Button>
-                <Button
-                  onClick={() => setShowUploadModal(false)}
-                  disabled={uploading}
-                  className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white"
-                >
-                  {uploading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Uploading...
-                    </>
-                  ) : (
-                    "Done"
+
+                {/* Finalize Button - show after successful upload */}
+                {!uploading &&
+                  uploadProgress === 100 &&
+                  uploadedUrls.length > 0 && (
+                    <Button
+                      onClick={finalizeUploads}
+                      className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
+                    >
+                      Add to Gallery
+                    </Button>
                   )}
-                </Button>
               </div>
             </motion.div>
           </motion.div>
@@ -536,7 +675,10 @@ export default function VendorGalleryPage() {
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Image Details</DialogTitle>
+            <DialogTitle>
+              Edit {selectedImage?.mediaType === "video" ? "Video" : "Image"}{" "}
+              Details
+            </DialogTitle>
           </DialogHeader>
 
           {selectedImage && (
@@ -545,13 +687,23 @@ export default function VendorGalleryPage() {
               animate={{ opacity: 1 }}
               className="space-y-6"
             >
-              {/* Image Preview */}
+              {/* Media Preview */}
               <div className="relative w-full h-96 rounded-lg overflow-hidden bg-gray-100">
-                <img
-                  src={selectedImage.url}
-                  alt={selectedImage.title}
-                  className="w-full h-full object-cover"
-                />
+                {selectedImage.mediaType === "video" ? (
+                  <video
+                    src={selectedImage.url}
+                    controls
+                    preload="metadata"
+                    className="w-full h-full max-h-96 object-contain bg-black rounded-lg"
+                    playsInline
+                  />
+                ) : (
+                  <img
+                    src={selectedImage.url}
+                    alt={selectedImage.title}
+                    className="w-full h-full object-cover"
+                  />
+                )}
               </div>
 
               {/* Edit Form */}
@@ -563,7 +715,9 @@ export default function VendorGalleryPage() {
                   <Input
                     value={imageTitle}
                     onChange={(e) => setImageTitle(e.target.value)}
-                    placeholder="Image title"
+                    placeholder={`${
+                      selectedImage?.mediaType === "video" ? "Video" : "Image"
+                    } title`}
                     className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
                   />
                 </div>
@@ -575,7 +729,9 @@ export default function VendorGalleryPage() {
                   <Input
                     value={imageDescription}
                     onChange={(e) => setImageDescription(e.target.value)}
-                    placeholder="Image description"
+                    placeholder={`${
+                      selectedImage?.mediaType === "video" ? "Video" : "Image"
+                    } description`}
                     className="border-gray-300 focus:border-emerald-500 focus:ring-emerald-500"
                   />
                 </div>

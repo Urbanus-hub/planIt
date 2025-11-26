@@ -9,8 +9,9 @@ import {
   deleteUser,
   getCurrentUser,
   toggleUserActive,
-  verifyVendor
+  verifyVendor,
 } from "../controllers/users.controller.js";
+
 import authorize from "../middlewares/authorize.middleware.js";
 import { authorizeRole } from "../middlewares/roleBasedAccess.middleware";
 import { verifyUserOwnership } from "../middlewares/userAuthorization";
@@ -32,28 +33,13 @@ router.post("/logout", authorize, logoutUser);
 router.get("/", authorize, authorizeRole("admin"), getUsers);
 
 // Get user by ID (user themselves or admin)
-router.get(
-  "/:id",
-  authorize,
-  verifyUserOwnership,
-  getUser
-);
+router.get("/:id", authorize, verifyUserOwnership, getUser);
 
 // Update user (user themselves or admin)
-router.patch(
-  "/:id",
-  authorize,
-  verifyUserOwnership,
-  updateUser
-);
+router.patch("/:id", authorize, verifyUserOwnership, updateUser);
 
 // Delete user (user themselves or admin)
-router.delete(
-  "/:id",
-  authorize,
-  verifyUserOwnership,
-  deleteUser
-);
+router.delete("/:id", authorize, verifyUserOwnership, deleteUser);
 
 // deactivate or activate user
 router.patch(
@@ -64,7 +50,8 @@ router.patch(
 );
 
 // verify vendor
-router.patch("/:id/verify-vendor",
+router.patch(
+  "/:id/verify-vendor",
   authorize,
   authorizeRole("admin"),
   verifyVendor
