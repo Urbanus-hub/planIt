@@ -5,7 +5,7 @@ import Gallery from "../models/gallery.model";
 export const uploadGalleryImage = async (req: Request, res: Response) => {
   try {
     const { vendorId } = req.params;
-    const { url, title, description } = req.body;
+    const { url, title, description, mediaType } = req.body;
 
     if (!url) {
       return res
@@ -22,11 +22,22 @@ export const uploadGalleryImage = async (req: Request, res: Response) => {
       });
     }
 
+    // Detect media type from URL if not provided
+    let detectedMediaType = mediaType || "image";
+    if (!mediaType) {
+      const videoExtensions = [".mp4", ".webm", ".ogg", ".mov", ".avi"];
+      const urlLower = url.toLowerCase();
+      if (videoExtensions.some((ext) => urlLower.includes(ext))) {
+        detectedMediaType = "video";
+      }
+    }
+
     const newImage = {
       vendorId,
       url,
       title: title || "",
       description: description || "",
+      mediaType: detectedMediaType,
       uploadedAt: new Date(),
       updatedAt: new Date(),
     };
@@ -36,12 +47,12 @@ export const uploadGalleryImage = async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      message: "Image uploaded successfully",
+      message: "Media uploaded successfully",
       data: gallery,
     });
   } catch (error) {
-    console.error("Error uploading gallery image:", error);
-    res.status(500).json({ success: false, message: "Failed to upload image" });
+    console.error("Error uploading gallery media:", error);
+    res.status(500).json({ success: false, message: "Failed to upload media" });
   }
 };
 

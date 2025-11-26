@@ -88,6 +88,7 @@ export interface GalleryImage {
   url: string;
   title?: string;
   description?: string;
+  mediaType?: "image" | "video"; // 'image' or 'video'
   uploadedAt: string;
   updatedAt: string;
 }

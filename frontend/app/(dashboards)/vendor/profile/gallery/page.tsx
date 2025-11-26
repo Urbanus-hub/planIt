@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { uploadToCloudinary } from "@/lib/cloudinary";
-import { galleryAPI } from "@/lib/galleryAPI";
+import { galleryAPI } from "@/lib/api";
 import { GalleryImage } from "@/lib/types";
 import Link from "next/link";
 
@@ -59,8 +59,8 @@ export default function VendorGalleryPage() {
   const loadGalleryImages = async () => {
     try {
       setLoading(true);
-      const data = await galleryAPI.getImages(user?._id || "", 100, 1);
-      setImages(data.images);
+      const response = await galleryAPI.getImages(user?._id || "", 100, 1);
+      setImages(response.data.data.images);
     } catch (error) {
       toast.error("Failed to load gallery images");
       console.error(error);
@@ -73,15 +73,19 @@ export default function VendorGalleryPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+    // Validate file type - allow images and videos
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+    
+    if (!isImage && !isVideo) {
+      toast.error("Please select an image or video file");
       return;
     }
 
-    // Validate file size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("File size must be less than 10MB");
+    // Validate file size (100MB for videos, 10MB for images)
+    const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error(`File size must be less than ${isVideo ? "100MB" : "10MB"}`);
       return;
     }
 
@@ -105,30 +109,34 @@ export default function VendorGalleryPage() {
         });
       }, 200);
 
-      const imageUrl = await uploadToCloudinary(file);
+      const mediaUrl = await uploadToCloudinary(file);
       clearInterval(progressInterval);
       setUploadProgress(100);
+
+      // Detect media type
+      const mediaType = file.type.startsWith("video/") ? "video" : "image";
 
       // Add to gallery with metadata
       const newGalleryItem = await galleryAPI.uploadImage(
         user._id,
-        imageUrl,
+        mediaUrl,
         imageTitle || "Untitled",
-        imageDescription || ""
+        imageDescription || "",
+        mediaType
       );
 
       // Update local state with new images
-      if (newGalleryItem.images) {
-        setImages(newGalleryItem.images);
+      if (newGalleryItem?.data?.data?.images) {
+        setImages(newGalleryItem.data.data.images);
       }
 
-      toast.success("Image uploaded successfully!");
+      toast.success(`${mediaType === "video" ? "Video" : "Image"} uploaded successfully!`);
       setImageTitle("");
       setImageDescription("");
       setUploadProgress(0);
       setShowUploadModal(false);
     } catch (error) {
-      toast.error("Failed to upload image");
+      toast.error("Failed to upload media");
       console.error(error);
     } finally {
       setUploading(false);
@@ -140,8 +148,8 @@ export default function VendorGalleryPage() {
     if (!user?._id) return;
 
     try {
-      const updatedGallery = await galleryAPI.deleteImage(user._id, imageId);
-      setImages(updatedGallery.images);
+      const response = await galleryAPI.deleteImage(user._id, imageId);
+      setImages(response.data.data.images);
       toast.success("Image deleted successfully");
     } catch (error) {
       toast.error("Failed to delete image");
@@ -153,13 +161,13 @@ export default function VendorGalleryPage() {
     if (!user?._id || !selectedImage) return;
 
     try {
-      const updatedGallery = await galleryAPI.updateImage(
+      const response = await galleryAPI.updateImage(
         user._id,
         imageId,
         imageTitle,
         imageDescription
       );
-      setImages(updatedGallery.images);
+      setImages(response.data.data.images);
       toast.success("Image updated successfully");
       setIsPreviewOpen(false);
       setSelectedImage(null);

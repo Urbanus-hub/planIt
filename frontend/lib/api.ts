@@ -106,7 +106,7 @@ export const authAPI = {
 
   getUserById: (id: string) => api.get(`/users/${id}`),
 
-  updateProfile: (id:string,data: any) => api.patch(`/users/${id}`, data),
+  updateProfile: (id: string, data: any) => api.patch(`/users/${id}`, data),
   deleteUser: (id: string) => api.delete(`/users/${id}`),
   toggleUserActiveness: (id: string, active: any) => {
     // backend expects the raw boolean in the body (req.body === true/false)
@@ -150,6 +150,52 @@ export const bookingsAPI = {
   cancel: (id: string) => api.patch(`/bookings/${id}/cancel`),
 
   delete: (id: string) => api.delete(`/bookings/${id}`),
+};
+
+// API methods for gallery
+export const galleryAPI = {
+  // Upload image/video to gallery
+  uploadImage: async (
+    vendorId: string,
+    url: string,
+    title?: string,
+    description?: string,
+    mediaType?: "image" | "video"
+  ) => {
+    return api.post(`/gallery/upload/${vendorId}`, {
+      url,
+      title,
+      description,
+      mediaType: mediaType || "image",
+    });
+  },
+
+  // Get gallery images for a vendor
+  getImages: async (vendorId: string, limit: number = 12, page: number = 1) => {
+    return api.get(`/gallery/${vendorId}`, {
+      params: { limit, page },
+    });
+  },
+
+  // Delete image from gallery
+  deleteImage: async (vendorId: string, imageId: string) => {
+    return api.delete(`/gallery/${vendorId}/${imageId}`);
+  },
+
+  // Update image info (title, description)
+  updateImage: async (
+    vendorId: string,
+    imageId: string,
+    title?: string,
+    description?: string
+  ) => {
+    return api.put(`/gallery/${vendorId}/${imageId}`, { title, description });
+  },
+
+  // Clear entire gallery
+  clearGallery: async (vendorId: string) => {
+    return api.delete(`/gallery/clear/${vendorId}`);
+  },
 };
 
 export default api;

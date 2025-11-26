@@ -5,6 +5,7 @@ export interface IGalleryImage extends Document {
   url: string;
   title?: string;
   description?: string;
+  mediaType?: "image" | "video";
   uploadedAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +34,11 @@ const GalleryImageSchema = new Schema({
   description: {
     type: String,
     default: "",
+  },
+  mediaType: {
+    type: String,
+    enum: ["image", "video"],
+    default: "image",
   },
   uploadedAt: {
     type: Date,
