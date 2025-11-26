@@ -39,6 +39,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { authAPI } from "@/lib/api";
 import { useRef } from "react";
+import Link from "next/link";
 
 type ProfileFormData = {
   businessName: string;
@@ -306,7 +307,7 @@ export default function VendorProfilePage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2 w-full sm:w-auto">
+                    <div className="flex gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
                       {isEditing ? (
                         <>
                           <Button
@@ -329,14 +330,27 @@ export default function VendorProfilePage() {
                           </Button>
                         </>
                       ) : (
-                        <Button
-                          onClick={() => setIsEditing(true)}
-                          size="sm"
-                          className="w-full sm:w-auto bg-slate-700 hover:bg-slate-800"
-                        >
-                          <Edit2 className="h-4 w-4 mr-1.5" />
-                          Edit Profile
-                        </Button>
+                        <>
+                          <Link
+                            href="/vendor/profile/gallery"
+                            className="flex-1 sm:flex-none"
+                          >
+                            <Button
+                              size="sm"
+                              className="w-full bg-emerald-600 hover:bg-emerald-700"
+                            >
+                              View Portfolio
+                            </Button>
+                          </Link>
+                          <Button
+                            onClick={() => setIsEditing(true)}
+                            size="sm"
+                            className="flex-1 sm:flex-none bg-slate-700 hover:bg-slate-800"
+                          >
+                            <Edit2 className="h-4 w-4 mr-1.5" />
+                            Edit Profile
+                          </Button>
+                        </>
                       )}
                     </div>
                   </div>
