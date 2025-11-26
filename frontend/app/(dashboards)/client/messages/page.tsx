@@ -1,6 +1,8 @@
 "use client";
 
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
+import { useMessaging } from "@/hooks/useMessaging";
 import {
   MessageSquare,
   Search,
@@ -13,6 +15,7 @@ import {
   Plus,
   Smile,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -31,12 +34,50 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export default function ClientMessages() {
+  const { user } = useAuth();
   const [selectedConversation, setSelectedConversation] = useState("1");
   const [messageInput, setMessageInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Socket.IO messaging hook for real-time updates
+  const {
+    isConnected,
+    messages: socketMessages,
+    sendMessage,
+    handleTypingWithDebounce,
+    isTyping,
+    isUserOnline,
+    setMessages,
+  } = useMessaging({
+    userId: user?._id || "",
+    conversationId: selectedConversation,
+    // Callback when message is received
+    onMessageReceived: (message) => {
+      console.log("📨 New message received:", message);
+      toast.success("New message from " + message.sender.name);
+    },
+    // Callback when user is typing
+    onTyping: (data) => {
+      if (data.isTyping) {
+        setTypingUsers((prev) => new Set(prev).add(data.userId));
+      } else {
+        setTypingUsers((prev) => {
+          const next = new Set(prev);
+          next.delete(data.userId);
+          return next;
+        });
+      }
+    },
+    // Callback when user comes online
+    onUserOnline: (data) => {
+      toast.success("User is online");
+    },
+  });
+
+  // Sample conversations - in production, fetch from API
   const conversations = [
     {
       id: "1",
@@ -46,8 +87,9 @@ export default function ClientMessages() {
       unread: 0,
       avatar:
         "https://images.unsplash.com/photo-1555939594-58d7cb561522?w=100&h=100&fit=crop",
-      online: true,
+      online: isUserOnline("vendor1"),
       pinned: true,
+      vendorId: "vendor1",
     },
     {
       id: "2",
@@ -57,8 +99,9 @@ export default function ClientMessages() {
       unread: 2,
       avatar:
         "https://images.unsplash.com/photo-1606011334315-76b8191da5f3?w=100&h=100&fit=crop",
-      online: true,
+      online: isUserOnline("vendor2"),
       pinned: false,
+      vendorId: "vendor2",
     },
     {
       id: "3",
@@ -68,94 +111,44 @@ export default function ClientMessages() {
       unread: 0,
       avatar:
         "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop",
-      online: false,
+      online: isUserOnline("vendor3"),
       pinned: false,
+      vendorId: "vendor3",
     },
   ];
-
-  const messages = {
-    "1": [
-      {
-        id: "1",
-        sender: "vendor",
-        text: "Hi! Thanks for booking with us.",
-        time: "10:30 AM",
-        read: true,
-      },
-      {
-        id: "2",
-        sender: "client",
-        text: "Thank you! Looking forward to it.",
-        time: "10:32 AM",
-        read: true,
-      },
-      {
-        id: "3",
-        sender: "vendor",
-        text: "Thanks for choosing us! Your catering is confirmed.",
-        time: "10:35 AM",
-        read: true,
-      },
-    ],
-    "2": [
-      {
-        id: "1",
-        sender: "vendor",
-        text: "Hi! Let's discuss your event photography.",
-        time: "2:00 PM",
-        read: true,
-      },
-      {
-        id: "2",
-        sender: "client",
-        text: "Sure! I need coverage for the whole day.",
-        time: "2:15 PM",
-        read: true,
-      },
-      {
-        id: "3",
-        sender: "vendor",
-        text: "Can you confirm the timing for the event?",
-        time: "2:30 PM",
-        read: false,
-      },
-    ],
-    "3": [
-      {
-        id: "1",
-        sender: "vendor",
-        text: "Good news! Your DJ equipment is all set.",
-        time: "Yesterday",
-        read: true,
-      },
-      {
-        id: "2",
-        sender: "client",
-        text: "Great! When will you deliver?",
-        time: "Yesterday",
-        read: true,
-      },
-      {
-        id: "3",
-        sender: "vendor",
-        text: "Equipment will be delivered one day before the event",
-        time: "Yesterday",
-        read: true,
-      },
-    ],
-  };
 
   const currentConversation = conversations.find(
     (c) => c.id === selectedConversation
   );
-  const currentMessages =
-    messages[selectedConversation as keyof typeof messages] || [];
 
+  /**
+   * Handle sending a message
+   * - Validate message content
+   * - Send via Socket.IO to backend
+   * - Clear input field
+   */
   const handleSendMessage = () => {
-    if (messageInput.trim()) {
-      toast.success("Message sent!");
-      setMessageInput("");
+    if (!messageInput.trim()) {
+      toast.error("Message cannot be empty");
+      return;
     }
+
+    if (!currentConversation) {
+      toast.error("No conversation selected");
+      return;
+    }
+
+    if (!isConnected) {
+      toast.error("Not connected to server. Please wait...");
+      return;
+    }
+
+    // Send message through Socket.IO
+    sendMessage(messageInput, currentConversation.vendorId);
+
+    // Clear input
+    setMessageInput("");
+    toast.success("Message sent!");
   };
 
   const handlePinConversation = () => {
@@ -165,6 +158,7 @@ export default function ClientMessages() {
   const handleSelectConversation = (id: string) => {
     setSelectedConversation(id);
     setShowChatOnMobile(true);
+    setTypingUsers(new Set()); // Clear typing indicators when switching conversations
   };
 
   const handleBackToList = () => {
@@ -174,7 +168,15 @@ export default function ClientMessages() {
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [currentMessages]);
+  }, [socketMessages]);
+
+  // Handle typing with debounce
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessageInput(e.target.value);
+    if (e.target.value.trim()) {
+      handleTypingWithDebounce();
+    }
+  };
 
   // Filter conversations based on search query
   const filteredConversations = conversations.filter((conv) =>
@@ -193,11 +195,13 @@ export default function ClientMessages() {
       <div className="flex-1 min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="flex h-screen overflow-hidden">
           {/* Left Sidebar - Conversations List */}
-          <div className={cn(
-            "flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700",
-            showChatOnMobile ? "hidden md:flex" : "flex",
-            "w-full md:w-80"
-          )}>
+          <div
+            className={cn(
+              "flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700",
+              showChatOnMobile ? "hidden md:flex" : "flex",
+              "w-full md:w-80"
+            )}
+          >
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-4">
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -333,61 +337,104 @@ export default function ClientMessages() {
 
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {currentMessages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex gap-3 ${
-                        msg.sender === "client"
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                    >
-                      {msg.sender === "vendor" && (
-                        <Avatar className="h-8 w-8 mt-1">
-                          <AvatarImage
-                            src={currentConversation.avatar}
-                            alt={currentConversation.vendor}
-                          />
-                          <AvatarFallback className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-xs">
-                            {currentConversation.vendor.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                      )}
+                  {socketMessages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm">
+                          No messages yet. Start the conversation!
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    socketMessages.map((msg) => (
                       <div
-                        className={`max-w-xs md:max-w-md px-4 py-2 rounded-lg ${
-                          msg.sender === "client"
-                            ? "bg-emerald-600 text-white rounded-br-none"
-                            : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none"
+                        key={msg._id}
+                        className={`flex gap-3 ${
+                          msg.sender._id === user?._id
+                            ? "justify-end"
+                            : "justify-start"
                         }`}
                       >
-                        <p className="text-sm">{msg.text}</p>
-                        <div className="flex items-center justify-end gap-1 mt-1">
-                          <p
-                            className={`text-xs ${
-                              msg.sender === "client"
-                                ? "text-emerald-100"
-                                : "text-gray-500 dark:text-gray-400"
-                            }`}
-                          >
-                            {msg.time}
-                          </p>
-                          {msg.sender === "client" && (
-                            msg.read ? (
-                              <CheckCheck className="w-3 h-3 text-emerald-100" />
-                            ) : (
-                              <Check className="w-3 h-3 text-emerald-100" />
-                            )
-                          )}
+                        {msg.sender._id !== user?._id && (
+                          <Avatar className="h-8 w-8 mt-1 shrink-0">
+                            <AvatarImage
+                              src={msg.sender.avatar}
+                              alt={msg.sender.name}
+                            />
+                            <AvatarFallback className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-xs">
+                              {msg.sender.name?.charAt(0) || "U"}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div
+                          className={`max-w-xs md:max-w-md px-4 py-2 rounded-lg ${
+                            msg.sender._id === user?._id
+                              ? "bg-emerald-600 text-white rounded-br-none"
+                              : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-none"
+                          }`}
+                        >
+                          <p className="text-sm">{msg.content}</p>
+                          <div className="flex items-center justify-end gap-1 mt-1">
+                            <p
+                              className={`text-xs ${
+                                msg.sender._id === user?._id
+                                  ? "text-emerald-100"
+                                  : "text-gray-500 dark:text-gray-400"
+                              }`}
+                            >
+                              {new Date(msg.createdAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                            {msg.sender._id === user?._id && (
+                              msg.isRead ? (
+                                <CheckCheck className="w-3 h-3 text-emerald-100" />
+                              ) : (
+                                <Check className="w-3 h-3 text-emerald-100" />
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+
+                  {/* Typing Indicator */}
+                  {typingUsers.size > 0 && (
+                    <div className="flex gap-3">
+                      <Avatar className="h-8 w-8 mt-1 shrink-0">
+                        <AvatarFallback className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-xs">
+                          {currentConversation?.vendor.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg rounded-bl-none">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
+                          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-100" />
+                          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-200" />
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )}
+
                   <div ref={messagesEndRef} />
                 </div>
 
                 {/* Input Area */}
                 <div className="p-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex gap-2 items-center">
+                    {/* Socket Status Indicator */}
+                    <div className="flex items-center gap-1">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          isConnected ? "bg-emerald-500" : "bg-red-500"
+                        }`}
+                        title={isConnected ? "Connected" : "Disconnected"}
+                      />
+                    </div>
+
                     <Button
                       variant="ghost"
                       size="icon"
@@ -397,12 +444,17 @@ export default function ClientMessages() {
                     </Button>
                     <div className="flex-1 relative">
                       <Input
-                        placeholder="Type a message..."
+                        placeholder={
+                          isConnected
+                            ? "Type a message..."
+                            : "Connecting to server..."
+                        }
                         value={messageInput}
-                        onChange={(e) => setMessageInput(e.target.value)}
+                        onChange={handleInputChange}
                         onKeyPress={(e) =>
                           e.key === "Enter" && handleSendMessage()
                         }
+                        disabled={!isConnected}
                         className="bg-gray-100 dark:bg-gray-700 border-0 pr-10"
                       />
                       <Button
@@ -415,10 +467,15 @@ export default function ClientMessages() {
                     </div>
                     <Button
                       onClick={handleSendMessage}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                      disabled={!isConnected || !messageInput.trim()}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                       size="icon"
                     >
-                      <Send className="w-4 h-4" />
+                      {isConnected ? (
+                        <Send className="w-4 h-4" />
+                      ) : (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      )}
                     </Button>
                   </div>
                 </div>

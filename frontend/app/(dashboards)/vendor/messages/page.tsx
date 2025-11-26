@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { useMessaging } from "@/hooks/useMessaging";
 import {
   Card,
   CardContent,
@@ -35,10 +37,10 @@ import {
   Reply,
   Pin,
   Bell,
+  Loader2,
 } from "lucide-react";
 import AnimatedList from "@/components/ui/animated-list";
 import ConfirmDialog from "@/components/ui/confirm-dialog";
-import { useAuth } from "@/contexts/AuthContext";
 
 type Message = {
   _id: string;
@@ -67,6 +69,7 @@ type Conversation = {
 };
 
 export default function MessagesPage() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<{
     [key: string]: Conversation;
@@ -79,22 +82,100 @@ export default function MessagesPage() {
   const [newMessageText, setNewMessageText] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
 
-  const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Socket.IO messaging hook for real-time updates
+  const { isConnected, sendMessage, handleTypingWithDebounce } = useMessaging({
+    userId: user?._id || "",
+    conversationId: selectedMessage?._id,
+    onMessageReceived: (message) => {
+      console.log("📨 New message received:", message);
+      toast.success("New message from " + message.sender.name);
+    },
+    onTyping: (data) => {
+      if (data.isTyping) {
+        setTypingUsers((prev) => new Set(prev).add(data.userId));
+      } else {
+        setTypingUsers((prev) => {
+          const next = new Set(prev);
+          next.delete(data.userId);
+          return next;
+        });
+      }
+    },
+  });
+
+  // Sample messages for display - in production, fetch from API
   const mockMessages: Message[] = [
-    
+    {
+      _id: "conv1",
+      clientName: "Sarah Johnson",
+      clientId: "client1",
+      clientAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+      lastMessage: "Perfect! Looking forward to working with you.",
+      lastMessageTime: new Date(Date.now() - 3600000).toISOString(),
+      unreadCount: 0,
+      status: "active",
+      isOnline: true,
+      priority: "high",
+    },
+    {
+      _id: "conv2",
+      clientName: "John Smith",
+      clientId: "client2",
+      clientAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+      lastMessage: "Can you confirm the pricing?",
+      lastMessageTime: new Date(Date.now() - 7200000).toISOString(),
+      unreadCount: 2,
+      status: "active",
+      isOnline: true,
+      priority: "medium",
+    },
+    {
+      _id: "conv3",
+      clientName: "Emily Brown",
+      clientId: "client3",
+      clientAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+      lastMessage: "Thanks for the great service!",
+      lastMessageTime: new Date(Date.now() - 86400000).toISOString(),
+      unreadCount: 0,
+      status: "archived",
+      isOnline: false,
+      priority: "low",
+    },
   ];
 
   const mockConversations: { [key: string]: Conversation } = {
-    
+    conv1: {
+      _id: "conv1",
+      messages: [
+        {
+          _id: "msg1",
+          senderId: "client1",
+          senderName: "Sarah Johnson",
+          content: "Hi! I'm interested in your catering services.",
+          timestamp: new Date(Date.now() - 7200000).toISOString(),
+          read: true,
+        },
+        {
+          _id: "msg2",
+          senderId: "vendor",
+          senderName: "You",
+          content: "Hello Sarah! Yes, we'd love to help with your event.",
+          timestamp: new Date(Date.now() - 6900000).toISOString(),
+          read: true,
+        },
+      ],
+    },
   };
 
   const fetchMessages = async () => {
     setLoading(true);
     setError(null);
     try {
+      // In production, fetch from API
       setMessages(mockMessages);
       setConversations(mockConversations);
     } catch (err: any) {
@@ -147,12 +228,31 @@ export default function MessagesPage() {
     return { totalUnread, activeCount, onlineCount, highPriorityCount };
   }, [messages]);
 
+  /**
+   * Handle sending a message via Socket.IO
+   * Sends message to client through real-time connection
+   */
   const handleSendMessage = () => {
-    if (!newMessageText.trim() || !selectedMessage) return;
+    if (!newMessageText.trim() || !selectedMessage) {
+      toast.error("Please select a conversation and type a message");
+      return;
+    }
+
+    if (!isConnected) {
+      toast.error("Not connected to server. Please wait...");
+      return;
+    }
 
     const conversation = conversations[selectedMessage._id];
-    if (!conversation) return;
+    if (!conversation) {
+      toast.error("Conversation not found");
+      return;
+    }
 
+    // Send message through Socket.IO
+    sendMessage(newMessageText, selectedMessage.clientId || "");
+
+    // Update local conversations state
     const newMsg = {
       _id: `m${Date.now()}`,
       senderId: "vendor",
@@ -170,6 +270,7 @@ export default function MessagesPage() {
       },
     }));
 
+    // Update last message in conversations list
     setMessages((prev) =>
       prev.map((m) =>
         m._id === selectedMessage._id
@@ -599,7 +700,22 @@ export default function MessagesPage() {
                 </CardContent>
 
                 <div className="border-t border-gray-200 p-4 bg-white">
+                  {/* Typing Indicator */}
+                  {typingUsers.size > 0 && (
+                    <div className="text-xs text-gray-500 mb-2 italic">
+                      {selectedMessage?.clientName} is typing...
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-3">
+                    {/* Connection Status Indicator */}
+                    <div
+                      className={`w-2.5 h-2.5 rounded-full ${
+                        isConnected ? "bg-emerald-500" : "bg-red-500"
+                      }`}
+                      title={isConnected ? "Connected" : "Disconnected"}
+                    />
+
                     <Button
                       size="sm"
                       variant="ghost"
@@ -608,28 +724,42 @@ export default function MessagesPage() {
                       <Paperclip className="h-5 w-5" />
                     </Button>
                     <Input
-                      placeholder="Aa"
+                      placeholder={
+                        isConnected
+                          ? "Type your message..."
+                          : "Connecting..."
+                      }
                       value={newMessageText}
-                      onChange={(e) => setNewMessageText(e.target.value)}
+                      onChange={(e) => {
+                        setNewMessageText(e.target.value);
+                        if (e.target.value.trim()) {
+                          handleTypingWithDebounce();
+                        }
+                      }}
                       onKeyPress={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
                           handleSendMessage();
                         }
                       }}
-                      className="flex-1 bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-400 focus:bg-white rounded-2xl px-4 py-2 focus:ring-0"
+                      disabled={!isConnected}
+                      className="flex-1 bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-400 focus:bg-white rounded-2xl px-4 py-2 focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: isConnected ? 1.1 : 1 }}
+                      whileTap={{ scale: isConnected ? 0.95 : 1 }}
                     >
                       <Button
                         size="sm"
                         onClick={handleSendMessage}
-                        disabled={!newMessageText.trim()}
+                        disabled={!newMessageText.trim() || !isConnected}
                         className="h-10 w-10 p-0 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Send className="h-4 w-4" />
+                        {isConnected ? (
+                          <Send className="h-4 w-4" />
+                        ) : (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        )}
                       </Button>
                     </motion.div>
                   </div>
