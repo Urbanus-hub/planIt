@@ -278,29 +278,59 @@ export const updateUser = async (
   try {
     const {
       name,
+      email,
       phone,
       avatar,
       profileImage,
+      profileBackground,
       businessName,
       businessDescription,
       businessAddress,
       businessLogo,
+      serviceCategory,
+      yearsOfExperience,
+      businessLicense,
       taxId,
+      specialties,
+      certifications,
+      businessHours,
+      responseTime,
+      city,
+      state,
+      website,
     } = req.body;
 
     // Don't allow updating sensitive fields
     const allowedUpdates: any = {};
     if (name) allowedUpdates.name = name;
+    if (email) allowedUpdates.email = email;
     if (phone !== undefined) allowedUpdates.phone = phone;
     if (avatar !== undefined) allowedUpdates.avatar = avatar;
     if (profileImage !== undefined) allowedUpdates.profileImage = profileImage;
+    if (profileBackground !== undefined)
+      allowedUpdates.profileBackground = profileBackground;
     if (businessName !== undefined) allowedUpdates.businessName = businessName;
     if (businessDescription !== undefined)
       allowedUpdates.businessDescription = businessDescription;
     if (businessAddress !== undefined)
       allowedUpdates.businessAddress = businessAddress;
     if (businessLogo !== undefined) allowedUpdates.businessLogo = businessLogo;
+    if (serviceCategory !== undefined)
+      allowedUpdates.serviceCategory = serviceCategory;
+    if (yearsOfExperience !== undefined)
+      allowedUpdates.yearsOfExperience = yearsOfExperience;
+    if (businessLicense !== undefined)
+      allowedUpdates.businessLicense = businessLicense;
     if (taxId !== undefined) allowedUpdates.taxId = taxId;
+    if (specialties !== undefined) allowedUpdates.specialties = specialties;
+    if (certifications !== undefined)
+      allowedUpdates.certifications = certifications;
+    if (businessHours !== undefined)
+      allowedUpdates.businessHours = businessHours;
+    if (responseTime !== undefined) allowedUpdates.responseTime = responseTime;
+    if (city !== undefined) allowedUpdates.city = city;
+    if (state !== undefined) allowedUpdates.state = state;
+    if (website !== undefined) allowedUpdates.website = website;
 
     const user = await User.findByIdAndUpdate(
       req.params.id,

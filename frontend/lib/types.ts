@@ -18,7 +18,18 @@ export interface User {
   businessLogo?: string;
   avatar?: string;
   profileImage?: string;
+  profileBackground?: string;
   taxId?: string;
+  serviceCategory?: string;
+  yearsOfExperience?: number;
+  businessLicense?: string;
+  specialties?: string[];
+  certifications?: string[];
+  businessHours?: string;
+  responseTime?: string;
+  city?: string;
+  state?: string;
+  website?: string;
   joinedDate: string;
   isActive: boolean;
   isVerified: boolean;

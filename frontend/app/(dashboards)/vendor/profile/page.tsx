@@ -66,7 +66,9 @@ type ProfileImage = {
 
 export default function VendorProfilePage() {
   const { user } = useAuth();
+  console.log("user data", user);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverImageFileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -82,6 +84,7 @@ export default function VendorProfilePage() {
       user?.avatar ||
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
     coverImage:
+      user?.profileBackground ||
       "https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=400&fit=crop",
   });
 
@@ -198,13 +201,90 @@ export default function VendorProfilePage() {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    if (coverImageFileInputRef.current) {
+      coverImageFileInputRef.current.value = "";
+    }
+  };
+
+  const handleCoverImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+
+    setSelectedFile(file);
+    setUploadingImageType("cover");
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImagePreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const saveCoverImage = async () => {
+    if (!selectedFile || !imagePreview || !user?._id) return;
+
+    setUploadingImage(true);
+    try {
+      const imageUrl = await uploadToCloudinary(selectedFile);
+      await authAPI.updateProfile(user._id, { profileBackground: imageUrl });
+
+      setImages((prev) => ({
+        ...prev,
+        coverImage: imageUrl,
+      }));
+
+      toast.success("Cover image updated successfully!");
+      cancelImageUpload();
+    } catch (error) {
+      toast.error("Failed to upload cover image");
+      console.error(error);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
       if (!user?._id) throw new Error("User ID not found");
-      await authAPI.updateProfile(user._id, formData);
+
+      // Map formData fields to backend field names
+      const updateData = {
+        businessName: formData.businessName,
+        businessDescription: formData.businessDescription,
+        email: formData.email,
+        phone: formData.phone,
+        businessAddress: formData.address,
+        city: formData.city,
+        state: formData.state,
+        website: formData.website,
+        serviceCategory: formData.serviceCategory,
+        yearsOfExperience: formData.yearsOfExperience
+          ? parseInt(formData.yearsOfExperience)
+          : 0,
+        businessLicense: formData.businessLicense,
+        taxId: formData.businessLicense,
+        specialties: formData.specialties,
+        certifications: formData.certifications,
+        businessHours: formData.businessHours,
+        responseTime: formData.responseTime,
+        profileBackground: images.coverImage,
+      };
+
+      await authAPI.updateProfile(user._id, updateData);
       toast.success("Profile updated successfully!");
       setIsEditing(false);
     } catch (error) {
@@ -234,19 +314,30 @@ export default function VendorProfilePage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             {isEditing && (
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                type="button"
-                className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <div className="flex flex-col items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg">
-                  <Camera className="h-6 w-6 text-gray-700" />
-                  <span className="text-sm text-gray-700 font-medium">
-                    Change Cover
-                  </span>
-                </div>
-              </motion.button>
+              <>
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  type="button"
+                  onClick={() => coverImageFileInputRef.current?.click()}
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <div className="flex flex-col items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg">
+                    <Camera className="h-6 w-6 text-gray-700" />
+                    <span className="text-sm text-gray-700 font-medium">
+                      Change Cover
+                    </span>
+                  </div>
+                </motion.button>
+                <input
+                  title="file input"
+                  type="file"
+                  ref={coverImageFileInputRef}
+                  onChange={handleCoverImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+              </>
             )}
           </div>
 
@@ -894,7 +985,11 @@ export default function VendorProfilePage() {
               />
               <div className="flex gap-3">
                 <Button
-                  onClick={saveProfileImage}
+                  onClick={
+                    uploadingImageType === "cover"
+                      ? saveCoverImage
+                      : saveProfileImage
+                  }
                   disabled={uploadingImage}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >
