@@ -280,9 +280,12 @@ export const updateUser = async (
       name,
       phone,
       avatar,
+      profileImage,
       businessName,
       businessDescription,
       businessAddress,
+      businessLogo,
+      taxId,
     } = req.body;
 
     // Don't allow updating sensitive fields
@@ -290,11 +293,14 @@ export const updateUser = async (
     if (name) allowedUpdates.name = name;
     if (phone !== undefined) allowedUpdates.phone = phone;
     if (avatar !== undefined) allowedUpdates.avatar = avatar;
+    if (profileImage !== undefined) allowedUpdates.profileImage = profileImage;
     if (businessName !== undefined) allowedUpdates.businessName = businessName;
     if (businessDescription !== undefined)
       allowedUpdates.businessDescription = businessDescription;
     if (businessAddress !== undefined)
       allowedUpdates.businessAddress = businessAddress;
+    if (businessLogo !== undefined) allowedUpdates.businessLogo = businessLogo;
+    if (taxId !== undefined) allowedUpdates.taxId = taxId;
 
     const user = await User.findByIdAndUpdate(
       req.params.id,
@@ -319,48 +325,44 @@ export const updateUser = async (
     next(error);
   }
 };
-export const deleteUser=async(
+export const deleteUser = async (
   req: Request,
   res: Response,
   next: NextFunction
-):Promise<void>=>{
- try{
-  
-   
-    if((req.user as AuthUser).role!=="admin"){
+): Promise<void> => {
+  try {
+    if ((req.user as AuthUser).role !== "admin") {
       res.status(403).json({
-        success:false,
-        message:"Only admin can delete users"
-      })
+        success: false,
+        message: "Only admin can delete users",
+      });
       return;
-      
     }
-    const user=await User.findById(req.params.id);
+    const user = await User.findById(req.params.id);
 
-    if(!user){
+    if (!user) {
       res.status(404).json({
-        success:false,
-        message:"User not found"
-      })
+        success: false,
+        message: "User not found",
+      });
       return;
-    } 
-    if(user.role==="admin"){
+    }
+    if (user.role === "admin") {
       res.status(400).json({
-        success:false,
-        message:"Cannot delete admin user"
-      })
+        success: false,
+        message: "Cannot delete admin user",
+      });
       return;
     }
     await user.deleteOne();
     res.status(200).json({
-      success:true,
-      message:"User deleted successfully"
-    })
-
- }catch(err){
-   next(err)
- }
-}
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 export const toggleUserActive = async (
   req: Request,
   res: Response,
@@ -368,7 +370,7 @@ export const toggleUserActive = async (
 ): Promise<void> => {
   try {
     const user = await User.findById(req.params.id);
-    const {active}=req.body;
+    const { active } = req.body;
 
     if (!user) {
       res.status(404).json({
@@ -393,7 +395,7 @@ export const toggleUserActive = async (
     res.status(200).json({
       success: true,
       message: "User deleted successfully",
-      data:user,
+      data: user,
     });
   } catch (error) {
     next(error);
@@ -408,7 +410,7 @@ export const verifyVendor = async (
 ): Promise<void> => {
   try {
     const user = await User.findById(req.params.id);
-    const{verify}=req.body;
+    const { verify } = req.body;
 
     if (!user) {
       res.status(404).json({
@@ -442,4 +444,3 @@ export const verifyVendor = async (
 //upload profile
 
 // Change password
-

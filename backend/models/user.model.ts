@@ -7,6 +7,7 @@ export interface IUser extends Document {
   role: "client" | "vendor" | "admin";
   phone?: string;
   avatar?: string;
+  profileImage?: string;
   isVerified: boolean;
   isActive: boolean;
   verificationToken?: string;
@@ -59,6 +60,7 @@ const userSchema = new Schema<IUser>(
       trim: true,
     },
     avatar: String,
+    profileImage: String,
     isVerified: {
       type: Boolean,
       default: false,

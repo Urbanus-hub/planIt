@@ -7,6 +7,7 @@ import userRoutes from "./routes/user.routes";
 import handleGlobalError from "./middlewares/globalErrorsHandler.middleware";
 import servicesRouter from "./routes/service.route";
 import BookingRouter from "./routes/bookings.route";
+import galleryRouter from "./routes/gallery.route";
 import http from "http";
 import { Server } from "socket.io";
 import { Message, Conversation } from "./models/messages.model";
@@ -48,14 +49,14 @@ const typingUsers = new Map<string, Set<string>>();
 app.use("/api/users", userRoutes); // user routes
 app.use("/api/services", servicesRouter);
 app.use("/api/bookings", BookingRouter);
+app.use("/api/gallery", galleryRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "API is running..." });
-}); 
+});
 io.on("connection", (socket) => {
   console.log(`✓ User connected: ${socket.id}`);
 
-  
   socket.on("user:join", async ({ userId, conversationId }) => {
     try {
       // Verify this is a TWO-PARTY conversation
@@ -113,7 +114,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  
   socket.on(
     "message:send",
     async ({
@@ -234,7 +234,6 @@ io.on("connection", (socket) => {
     }
   );
 
-  
   socket.on("user:typing", ({ userId, conversationId }) => {
     // Track typing user for this conversation
     if (!typingUsers.has(conversationId)) {
@@ -251,7 +250,6 @@ io.on("connection", (socket) => {
     console.log(`⌨️  User ${userId} is typing in ${conversationId}`);
   });
 
-  
   socket.on("user:stop-typing", ({ userId, conversationId }) => {
     // Remove user from typing set
     typingUsers.get(conversationId)?.delete(userId);
@@ -265,7 +263,6 @@ io.on("connection", (socket) => {
     console.log(`⏸️  User ${userId} stopped typing in ${conversationId}`);
   });
 
-  
   socket.on("user:leave", ({ userId, conversationId }) => {
     // Remove user from active conversations tracking
     activeConversations.get(conversationId)?.delete(userId);
@@ -285,7 +282,6 @@ io.on("connection", (socket) => {
     console.log(`👋 User ${userId} left conversation: ${conversationId}`);
   });
 
-  
   socket.on("disconnect", () => {
     // Find and remove user from all tracked locations
     let disconnectedUserId: string | undefined;

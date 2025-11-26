@@ -77,7 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: "Dashboard", url: "/vendor", icon: LayoutDashboard },
           { title: "Services", url: "/vendor/services", icon: Package },
           { title: "Bookings", url: "/vendor/bookings", icon: Calendar },
-          { title: "Messages", url: "/vendor/messages", icon: Users },
+          { title: "Messages", url: "/vendor/messages", icon: MessageCircle},
           { title: "Reviews", url: "/vendor/reviews", icon: Star },
           { title: "Profile", url: "/vendor/profile", icon: User },
           { title: "Analytics", url: "/vendor/analytics", icon: BarChart3 },

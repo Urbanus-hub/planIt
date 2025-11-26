@@ -18,6 +18,7 @@ import {
   Edit2,
   Check,
   X,
+  Loader2,
   Mail,
   Phone,
   MapPin,
@@ -35,6 +36,9 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { uploadToCloudinary } from "@/lib/cloudinary";
+import { authAPI } from "@/lib/api";
+import { useRef } from "react";
 
 type ProfileFormData = {
   businessName: string;
@@ -61,38 +65,40 @@ type ProfileImage = {
 
 export default function VendorProfilePage() {
   const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImageType, setUploadingImageType] = useState<
+    "avatar" | "cover" | null
+  >(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const [images, setImages] = useState<ProfileImage>({
     avatar:
+      user?.businessLogo ||
+      user?.avatar ||
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
     coverImage:
       "https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=400&fit=crop",
   });
 
   const [formData, setFormData] = useState<ProfileFormData>({
-    businessName: "Urban Photography Studios",
+    businessName: user?.businessName || "Your Business Name",
     businessDescription:
-      "Professional photography services specializing in weddings, events, and corporate photography. With over a decade of experience, we capture moments that last a lifetime.",
-    email: "urban@photography.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Main Street, Suite 100",
-    city: "New York",
-    state: "NY",
-    website: "www.urbanphoto.com",
+      user?.businessDescription || "Your business description",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    address: user?.businessAddress || "",
+    city: "",
+    state: "",
+    website: "",
     serviceCategory: "Photography",
-    yearsOfExperience: "10",
-    businessLicense: "BL-2024-12345",
-    specialties: [
-      "Weddings",
-      "Corporate Events",
-      "Portraits",
-      "Product Photography",
-    ],
-    certifications: [
-      "Professional Photographers of America",
-      "Certified Event Photographer",
-    ],
+    yearsOfExperience: "",
+    businessLicense: user?.taxId || "",
+    specialties: [],
+    certifications: [],
     businessHours: "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM",
     responseTime: "< 2 hours",
   });
@@ -134,37 +140,75 @@ export default function VendorProfilePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = (type: "avatar" | "coverImage") => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event: any) => {
-          setImages((prev) => ({
-            ...prev,
-            [type]: event.target.result,
-          }));
-          toast.success(
-            `${type === "avatar" ? "Avatar" : "Cover image"} updated`
-          );
-        };
-        reader.readAsDataURL(file);
-      }
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+
+    setSelectedFile(file);
+    setUploadingImageType("avatar");
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImagePreview(event.target?.result as string);
     };
-    input.click();
+    reader.readAsDataURL(file);
+  };
+
+  const saveProfileImage = async () => {
+    if (!selectedFile || !imagePreview || !user?._id) return;
+
+    setUploadingImage(true);
+    try {
+      const imageUrl = await uploadToCloudinary(selectedFile);
+      await authAPI.updateProfile(user._id, { businessLogo: imageUrl });
+
+      setImages((prev) => ({
+        ...prev,
+        avatar: imageUrl,
+      }));
+
+      toast.success("Profile image updated successfully!");
+      cancelImageUpload();
+    } catch (error) {
+      toast.error("Failed to upload image");
+      console.error(error);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const cancelImageUpload = () => {
+    setImagePreview(null);
+    setSelectedFile(null);
+    setUploadingImageType(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      if (!user?._id) throw new Error("User ID not found");
+      await authAPI.updateProfile(user._id, formData);
       toast.success("Profile updated successfully!");
       setIsEditing(false);
     } catch (error) {
       toast.error("Failed to update profile");
+      console.error(error);
     } finally {
       setIsSaving(false);
     }
@@ -192,7 +236,7 @@ export default function VendorProfilePage() {
               <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                onClick={() => handleImageUpload("coverImage")}
+                type="button"
                 className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <div className="flex flex-col items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg">
@@ -222,12 +266,20 @@ export default function VendorProfilePage() {
                     <motion.button
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      onClick={() => handleImageUpload("avatar")}
+                      onClick={() => fileInputRef.current?.click()}
                       className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"
                     >
                       <Camera className="h-6 w-6 text-white" />
                     </motion.button>
                   )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    title="Upload profile image"
+                  />
                 </div>
 
                 {/* Info */}
@@ -461,7 +513,7 @@ export default function VendorProfilePage() {
                   </label>
                   {isEditing ? (
                     <textarea
-                     title="text"
+                      title="text"
                       name="businessDescription"
                       value={formData.businessDescription}
                       onChange={handleInputChange}
@@ -804,6 +856,58 @@ export default function VendorProfilePage() {
             </Card>
           </div>
         </motion.div>
+
+        {/* Image Preview Modal */}
+        {imagePreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            onClick={cancelImageUpload}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-xl font-bold mb-4">Preview Image</h2>
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-64 object-cover rounded-lg mb-4"
+              />
+              <div className="flex gap-3">
+                <Button
+                  onClick={saveProfileImage}
+                  disabled={uploadingImage}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  {uploadingImage ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      Confirm
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={cancelImageUpload}
+                  disabled={uploadingImage}
+                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </div>
     </div>
   );
