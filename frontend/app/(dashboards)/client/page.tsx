@@ -31,6 +31,7 @@ import {
   Award,
   MoreHorizontal,
   Info,
+  MessageCircle,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -48,7 +49,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-
+import { authAPI } from "@/lib/api";
 // Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -56,6 +57,9 @@ if (typeof window !== "undefined") {
 
 export default function ClientDashboard() {
   const { user } = useAuth();
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [vendorsLoading, setVendorsLoading] = useState(true);
+  const [vendorsError, setVendorsError] = useState<string | null>(null);
   const [galleryFilter, setGalleryFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [vendorFilter, setVendorFilter] = useState("all");
@@ -154,6 +158,51 @@ export default function ClientDashboard() {
         }
       );
     }
+
+    // Fetch vendors data
+    const fetchVendors = async () => {
+      try {
+        setVendorsLoading(true);
+        setVendorsError(null);
+
+        const response = await authAPI.getVendors();
+        console.log("Vendors response:", response);
+
+        if (response.data && response.data.success) {
+          setVendors(response.data.data);
+          console.log("Vendors loaded:", response.data.data);
+        } else {
+          console.error("Invalid vendors response:", response);
+          setVendorsError("Invalid response format");
+        }
+      } catch (error: any) {
+        console.error("Error fetching vendors:", error);
+
+        let errorMessage = "Failed to load vendors";
+        if (error.response) {
+          console.error(
+            "Server error:",
+            error.response.status,
+            error.response.data
+          );
+          errorMessage =
+            error.response.data?.message ||
+            `Server error: ${error.response.status}`;
+        } else if (error.request) {
+          console.error("Network error:", error.request);
+          errorMessage = "Network error - please check your connection";
+        } else {
+          console.error("Error:", error.message);
+          errorMessage = error.message;
+        }
+
+        setVendorsError(errorMessage);
+      } finally {
+        setVendorsLoading(false);
+      }
+    };
+
+    fetchVendors();
   }, []);
 
   const stats = [
@@ -218,73 +267,79 @@ export default function ClientDashboard() {
     },
   ];
 
-  // Featured vendors with their recent work
-  const featuredVendors = [
-    {
-      id: 1,
-      name: "Sarah's Catering",
-      category: "Catering",
-      rating: 4.9,
-      reviews: 234,
-      image:
+  // Default fallback images for different categories
+  const getCategoryFallbackImage = (category: string) => {
+    const categoryImages: Record<string, string> = {
+      Catering:
         "https://images.unsplash.com/photo-1466978913421-dc2cf60dab96?w=600&h=400&fit=crop",
-      recentWork: {
-        title: "Elegant Wedding Reception",
-        image:
-          "https://images.unsplash.com/photo-1466978913421-dc2cf60dab96?w=600&h=400&fit=crop",
-        date: "Nov 28, 2025",
-      },
-      icon: Utensils,
-    },
-    {
-      id: 2,
-      name: "Elite Photographers",
-      category: "Photography",
-      rating: 4.8,
-      reviews: 189,
-      image:
+      Photography:
         "https://images.unsplash.com/photo-1542038784886-63d5b10c2c6e?w=600&h=400&fit=crop",
-      recentWork: {
-        title: "Corporate Gala",
-        image:
-          "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&h=400&fit=crop",
-        date: "Nov 15, 2025",
-      },
-      icon: Camera,
-    },
-    {
-      id: 3,
-      name: "Sound Masters Pro",
-      category: "Sound & DJ",
-      rating: 4.7,
-      reviews: 156,
-      image:
+      "Sound & DJ":
         "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&h=400&fit=crop",
-      recentWork: {
-        title: "Birthday Celebration",
-        image:
-          "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&h=400&fit=crop",
-        date: "Nov 5, 2025",
-      },
-      icon: Music,
-    },
-    {
-      id: 4,
-      name: "Floral Dreams",
-      category: "Decoration",
-      rating: 4.9,
-      reviews: 201,
-      image:
+      Decoration:
         "https://images.unsplash.com/photo-1566576912321-d58ddd7a4907?w=600&h=400&fit=crop",
-      recentWork: {
-        title: "Garden Party Setup",
-        image:
-          "https://images.unsplash.com/photo-1530549387789-4c1017266635e?w=600&h=400&fit=crop",
-        date: "Oct 20, 2025",
-      },
-      icon: Palette,
-    },
-  ];
+      Music:
+        "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=400&fit=crop",
+      Video:
+        "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600&h=400&fit=crop",
+      Planning:
+        "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&h=400&fit=crop",
+      default:
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=400&fit=crop",
+    };
+    return categoryImages[category] || categoryImages.default;
+  };
+
+  // Generate realistic service titles based on vendor category and name
+  const generateServiceTitle = (vendorName: string, category: string) => {
+    const serviceTemplates: Record<string, string[]> = {
+      Catering: [
+        "Premium Event Catering",
+        "Gourmet Food Service",
+        "Wedding Reception Catering",
+      ],
+      Photography: [
+        "Professional Event Photography",
+        "Wedding Photography Service",
+        "Corporate Event Coverage",
+      ],
+      "Sound & DJ": [
+        "Professional DJ Services",
+        "Sound System Rental",
+        "Wedding Entertainment",
+      ],
+      Decoration: [
+        "Event Decoration & Styling",
+        "Wedding Decor Service",
+        "Theme Party Setup",
+      ],
+      Music: [
+        "Live Music Performance",
+        "Band for Events",
+        "Musical Entertainment",
+      ],
+      Video: [
+        "Event Videography",
+        "Wedding Video Production",
+        "Professional Video Services",
+      ],
+      Planning: [
+        "Full Event Planning",
+        "Wedding Coordination",
+        "Corporate Event Management",
+      ],
+      default: [
+        "Professional Event Service",
+        "Quality Service Provider",
+        "Event Support Service",
+      ],
+    };
+
+    const templates = serviceTemplates[category] || serviceTemplates.default;
+    const randomTemplate =
+      templates[Math.floor(Math.random() * templates.length)];
+    return `${randomTemplate} by ${vendorName}`;
+  };
 
   // Gallery items for successful events
   const galleryItems = [
@@ -385,13 +440,64 @@ export default function ClientDashboard() {
     (item) => galleryFilter === "all" || item.category === galleryFilter
   );
 
-  const filteredVendors = featuredVendors.filter(
-    (vendor) =>
+  // Helper function to normalize vendor data
+  const normalizeVendorData = (vendor: any) => {
+    // If it's from the API, transform it to match the expected structure
+    if (vendor.email && !vendor.recentWork) {
+      return {
+        id: vendor._id || vendor.id,
+        name: vendor.businessName || vendor.name,
+        category: vendor.category || "Service Provider",
+        rating: vendor.rating || 4.5,
+        reviews: vendor.reviewsCount || 0,
+        image:
+          vendor.profileImage ||
+          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=400&fit=crop",
+        recentWork: {
+          title: `Professional ${vendor.businessName || vendor.name} Service`,
+          image:
+            vendor.profileBackground ||
+            vendor.profileImage ||
+            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=400&fit=crop",
+          date: new Date(vendor.createdAt || Date.now()).toLocaleDateString(),
+        },
+        icon: Utensils, // Default icon, could be made dynamic based on category
+        isVerified: vendor.isVerified || false,
+        email: vendor.email,
+        phone: vendor.phone,
+      };
+    }
+    // If it's already in the expected format, return as-is
+    return vendor;
+  };
+
+  // Process API vendors data
+  const processedVendors =
+    vendors.length > 0 ? vendors.map(normalizeVendorData) : [];
+
+  const filteredVendors = processedVendors.filter((vendor) => {
+    const matchesFilter =
       vendorFilter === "all" ||
-      vendor.category === vendorFilter ||
-      (searchQuery &&
-        vendor.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+      (vendor.category &&
+        vendor.category.toLowerCase().includes(vendorFilter.toLowerCase())) ||
+      (vendor.name &&
+        vendor.name.toLowerCase().includes(vendorFilter.toLowerCase()));
+
+    const matchesSearch =
+      !searchQuery ||
+      (vendor.name &&
+        vendor.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (vendor.category &&
+        vendor.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (vendor.email &&
+        vendor.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (vendor.recentWork?.title &&
+        vendor.recentWork.title
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()));
+
+    return matchesFilter && matchesSearch;
+  });
 
   // Card hover animation
   const handleCardHover = (
@@ -501,31 +607,46 @@ export default function ClientDashboard() {
 
           {/* Featured Vendors Section */}
           <div className="space-y-8">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-              <div>
-                <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
-                  Featured Vendors
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400 text-lg">
-                  Discover amazing services for your event
-                </p>
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/20 px-6 py-3 rounded-full mb-6">
+                <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-emerald-700 dark:text-emerald-300 font-semibold text-sm uppercase tracking-wider">
+                  Premium Vendors
+                </span>
               </div>
+              <h2 className="text-5xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
+                Featured{" "}
+                <span className="text-emerald-600 dark:text-emerald-400">
+                  Event Partners
+                </span>
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-xl max-w-2xl mx-auto leading-relaxed">
+                Connect with top-rated professionals who bring your vision to
+                life.
+                <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                  {" "}
+                  Message them instantly
+                </span>{" "}
+                to start planning your perfect event.
+              </p>
+            </div>
 
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-emerald-100 dark:border-emerald-900/30">
               {/* Vendor Filter and Search */}
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center">
                 <div className="relative flex-1 sm:flex-none">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-400 w-5 h-5" />
                   <Input
-                    placeholder="Search vendors..."
+                    placeholder="Search by vendor name..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-10 py-2.5 w-full sm:w-64 border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-lg"
+                    className="pl-10 pr-10 py-3 w-full sm:w-72 border-2 border-emerald-200/50 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm transition-all"
                   />
                   {searchQuery && (
                     <button
                       title="Clear search"
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors p-1 hover:bg-emerald-50 rounded-full"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -536,113 +657,231 @@ export default function ClientDashboard() {
                   title="Select category filter"
                   value={vendorFilter}
                   onChange={(e) => setVendorFilter(e.target.value)}
-                  className="px-4 py-2.5 border border-emerald-200 rounded-lg bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-sm transition-all"
+                  className="px-5 py-3 border-2 border-emerald-200/50 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 font-medium text-sm transition-all cursor-pointer"
                 >
-                  <option value="all">All Categories</option>
-                  <option value="Catering">Catering</option>
-                  <option value="Photography">Photography</option>
-                  <option value="Sound & DJ">Sound & DJ</option>
-                  <option value="Decoration">Decoration</option>
+                  <option value="all">🎯 All Categories</option>
+                  <option value="Catering">🍽️ Catering</option>
+                  <option value="Photography">📸 Photography</option>
+                  <option value="Sound & DJ">🎵 Sound & DJ</option>
+                  <option value="Decoration">🎨 Decoration</option>
                 </select>
 
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 whitespace-nowrap"
+                  className="border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 whitespace-nowrap px-6 py-3 rounded-xl font-semibold backdrop-blur-sm"
                 >
                   <Filter className="h-4 w-4 mr-2" />
-                  Filter
+                  Advanced
                 </Button>
               </div>
             </div>
 
-            <div
-              ref={vendorsRef}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-            >
-              {filteredVendors
-                .slice(0, showMoreVendors ? featuredVendors.length : 4)
-                .map((vendor) => (
-                  <Card
-                    key={vendor.id}
-                    className="overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white dark:bg-gray-800 group"
-                    onMouseEnter={(e) => handleCardHover(e, true)}
-                    onMouseLeave={(e) => handleCardHover(e, false)}
+            {/* Loading State */}
+            {vendorsLoading && (
+              <div className="flex justify-center items-center py-20">
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Loading vendors...
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {vendorsError && !vendorsLoading && (
+              <div className="text-center py-20">
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 max-w-md mx-auto">
+                  <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
+                    Failed to Load Vendors
+                  </h3>
+                  <p className="text-red-600 dark:text-red-300 text-sm mb-4">
+                    {vendorsError}
+                  </p>
+                  <Button
+                    onClick={() => window.location.reload()}
+                    variant="outline"
+                    className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-300"
                   >
-                    <div className="relative h-48 overflow-hidden">
-                      <Image
-                        src={vendor.recentWork.image}
-                        alt={vendor.recentWork.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm rounded-full p-2 shadow-lg">
-                        {getCategoryIcon(vendor.category)}
-                      </div>
-                    </div>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between mb-3">
-                        <Badge
-                          variant="secondary"
-                          className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 text-sm px-3 py-1"
-                        >
-                          {vendor.category}
-                        </Badge>
-                        <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-1 rounded-full">
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                            {vendor.rating}
-                          </span>
-                        </div>
-                      </div>
-                      <CardTitle className="text-lg text-gray-900 dark:text-white">
-                        {vendor.name}
-                      </CardTitle>
-                      <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                        {vendor.recentWork.title}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="flex items-center justify-between mb-5 text-sm text-gray-500 dark:text-gray-400">
-                        <span>{vendor.recentWork.date}</span>
-                        <span>{vendor.reviews} reviews</span>
-                      </div>
-                      <Link href={`/vendors/${vendor.id}`}>
-                        <Button
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-all py-3"
-                          size="sm"
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Profile
-                        </Button>
-                      </Link>
-                    </CardContent>
-                  </Card>
-                ))}
-            </div>
-
-            {/* Explore More Vendors Button */}
-            {featuredVendors.length > 4 && (
-              <div className="flex justify-center mt-4">
-                <Button
-                  variant="outline"
-                  className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-full"
-                  onClick={() => setShowMoreVendors(!showMoreVendors)}
-                >
-                  {showMoreVendors ? (
-                    <>
-                      Show Less
-                      <X className="h-4 w-4 ml-2" />
-                    </>
-                  ) : (
-                    <>
-                      Explore More Vendors
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </>
-                  )}
-                </Button>
+                    Retry
+                  </Button>
+                </div>
               </div>
+            )}
+
+            {/* Vendors Grid */}
+            {!vendorsLoading && !vendorsError && (
+              <>
+                <div
+                  ref={vendorsRef}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                >
+                  {filteredVendors
+                    .slice(0, showMoreVendors ? filteredVendors.length : 4)
+                    .map((vendor) => (
+                      <Card
+                        key={vendor.id}
+                        className="overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 bg-white dark:bg-gray-800 group border-0 rounded-2xl transform hover:-translate-y-2"
+                        onMouseEnter={(e) => handleCardHover(e, true)}
+                        onMouseLeave={(e) => handleCardHover(e, false)}
+                      >
+                        <div className="relative h-56 overflow-hidden">
+                          <Image
+                            src={vendor.recentWork.image}
+                            alt={vendor.recentWork.title}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+
+                          {/* Category Badge */}
+                          <div className="absolute top-4 left-4 bg-emerald-500/95 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg transform -translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                            <div className="flex items-center gap-1.5">
+                              <div className="text-white text-xs">
+                                {getCategoryIcon(vendor.category)}
+                              </div>
+                              <span className="text-white text-xs font-semibold">
+                                {vendor.category}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Verification Badge */}
+                          {vendor.isVerified && (
+                            <div className="absolute top-4 right-4 bg-blue-500/95 backdrop-blur-sm rounded-full p-2 shadow-lg transform -translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-75">
+                              <Award className="h-3 w-3 text-white" />
+                            </div>
+                          )}
+
+                          {/* Rating Badge */}
+                          <div className="absolute bottom-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full px-3 py-1.5 shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-100">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3.5 w-3.5 fill-white text-white" />
+                              <span className="text-sm font-bold text-white">
+                                {vendor.rating}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Hover Actions */}
+                          <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                            <div className="flex gap-2">
+                              <Link href={`/vendors/${vendor.id}`}>
+                                <Button
+                                  size="sm"
+                                  className="bg-white/95 hover:bg-white text-gray-900 font-semibold transition-all backdrop-blur-sm border-0 shadow-lg"
+                                >
+                                  <Eye className="h-4 w-4 mr-1.5" />
+                                  View
+                                </Button>
+                              </Link>
+                              <Link
+                                href={`/messaging?vendor=${
+                                  vendor.id
+                                }&name=${encodeURIComponent(vendor.name)}`}
+                              >
+                                <Button
+                                  size="sm"
+                                  className="bg-emerald-500/95 hover:bg-emerald-600 text-white font-semibold transition-all backdrop-blur-sm border-0 shadow-lg"
+                                >
+                                  <MessageCircle className="h-4 w-4 mr-1.5" />
+                                  Message
+                                </Button>
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+
+                        <CardHeader className="pb-4 px-6 pt-5">
+                          <div className="space-y-3">
+                            <CardTitle className="text-xl font-bold text-gray-900 dark:text-white leading-tight line-clamp-1">
+                              {vendor.name}
+                            </CardTitle>
+
+                            <CardDescription className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2 min-h-10">
+                              {vendor.recentWork.title}
+                            </CardDescription>
+                          </div>
+                        </CardHeader>
+
+                        <CardContent className="pt-0 px-6 pb-6">
+                          <div className="flex items-center justify-between text-sm mb-4">
+                            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                              <Users className="h-4 w-4" />
+                              <span className="font-medium">
+                                {vendor.reviews} reviews
+                              </span>
+                            </div>
+                            <div className="text-gray-400 dark:text-gray-500 text-xs">
+                              {vendor.recentWork.date}
+                            </div>
+                          </div>
+
+                          {/* Contact Info for API vendors */}
+                          {vendor.email && (
+                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-lg">
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                              <span>Available for new projects</span>
+                            </div>
+                          )}
+
+                          {/* Default Action Buttons (visible when not hovering) */}
+                          <div className="flex gap-2 mt-4 group-hover:opacity-0 transition-opacity duration-300">
+                            <Link
+                              href={`/vendors/${vendor.id}`}
+                              className="flex-1"
+                            >
+                              <Button
+                                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium transition-all border-0"
+                                size="sm"
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Profile
+                              </Button>
+                            </Link>
+                            <Link
+                              href={`/messaging?vendor=${
+                                vendor.id
+                              }&name=${encodeURIComponent(vendor.name)}`}
+                            >
+                              <Button
+                                className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-all px-4"
+                                size="sm"
+                              >
+                                <MessageCircle className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                </div>
+
+                {/* Explore More Vendors Button */}
+                {filteredVendors.length > 4 && (
+                  <div className="flex justify-center mt-4">
+                    <Button
+                      variant="outline"
+                      className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-full"
+                      onClick={() => setShowMoreVendors(!showMoreVendors)}
+                    >
+                      {showMoreVendors ? (
+                        <>
+                          Show Less
+                          <X className="h-4 w-4 ml-2" />
+                        </>
+                      ) : (
+                        <>
+                          Explore More Vendors
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

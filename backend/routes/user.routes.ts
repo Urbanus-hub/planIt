@@ -10,6 +10,7 @@ import {
   getCurrentUser,
   toggleUserActive,
   verifyVendor,
+  getVendors,
 } from "../controllers/users.controller.js";
 
 import authorize from "../middlewares/authorize.middleware.js";
@@ -31,6 +32,9 @@ router.post("/logout", authorize, logoutUser);
 
 // Get all users (admin only)
 router.get("/", authorize, authorizeRole("admin"), getUsers);
+
+//get vendors (must be before /:id route)
+router.get("/vendors", getVendors);
 
 // Get user by ID (user themselves or admin)
 router.get("/:id", authorize, verifyUserOwnership, getUser);
@@ -56,7 +60,5 @@ router.patch(
   authorizeRole("admin"),
   verifyVendor
 );
-
-
 
 export default router;

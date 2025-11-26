@@ -245,6 +245,34 @@ export const getUsers = async (
   }
 };
 
+//get vendors
+export const getVendors = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { isVerified, isActive } = req.query;
+    const filter: any = { role: "vendor" };
+    if (isVerified !== undefined)
+      filter.isVerified = isVerified === "true" ? true : false;
+    if (isActive !== undefined) filter.isActive = isActive === "true";
+
+    const vendors = await User.find(filter)
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: vendors.length,
+      data: vendors,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 export const getUser = async (
   req: Request,
   res: Response,

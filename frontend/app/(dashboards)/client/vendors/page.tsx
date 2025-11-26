@@ -27,8 +27,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { authAPI } from "@/lib/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,106 +38,113 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+interface VendorType {
+  id: string;
+  name: string;
+  category: string;
+  location: string;
+  rating: number;
+  reviews: number;
+  price: string;
+  image: string;
+  description: string;
+  isFavorite: boolean;
+  availability: string;
+  responseTime: string;
+  email?: string;
+  phone?: string;
+}
+
 export default function BrowseVendors() {
+  const { user } = useAuth();
   const [favorites, setFavorites] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [viewMode, setViewMode] = useState("grid"); // grid or list
   const [showFilters, setShowFilters] = useState(false);
-  
-  const [vendors] = useState([
-    {
-      id: "1",
-      name: "Elite Catering Co.",
-      category: "Catering",
-      location: "Nairobi",
-      rating: 4.9,
-      reviews: 234,
-      price: "KSh 5K-20K per plate",
-      image:
-        "https://images.unsplash.com/photo-1555939594-58d7cb561522?w=400&h=300&fit=crop",
-      description:
-        "Premium catering services for weddings and corporate events with over 10 years of experience.",
-      isFavorite: false,
-      availability: "Available",
-      responseTime: "Within 2 hours",
-    },
-    {
-      id: "2",
-      name: "Pro Photographers",
-      category: "Photography",
-      location: "Mombasa",
-      rating: 4.8,
-      reviews: 189,
-      price: "KSh 3K-10K per hour",
-      image:
-        "https://images.unsplash.com/photo-1606011334315-76b8191da5f3?w=400&h=300&fit=crop",
-      description: "Professional photography for all occasions with state-of-the-art equipment.",
-      isFavorite: false,
-      availability: "Available",
-      responseTime: "Within 4 hours",
-    },
-    {
-      id: "3",
-      name: "Sound Masters Pro",
-      category: "Sound & DJ",
-      location: "Kisumu",
-      rating: 4.7,
-      reviews: 156,
-      price: "KSh 2K-8K per event",
-      image:
-        "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=300&fit=crop",
-      description: "Professional DJ and sound equipment rental for memorable events.",
-      isFavorite: false,
-      availability: "Limited",
-      responseTime: "Within 6 hours",
-    },
-    {
-      id: "4",
-      name: "Floral Dreams",
-      category: "Decoration",
-      location: "Nairobi",
-      rating: 4.9,
-      reviews: 201,
-      price: "KSh 3K-15K per arrangement",
-      image:
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop",
-      description: "Beautiful floral arrangements and decorations for any event theme.",
-      isFavorite: false,
-      availability: "Available",
-      responseTime: "Within 3 hours",
-    },
-    {
-      id: "5",
-      name: "Event Planners Plus",
-      category: "Planning",
-      location: "Nairobi",
-      rating: 4.8,
-      reviews: 167,
-      price: "KSh 10K-50K per event",
-      image:
-        "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&h=300&fit=crop",
-      description: "Full-service event planning from concept to execution.",
-      isFavorite: false,
-      availability: "Available",
-      responseTime: "Within 1 hour",
-    },
-    {
-      id: "6",
-      name: "Luxury Venue Rentals",
-      category: "Venue",
-      location: "Mombasa",
-      rating: 4.7,
-      reviews: 143,
-      price: "KSh 20K-100K per day",
-      image:
-        "https://images.unsplash.com/photo-1519167758481-83f550649ee4?w=400&h=300&fit=crop",
-      description: "Premium venues for weddings, corporate events, and special occasions.",
-      isFavorite: false,
-      availability: "Limited",
-      responseTime: "Within 12 hours",
-    },
-  ]);
+  const [vendors, setVendors] = useState<VendorType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch vendors from API
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await authAPI.getVendors();
+
+        console.log("Vendors response:", response);
+
+        if (response.data && response.data.success) {
+          // Transform API data to match component expectations
+          const transformedVendors: VendorType[] = response.data.data.map(
+            (vendor: any) => ({
+              id: vendor._id || vendor.id,
+              name: vendor.businessName || vendor.name || "Unknown Vendor",
+              category:
+                vendor.serviceCategory || vendor.category || "Service Provider",
+              location:
+                vendor.city || vendor.location || "Location not specified",
+              rating: vendor.rating || 4.5,
+              reviews: vendor.reviewsCount || 0,
+              price: vendor.pricing || "Contact for pricing",
+              image:
+                vendor.profileImage ||
+                "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=300&fit=crop",
+              description:
+                vendor.businessDescription ||
+                vendor.bio ||
+                vendor.description ||
+                "Professional service provider",
+              isFavorite: false,
+              availability: vendor.availability || "Available",
+              responseTime: vendor.responseTime || "Contact for response time",
+              email: vendor.email,
+              phone: vendor.phone,
+            })
+          );
+          setVendors(transformedVendors);
+          console.log("Vendors loaded:", transformedVendors);
+        } else {
+          console.error("Invalid vendors response:", response);
+          setError("Invalid response format");
+        }
+      } catch (err: any) {
+        console.error("Error fetching vendors:", err);
+
+        let errorMessage = "Failed to load vendors";
+        if (err.response) {
+          console.error(
+            "Server error:",
+            err.response.status,
+            err.response.data
+          );
+          if (err.response.status === 401) {
+            errorMessage = "Authentication required. Please log in again.";
+          } else if (err.response.status === 403) {
+            errorMessage =
+              "Access denied. You don't have permission to view vendors.";
+          } else {
+            errorMessage = err.response.data?.message || errorMessage;
+          }
+        } else if (err.request) {
+          errorMessage =
+            "Network error. Please check your connection and try again.";
+        }
+
+        setError(errorMessage);
+        toast.error("Failed to load vendors");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchVendors();
+    }
+  }, [user]);
 
   const categories = [
     { value: "all", label: "All Categories" },
@@ -169,14 +178,60 @@ export default function BrowseVendors() {
 
   // Filter vendors based on search term and selected category
   const filteredVendors = vendors.filter((vendor) => {
-    const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vendor.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vendor.location.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = selectedCategory === "all" || vendor.category === selectedCategory;
-    
+    const matchesSearch =
+      vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vendor.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vendor.location.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory =
+      selectedCategory === "all" || vendor.category === selectedCategory;
+
     return matchesSearch && matchesCategory;
   });
+
+  // Loading state
+  if (loading) {
+    return (
+      <ProtectedRoute allowedRoles={["client"]}>
+        <div className="flex-1 min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-green-50/20 dark:from-gray-900 dark:via-emerald-900/10 dark:to-gray-800 p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto space-y-6">
+            <div className="text-center py-20">
+              <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-emerald-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600 dark:text-gray-400 text-lg">
+                Loading vendors...
+              </p>
+            </div>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <ProtectedRoute allowedRoles={["client"]}>
+        <div className="flex-1 min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-green-50/20 dark:from-gray-900 dark:via-emerald-900/10 dark:to-gray-800 p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto space-y-6">
+            <div className="text-center py-20">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-6 py-4 rounded-xl max-w-md mx-auto">
+                <h3 className="font-semibold text-lg mb-2">
+                  Error loading vendors
+                </h3>
+                <p className="text-sm mb-4">{error}</p>
+                <Button
+                  onClick={() => window.location.reload()}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Try Again
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute allowedRoles={["client"]}>
@@ -196,10 +251,16 @@ export default function BrowseVendors() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+                onClick={() =>
+                  setViewMode(viewMode === "grid" ? "list" : "grid")
+                }
                 className="border-emerald-600 text-emerald-600"
               >
-                {viewMode === "grid" ? <List className="w-4 h-4" /> : <Grid3X3 className="w-4 h-4" />}
+                {viewMode === "grid" ? (
+                  <List className="w-4 h-4" />
+                ) : (
+                  <Grid3X3 className="w-4 h-4" />
+                )}
               </Button>
               <Button
                 variant="outline"
@@ -226,7 +287,7 @@ export default function BrowseVendors() {
                 />
                 {searchTerm && (
                   <button
-                  title="btn"
+                    title="btn"
                     onClick={() => setSearchTerm("")}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
@@ -242,7 +303,9 @@ export default function BrowseVendors() {
                     variant="outline"
                     className="w-full md:w-48 justify-between border-emerald-200 text-gray-700 dark:text-gray-300"
                   >
-                    {selectedCategory === "all" ? "All Categories" : selectedCategory}
+                    {selectedCategory === "all"
+                      ? "All Categories"
+                      : selectedCategory}
                     <ChevronDown className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -251,7 +314,11 @@ export default function BrowseVendors() {
                     <DropdownMenuItem
                       key={category.value}
                       onClick={() => setSelectedCategory(category.value)}
-                      className={selectedCategory === category.value ? "bg-emerald-50 dark:bg-emerald-900/20" : ""}
+                      className={
+                        selectedCategory === category.value
+                          ? "bg-emerald-50 dark:bg-emerald-900/20"
+                          : ""
+                      }
                     >
                       {category.label}
                     </DropdownMenuItem>
@@ -263,19 +330,35 @@ export default function BrowseVendors() {
             {/* Active Filters */}
             {(searchTerm || selectedCategory !== "all") && (
               <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Active filters:</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Active filters:
+                </span>
                 {searchTerm && (
-                  <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+                  <Badge
+                    variant="secondary"
+                    className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200"
+                  >
                     Search: {searchTerm}
-                    <button title="btn" onClick={() => setSearchTerm("")} className="ml-1">
+                    <button
+                      title="btn"
+                      onClick={() => setSearchTerm("")}
+                      className="ml-1"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </Badge>
                 )}
                 {selectedCategory !== "all" && (
-                  <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+                  <Badge
+                    variant="secondary"
+                    className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200"
+                  >
                     Category: {selectedCategory}
-                    <button title="btn" onClick={() => setSelectedCategory("all")} className="ml-1">
+                    <button
+                      title="btn"
+                      onClick={() => setSelectedCategory("all")}
+                      className="ml-1"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </Badge>
@@ -316,7 +399,7 @@ export default function BrowseVendors() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <button
-                    title="btn"
+                      title="btn"
                       onClick={() => toggleFavorite(vendor.id)}
                       className={`absolute top-3 right-3 p-2 rounded-full transition-all ${
                         favorites.has(vendor.id)
@@ -324,16 +407,22 @@ export default function BrowseVendors() {
                           : "bg-white/80 text-gray-600 hover:bg-white"
                       }`}
                     >
-                      <Heart className={`w-5 h-5 ${favorites.has(vendor.id) ? "fill-current" : ""}`} />
+                      <Heart
+                        className={`w-5 h-5 ${
+                          favorites.has(vendor.id) ? "fill-current" : ""
+                        }`}
+                      />
                     </button>
                     <Badge className="absolute bottom-3 left-3 bg-emerald-600 hover:bg-emerald-700">
                       {vendor.category}
                     </Badge>
-                    <div className={`absolute top-3 left-3 px-2 py-1 rounded text-xs font-medium ${
-                      vendor.availability === "Available" 
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200" 
-                        : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
-                    }`}>
+                    <div
+                      className={`absolute top-3 left-3 px-2 py-1 rounded text-xs font-medium ${
+                        vendor.availability === "Available"
+                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200"
+                          : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                      }`}
+                    >
                       {vendor.availability}
                     </div>
                   </div>
@@ -427,7 +516,7 @@ export default function BrowseVendors() {
                         className="w-full h-full object-cover"
                       />
                       <button
-                      title="btn"
+                        title="btn"
                         onClick={() => toggleFavorite(vendor.id)}
                         className={`absolute top-3 right-3 p-2 rounded-full transition-all ${
                           favorites.has(vendor.id)
@@ -435,10 +524,14 @@ export default function BrowseVendors() {
                             : "bg-white/80 text-gray-600 hover:bg-white"
                         }`}
                       >
-                        <Heart className={`w-5 h-5 ${favorites.has(vendor.id) ? "fill-current" : ""}`} />
+                        <Heart
+                          className={`w-5 h-5 ${
+                            favorites.has(vendor.id) ? "fill-current" : ""
+                          }`}
+                        />
                       </button>
                     </div>
-                    
+
                     <div className="flex-1 p-6">
                       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                         <div className="flex-1">
@@ -449,15 +542,17 @@ export default function BrowseVendors() {
                             <Badge className="bg-emerald-600 hover:bg-emerald-700">
                               {vendor.category}
                             </Badge>
-                            <div className={`px-2 py-1 rounded text-xs font-medium ${
-                              vendor.availability === "Available" 
-                                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200" 
-                                : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
-                            }`}>
+                            <div
+                              className={`px-2 py-1 rounded text-xs font-medium ${
+                                vendor.availability === "Available"
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200"
+                                  : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                              }`}
+                            >
                               {vendor.availability}
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
                             <div className="flex items-center gap-1">
                               <MapPin className="w-4 h-4" />
@@ -471,11 +566,11 @@ export default function BrowseVendors() {
                               <span>({vendor.reviews} reviews)</span>
                             </div>
                           </div>
-                          
+
                           <p className="text-gray-600 dark:text-gray-400 mb-3">
                             {vendor.description}
                           </p>
-                          
+
                           <div className="flex flex-wrap items-center gap-4 text-sm">
                             <div className="flex items-center gap-1 font-semibold text-gray-900 dark:text-white">
                               <DollarSign className="w-4 h-4 text-emerald-600" />
@@ -487,7 +582,7 @@ export default function BrowseVendors() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex flex-col gap-2 md:w-48">
                           <Button
                             onClick={() => handleMessage(vendor.name)}
@@ -523,26 +618,32 @@ export default function BrowseVendors() {
           )}
 
           {/* No Results Message */}
-          {filteredVendors.length === 0 && (
+          {filteredVendors.length === 0 && !loading && (
             <div className="text-center py-12">
               <div className="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
                 <Search className="w-10 h-10 text-gray-400" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                No vendors found
+                {vendors.length === 0
+                  ? "No vendors available"
+                  : "No vendors found"}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Try adjusting your search or filter criteria
+                {vendors.length === 0
+                  ? "There are currently no registered vendors. Check back later."
+                  : "Try adjusting your search or filter criteria"}
               </p>
-              <Button
-                onClick={() => {
-                  setSearchTerm("");
-                  setSelectedCategory("all");
-                }}
-                className="bg-emerald-600 hover:bg-emerald-700"
-              >
-                Clear filters
-              </Button>
+              {vendors.length > 0 && (
+                <Button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedCategory("all");
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
+                  Clear filters
+                </Button>
+              )}
             </div>
           )}
         </div>

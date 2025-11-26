@@ -119,6 +119,7 @@ export const authAPI = {
   },
   verifyVendor: (id: string, verify: any) =>
     api.patch(`/users/${id}/verify-vendor`, verify),
+  getVendors: (params?: any) => api.get("/users/vendors", { params }),
 
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.put("/users/password", data),

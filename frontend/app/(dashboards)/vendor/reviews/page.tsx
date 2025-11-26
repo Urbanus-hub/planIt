@@ -62,66 +62,7 @@ export default function ReviewsPage() {
   const { user } = useAuth();
 
   const mockReviews: Review[] = [
-    {
-      _id: "1",
-      clientName: "Sarah Johnson",
-      rating: 5,
-      title: "Absolutely Amazing!",
-      content:
-        "The service was exceptional! The team was professional, punctual, and went above and beyond expectations. Highly recommend!",
-      serviceTitle: "Event Planning",
-      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      verified: true,
-      helpful: 24,
-      unhelpful: 1,
-      status: "published",
-      sentiment: "positive",
-    },
-    {
-      _id: "2",
-      clientName: "James Smith",
-      rating: 4,
-      title: "Great Experience",
-      content:
-        "Really good service with attention to detail. Minor delays but overall very satisfied.",
-      serviceTitle: "Catering",
-      date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      verified: true,
-      helpful: 12,
-      unhelpful: 0,
-      status: "published",
-      sentiment: "positive",
-    },
-    {
-      _id: "3",
-      clientName: "Emily Davis",
-      rating: 5,
-      title: "Perfect for our Wedding!",
-      content:
-        "This vendor made our special day unforgettable. Professional, creative, and so thoughtful. Thank you!",
-      serviceTitle: "Photography",
-      date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-      verified: true,
-      helpful: 45,
-      unhelpful: 0,
-      status: "published",
-      sentiment: "positive",
-    },
-    {
-      _id: "4",
-      clientName: "Michael Brown",
-      rating: 3,
-      title: "Decent, but could be better",
-      content:
-        "Service was okay. Communication could have been better, but the final result was good.",
-      serviceTitle: "Decoration",
-      date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-      verified: true,
-      helpful: 5,
-      unhelpful: 2,
-      status: "published",
-      sentiment: "neutral",
-    },
+   
   ];
 
   const fetchReviews = async () => {

@@ -66,7 +66,7 @@ const GallerySchema = new Schema(
 );
 
 // Indexes for fast queries
-GallerySchema.index({ vendorId: 1 });
+GallerySchema.index({ vendorId:1 });
 GallerySchema.index({ "images.uploadedAt": -1 });
 
 const Gallery = mongoose.model<IGallery>("Gallery", GallerySchema);
