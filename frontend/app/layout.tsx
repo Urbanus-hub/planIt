@@ -32,13 +32,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-  <html lang="en" className="scroll-smooth" suppressHydrationWarning={true}>
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning={true}>
       <body
         className={`${inter.variable} ${playfair.variable} ${outfit.variable} font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300`}
       >
         <ThemeProvider>
           <AuthProvider>{children}</AuthProvider>
-          <Toaster position="top-right" />
+          <Toaster position="top-center" />
         </ThemeProvider>
       </body>
     </html>

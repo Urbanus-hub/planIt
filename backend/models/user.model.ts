@@ -7,6 +7,8 @@ export interface IUser extends Document {
   role: "client" | "vendor" | "admin";
   phone?: string;
   avatar?: string;
+  profileImage?: string;
+  profileBackground?: string;
   isVerified: boolean;
   isActive: boolean;
   verificationToken?: string;
@@ -17,7 +19,17 @@ export interface IUser extends Document {
   businessDescription?: string;
   businessLogo?: string;
   businessAddress?: string;
+  serviceCategory?: string;
+  yearsOfExperience?: number;
+  businessLicense?: string;
   taxId?: string;
+  specialties?: string[];
+  certifications?: string[];
+  businessHours?: string;
+  responseTime?: string;
+  city?: string;
+  state?: string;
+  website?: string;
   rating?: number;
   reviewCount?: number;
   totalBookings?: number;
@@ -59,6 +71,8 @@ const userSchema = new Schema<IUser>(
       trim: true,
     },
     avatar: String,
+    profileImage: String,
+    profileBackground: String,
     isVerified: {
       type: Boolean,
       default: false,
@@ -76,7 +90,17 @@ const userSchema = new Schema<IUser>(
     businessDescription: String,
     businessLogo: String,
     businessAddress: String,
+    serviceCategory: String,
+    yearsOfExperience: Number,
+    businessLicense: String,
     taxId: String,
+    specialties: [String],
+    certifications: [String],
+    businessHours: String,
+    responseTime: String,
+    city: String,
+    state: String,
+    website: String,
     rating: {
       type: Number,
       min: 0,

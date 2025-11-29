@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import {
@@ -18,6 +18,7 @@ import {
   Edit2,
   Check,
   X,
+  Loader2,
   Mail,
   Phone,
   MapPin,
@@ -35,6 +36,10 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { uploadToCloudinary } from "@/lib/cloudinary";
+import { authAPI } from "@/lib/api";
+import { useRef } from "react";
+import Link from "next/link";
 
 type ProfileFormData = {
   businessName: string;
@@ -60,42 +65,84 @@ type ProfileImage = {
 };
 
 export default function VendorProfilePage() {
-  const { user } = useAuth();
+  const { user, refreshUser, loading } = useAuth();
+  console.log("user data", user);
+
+  // Show loading state while user data is loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600 dark:text-gray-300">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverImageFileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImageType, setUploadingImageType] = useState<
+    "avatar" | "cover" | null
+  >(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const [images, setImages] = useState<ProfileImage>({
     avatar:
+      user?.businessLogo ||
+      user?.avatar ||
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
     coverImage:
+      user?.profileBackground ||
       "https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=400&fit=crop",
   });
 
   const [formData, setFormData] = useState<ProfileFormData>({
-    businessName: "Urban Photography Studios",
-    businessDescription:
-      "Professional photography services specializing in weddings, events, and corporate photography. With over a decade of experience, we capture moments that last a lifetime.",
-    email: "urban@photography.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Main Street, Suite 100",
-    city: "New York",
-    state: "NY",
-    website: "www.urbanphoto.com",
-    serviceCategory: "Photography",
-    yearsOfExperience: "10",
-    businessLicense: "BL-2024-12345",
-    specialties: [
-      "Weddings",
-      "Corporate Events",
-      "Portraits",
-      "Product Photography",
-    ],
-    certifications: [
-      "Professional Photographers of America",
-      "Certified Event Photographer",
-    ],
-    businessHours: "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM",
-    responseTime: "< 2 hours",
+    businessName: "",
+    businessDescription: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    website: "",
+    serviceCategory: "",
+    yearsOfExperience: "0",
+    businessLicense: "",
+    specialties: [],
+    certifications: [],
+    businessHours: "",
+    responseTime: "",
   });
+
+  // Update form data when user data changes or when entering edit mode
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        businessName: user.businessName || "Your Business Name",
+        businessDescription:
+          user.businessDescription || "Your business description",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.businessAddress || "",
+        city: user.city || "",
+        state: user.state || "",
+        website: user.website || "",
+        serviceCategory: user.serviceCategory || "Photography",
+        yearsOfExperience: user.yearsOfExperience
+          ? String(user.yearsOfExperience)
+          : "0",
+        businessLicense: user.taxId || user.businessLicense || "",
+        specialties: user.specialties || [],
+        certifications: user.certifications || [],
+        businessHours: user.businessHours || "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM",
+        responseTime: user.responseTime || "< 2 hours",
+      });
+    }
+  }, [user]);
 
   const [stats] = useState({
     totalReviews: 124,
@@ -134,44 +181,190 @@ export default function VendorProfilePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = (type: "avatar" | "coverImage") => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event: any) => {
-          setImages((prev) => ({
-            ...prev,
-            [type]: event.target.result,
-          }));
-          toast.success(
-            `${type === "avatar" ? "Avatar" : "Cover image"} updated`
-          );
-        };
-        reader.readAsDataURL(file);
-      }
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+
+    setSelectedFile(file);
+    setUploadingImageType("avatar");
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImagePreview(event.target?.result as string);
     };
-    input.click();
+    reader.readAsDataURL(file);
+  };
+
+  const saveProfileImage = async () => {
+    if (!selectedFile || !imagePreview || !user?._id) return;
+
+    setUploadingImage(true);
+    try {
+      const imageUrl = await uploadToCloudinary(selectedFile);
+      await authAPI.updateProfile(user._id, { businessLogo: imageUrl });
+
+      setImages((prev) => ({
+        ...prev,
+        avatar: imageUrl,
+      }));
+
+      toast.success("Profile image updated successfully!");
+      cancelImageUpload();
+    } catch (error) {
+      toast.error("Failed to upload image");
+      console.error(error);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const cancelImageUpload = () => {
+    setImagePreview(null);
+    setSelectedFile(null);
+    setUploadingImageType(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    if (coverImageFileInputRef.current) {
+      coverImageFileInputRef.current.value = "";
+    }
+  };
+
+  const handleCoverImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+
+    setSelectedFile(file);
+    setUploadingImageType("cover");
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setImagePreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const saveCoverImage = async () => {
+    if (!selectedFile || !imagePreview || !user?._id) return;
+
+    setUploadingImage(true);
+    try {
+      const imageUrl = await uploadToCloudinary(selectedFile);
+      await authAPI.updateProfile(user._id, { profileBackground: imageUrl });
+
+      setImages((prev) => ({
+        ...prev,
+        coverImage: imageUrl,
+      }));
+
+      toast.success("Cover image updated successfully!");
+      cancelImageUpload();
+    } catch (error) {
+      toast.error("Failed to upload cover image");
+      console.error(error);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleCancel = () => {
+    // Reset form data to current user data
+    if (user) {
+      setFormData({
+        businessName: user.businessName || "Your Business Name",
+        businessDescription:
+          user.businessDescription || "Your business description",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.businessAddress || "",
+        city: user.city || "",
+        state: user.state || "",
+        website: user.website || "",
+        serviceCategory: user.serviceCategory || "Photography",
+        yearsOfExperience: user.yearsOfExperience
+          ? String(user.yearsOfExperience)
+          : "0",
+        businessLicense: user.taxId || user.businessLicense || "",
+        specialties: user.specialties || [],
+        certifications: user.certifications || [],
+        businessHours: user.businessHours || "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM",
+        responseTime: user.responseTime || "< 2 hours",
+      });
+    }
+    setIsEditing(false);
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      if (!user?._id) throw new Error("User ID not found");
+
+      // Map formData fields to backend field names
+      const updateData = {
+        businessName: formData.businessName,
+        businessDescription: formData.businessDescription,
+        email: formData.email,
+        phone: formData.phone,
+        businessAddress: formData.address,
+        city: formData.city,
+        state: formData.state,
+        website: formData.website,
+        serviceCategory: formData.serviceCategory,
+        yearsOfExperience: formData.yearsOfExperience
+          ? parseInt(formData.yearsOfExperience)
+          : 0,
+        businessLicense: formData.businessLicense,
+        taxId: formData.businessLicense,
+        specialties: formData.specialties,
+        certifications: formData.certifications,
+        businessHours: formData.businessHours,
+        responseTime: formData.responseTime,
+        profileBackground: images.coverImage,
+      };
+
+      await authAPI.updateProfile(user._id, updateData);
+
+      // Refresh user data to get the updated profile
+      await refreshUser();
+
       toast.success("Profile updated successfully!");
       setIsEditing(false);
     } catch (error) {
       toast.error("Failed to update profile");
+      console.error(error);
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header with Cover */}
         <motion.div
@@ -187,21 +380,32 @@ export default function VendorProfilePage() {
               alt="Cover"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
             {isEditing && (
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                onClick={() => handleImageUpload("coverImage")}
-                className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <div className="flex flex-col items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg">
-                  <Camera className="h-6 w-6 text-gray-700" />
-                  <span className="text-sm text-gray-700 font-medium">
-                    Change Cover
-                  </span>
-                </div>
-              </motion.button>
+              <>
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  type="button"
+                  onClick={() => coverImageFileInputRef.current?.click()}
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <div className="flex flex-col items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg">
+                    <Camera className="h-6 w-6 text-gray-700" />
+                    <span className="text-sm text-gray-700 font-medium">
+                      Change Cover
+                    </span>
+                  </div>
+                </motion.button>
+                <input
+                  title="file input"
+                  type="file"
+                  ref={coverImageFileInputRef}
+                  onChange={handleCoverImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+              </>
             )}
           </div>
 
@@ -210,8 +414,8 @@ export default function VendorProfilePage() {
             <CardContent className="p-6 sm:p-8">
               <div className="flex flex-col sm:flex-row sm:items-start gap-6">
                 {/* Avatar */}
-                <div className="relative group flex-shrink-0">
-                  <div className="h-32 w-32 rounded-xl overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-slate-100 to-slate-50">
+                <div className="relative group shrink-0">
+                  <div className="h-32 w-32 rounded-xl overflow-hidden border-4 border-white shadow-lg bg-linear-to-br from-slate-100 to-slate-50">
                     <img
                       src={images.avatar!}
                       alt="Avatar"
@@ -222,19 +426,27 @@ export default function VendorProfilePage() {
                     <motion.button
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      onClick={() => handleImageUpload("avatar")}
+                      onClick={() => fileInputRef.current?.click()}
                       className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl"
                     >
                       <Camera className="h-6 w-6 text-white" />
                     </motion.button>
                   )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    title="Upload profile image"
+                  />
                 </div>
 
                 {/* Info */}
                 <div className="flex-1">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div>
-                      <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+                      <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
                         {formData.businessName}
                       </h1>
                       <div className="flex items-center gap-3 flex-wrap">
@@ -254,7 +466,7 @@ export default function VendorProfilePage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2 w-full sm:w-auto">
+                    <div className="flex gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
                       {isEditing ? (
                         <>
                           <Button
@@ -267,7 +479,7 @@ export default function VendorProfilePage() {
                             {isSaving ? "Saving..." : "Save"}
                           </Button>
                           <Button
-                            onClick={() => setIsEditing(false)}
+                            onClick={handleCancel}
                             variant="outline"
                             size="sm"
                             className="flex-1 sm:flex-none"
@@ -277,14 +489,27 @@ export default function VendorProfilePage() {
                           </Button>
                         </>
                       ) : (
-                        <Button
-                          onClick={() => setIsEditing(true)}
-                          size="sm"
-                          className="w-full sm:w-auto bg-slate-700 hover:bg-slate-800"
-                        >
-                          <Edit2 className="h-4 w-4 mr-1.5" />
-                          Edit Profile
-                        </Button>
+                        <>
+                          <Link
+                            href="/vendor/profile/gallery"
+                            className="flex-1 sm:flex-none"
+                          >
+                            <Button
+                              size="sm"
+                              className="w-full bg-emerald-600 hover:bg-emerald-700"
+                            >
+                              View Portfolio
+                            </Button>
+                          </Link>
+                          <Button
+                            onClick={() => setIsEditing(true)}
+                            size="sm"
+                            className="flex-1 sm:flex-none bg-slate-700 hover:bg-slate-800"
+                          >
+                            <Edit2 className="h-4 w-4 mr-1.5" />
+                            Edit Profile
+                          </Button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -461,7 +686,7 @@ export default function VendorProfilePage() {
                   </label>
                   {isEditing ? (
                     <textarea
-                     title="text"
+                      title="text"
                       name="businessDescription"
                       value={formData.businessDescription}
                       onChange={handleInputChange}
@@ -518,7 +743,7 @@ export default function VendorProfilePage() {
                         alt={item.title}
                         className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                      <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                         <p className="text-white text-sm font-medium">
                           {item.title}
                         </p>
@@ -580,7 +805,7 @@ export default function VendorProfilePage() {
                         key={index}
                         className="flex items-center gap-2 p-2 bg-gray-50 rounded-md"
                       >
-                        <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
                         <p className="text-gray-700 text-sm">{cert}</p>
                       </div>
                     ))}
@@ -767,7 +992,7 @@ export default function VendorProfilePage() {
                 {!isEditing && (
                   <div className="pt-2">
                     <div className="bg-gray-50 rounded-lg p-3 flex items-start gap-2">
-                      <MapPin className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <MapPin className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
                       <p className="text-sm text-gray-600">
                         {formData.address}, {formData.city}, {formData.state}
                       </p>
@@ -785,7 +1010,7 @@ export default function VendorProfilePage() {
             </Card>
 
             {/* Response Time */}
-            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-0 shadow-md">
+            <Card className="bg-linear-to-r from-blue-50 to-indigo-50 border-0 shadow-md">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -804,6 +1029,62 @@ export default function VendorProfilePage() {
             </Card>
           </div>
         </motion.div>
+
+        {/* Image Preview Modal */}
+        {imagePreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            onClick={cancelImageUpload}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-xl font-bold mb-4">Preview Image</h2>
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-64 object-cover rounded-lg mb-4"
+              />
+              <div className="flex gap-3">
+                <Button
+                  onClick={
+                    uploadingImageType === "cover"
+                      ? saveCoverImage
+                      : saveProfileImage
+                  }
+                  disabled={uploadingImage}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  {uploadingImage ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      Confirm
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={cancelImageUpload}
+                  disabled={uploadingImage}
+                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

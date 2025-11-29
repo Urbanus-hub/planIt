@@ -242,7 +242,7 @@ export default function VendorDashboard() {
         <div className="relative overflow-hidden">
           {/* Background Image with Overlay */}
           <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/90 via-emerald-800/80 to-teal-900/90" />
+            <div className="absolute inset-0 bg-linear-to-r from-emerald-900/90 via-emerald-800/80 to-teal-900/90" />
             <div
               className="absolute inset-0 opacity-20"
               style={{
@@ -294,11 +294,11 @@ export default function VendorDashboard() {
               return (
                 <Card
                   key={index}
-                  className="border-0 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden"
+                  className="border-0 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden bg-white dark:bg-gray-800"
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         {stat.title}
                       </CardDescription>
                       <div className={`p-2 rounded-full ${colorClasses.bg}`}>
@@ -348,13 +348,13 @@ export default function VendorDashboard() {
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Recent Bookings */}
-            <Card className="lg:col-span-2 border-0 shadow-md">
+            <Card className="lg:col-span-2 border-0 shadow-md bg-white dark:bg-gray-800">
               <CardHeader className="flex flex-row items-center justify-between pb-4">
                 <div>
                   <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
                     Recent Bookings
                   </CardTitle>
-                  <CardDescription className="text-gray-600 dark:text-gray-400">
+                  <CardDescription className="text-gray-600 dark:text-gray-300">
                     Latest client bookings and activities
                   </CardDescription>
                 </div>
@@ -421,13 +421,13 @@ export default function VendorDashboard() {
             </Card>
 
             {/* Notifications */}
-            <Card className="border-0 shadow-md">
+            <Card className="border-0 shadow-md bg-white dark:bg-gray-800">
               <CardHeader className="flex flex-row items-center justify-between pb-4">
                 <div>
                   <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
                     Notifications
                   </CardTitle>
-                  <CardDescription className="text-gray-600 dark:text-gray-400">
+                  <CardDescription className="text-gray-600 dark:text-gray-300">
                     Recent updates and alerts
                   </CardDescription>
                 </div>
@@ -473,13 +473,13 @@ export default function VendorDashboard() {
           </div>
 
           {/* Top Services */}
-          <Card className="border-0 shadow-md">
+          <Card className="border-0 shadow-md bg-white dark:bg-gray-800">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <div>
                 <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
                   Top Services
                 </CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-400">
+                <CardDescription className="text-gray-600 dark:text-gray-300">
                   Best performing services this month
                 </CardDescription>
               </div>
@@ -501,7 +501,7 @@ export default function VendorDashboard() {
                         alt={service.name}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                       <div className="absolute bottom-2 left-2 right-2">
                         <p className="text-white text-sm font-medium line-clamp-2">
                           {service.name}

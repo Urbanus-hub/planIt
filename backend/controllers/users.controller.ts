@@ -245,6 +245,34 @@ export const getUsers = async (
   }
 };
 
+//get vendors
+export const getVendors = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { isVerified, isActive } = req.query;
+    const filter: any = { role: "vendor" };
+    if (isVerified !== undefined)
+      filter.isVerified = isVerified === "true" ? true : false;
+    if (isActive !== undefined) filter.isActive = isActive === "true";
+
+    const vendors = await User.find(filter)
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: vendors.length,
+      data: vendors,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 export const getUser = async (
   req: Request,
   res: Response,
@@ -278,23 +306,59 @@ export const updateUser = async (
   try {
     const {
       name,
+      email,
       phone,
       avatar,
+      profileImage,
+      profileBackground,
       businessName,
       businessDescription,
       businessAddress,
+      businessLogo,
+      serviceCategory,
+      yearsOfExperience,
+      businessLicense,
+      taxId,
+      specialties,
+      certifications,
+      businessHours,
+      responseTime,
+      city,
+      state,
+      website,
     } = req.body;
 
     // Don't allow updating sensitive fields
     const allowedUpdates: any = {};
     if (name) allowedUpdates.name = name;
+    if (email) allowedUpdates.email = email;
     if (phone !== undefined) allowedUpdates.phone = phone;
     if (avatar !== undefined) allowedUpdates.avatar = avatar;
+    if (profileImage !== undefined) allowedUpdates.profileImage = profileImage;
+    if (profileBackground !== undefined)
+      allowedUpdates.profileBackground = profileBackground;
     if (businessName !== undefined) allowedUpdates.businessName = businessName;
     if (businessDescription !== undefined)
       allowedUpdates.businessDescription = businessDescription;
     if (businessAddress !== undefined)
       allowedUpdates.businessAddress = businessAddress;
+    if (businessLogo !== undefined) allowedUpdates.businessLogo = businessLogo;
+    if (serviceCategory !== undefined)
+      allowedUpdates.serviceCategory = serviceCategory;
+    if (yearsOfExperience !== undefined)
+      allowedUpdates.yearsOfExperience = yearsOfExperience;
+    if (businessLicense !== undefined)
+      allowedUpdates.businessLicense = businessLicense;
+    if (taxId !== undefined) allowedUpdates.taxId = taxId;
+    if (specialties !== undefined) allowedUpdates.specialties = specialties;
+    if (certifications !== undefined)
+      allowedUpdates.certifications = certifications;
+    if (businessHours !== undefined)
+      allowedUpdates.businessHours = businessHours;
+    if (responseTime !== undefined) allowedUpdates.responseTime = responseTime;
+    if (city !== undefined) allowedUpdates.city = city;
+    if (state !== undefined) allowedUpdates.state = state;
+    if (website !== undefined) allowedUpdates.website = website;
 
     const user = await User.findByIdAndUpdate(
       req.params.id,
@@ -319,48 +383,44 @@ export const updateUser = async (
     next(error);
   }
 };
-export const deleteUser=async(
+export const deleteUser = async (
   req: Request,
   res: Response,
   next: NextFunction
-):Promise<void>=>{
- try{
-  
-   
-    if((req.user as AuthUser).role!=="admin"){
+): Promise<void> => {
+  try {
+    if ((req.user as AuthUser).role !== "admin") {
       res.status(403).json({
-        success:false,
-        message:"Only admin can delete users"
-      })
+        success: false,
+        message: "Only admin can delete users",
+      });
       return;
-      
     }
-    const user=await User.findById(req.params.id);
+    const user = await User.findById(req.params.id);
 
-    if(!user){
+    if (!user) {
       res.status(404).json({
-        success:false,
-        message:"User not found"
-      })
+        success: false,
+        message: "User not found",
+      });
       return;
-    } 
-    if(user.role==="admin"){
+    }
+    if (user.role === "admin") {
       res.status(400).json({
-        success:false,
-        message:"Cannot delete admin user"
-      })
+        success: false,
+        message: "Cannot delete admin user",
+      });
       return;
     }
     await user.deleteOne();
     res.status(200).json({
-      success:true,
-      message:"User deleted successfully"
-    })
-
- }catch(err){
-   next(err)
- }
-}
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 export const toggleUserActive = async (
   req: Request,
   res: Response,
@@ -368,7 +428,7 @@ export const toggleUserActive = async (
 ): Promise<void> => {
   try {
     const user = await User.findById(req.params.id);
-    const {active}=req.body;
+    const { active } = req.body;
 
     if (!user) {
       res.status(404).json({
@@ -393,7 +453,7 @@ export const toggleUserActive = async (
     res.status(200).json({
       success: true,
       message: "User deleted successfully",
-      data:user,
+      data: user,
     });
   } catch (error) {
     next(error);
@@ -408,7 +468,7 @@ export const verifyVendor = async (
 ): Promise<void> => {
   try {
     const user = await User.findById(req.params.id);
-    const{verify}=req.body;
+    const { verify } = req.body;
 
     if (!user) {
       res.status(404).json({
@@ -439,6 +499,6 @@ export const verifyVendor = async (
     next(error);
   }
 };
+//upload profile
 
 // Change password
-

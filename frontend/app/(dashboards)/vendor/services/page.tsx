@@ -38,7 +38,6 @@ import {
   Zap,
   Camera,
   Video,
-
 } from "lucide-react";
 
 import {
@@ -441,14 +440,16 @@ export default function VendorServicesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-6xl mx-auto px-6 lg:px-8 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Services</h1>
-              <p className="text-gray-600 mt-1">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                Services
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 mt-1">
                 Manage your service offerings
               </p>
             </div>
@@ -477,38 +478,38 @@ export default function VendorServicesPage() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <Card className="shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     Total Services
                   </p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
                     {stats.total}
                   </p>
-                  <div className="flex items-center mt-2 text-sm text-gray-600">
-                    <span className="text-green-600 font-medium">
+                  <div className="flex items-center mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    <span className="text-green-600 dark:text-green-400 font-medium">
                       {stats.active} active
                     </span>
                     <span className="mx-2">•</span>
-                    <span className="text-amber-600 font-medium">
+                    <span className="text-amber-600 dark:text-amber-400 font-medium">
                       {stats.featured} featured
                     </span>
                   </div>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <Package className="h-6 w-6 text-blue-600" />
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <Package className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     Average Rating
                   </p>
                   <div className="flex items-center mt-2">
@@ -574,16 +575,16 @@ export default function VendorServicesPage() {
         </div>
 
         {/* Search and Filters */}
-        <Card className="border-0 shadow-sm mb-6">
+        <Card className="border-0 shadow-sm mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search services..."
-                  className="pl-10 border-gray-200 focus:border-blue-500"
+                  className="pl-10 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div className="flex gap-2">
@@ -650,14 +651,14 @@ export default function VendorServicesPage() {
         </Card>
 
         {/* Services Table/Grid */}
-        <Card className="border-0 shadow-sm overflow-hidden">
-          <CardHeader className="bg-gray-50 border-b border-gray-200">
+        <Card className="border-0 shadow-sm overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <CardHeader className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-gray-900">
+                <CardTitle className="text-gray-900 dark:text-white">
                   Service Directory
                 </CardTitle>
-                <CardDescription className="text-gray-600">
+                <CardDescription className="text-gray-600 dark:text-gray-300">
                   {sorted.length} service{sorted.length !== 1 ? "s" : ""}
                 </CardDescription>
               </div>
@@ -793,7 +794,9 @@ export default function VendorServicesPage() {
                                     )}
                                   </div>
                                   <div className="text-sm text-gray-500 line-clamp-1">
-                                    {service.description?.substring(0, 30).concat("...") || "No description"}
+                                    {service.description
+                                      ?.substring(0, 30)
+                                      .concat("...") || "No description"}
                                   </div>
                                 </div>
                               </div>
@@ -1153,7 +1156,7 @@ export default function VendorServicesPage() {
                     Category *
                   </label>
                   <select
-                  title="text"
+                    title="text"
                     value={formData.category}
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })

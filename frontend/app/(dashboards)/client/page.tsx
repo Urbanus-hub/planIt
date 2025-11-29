@@ -2,6 +2,7 @@
 
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import {
   Calendar,
   Heart,
@@ -13,7 +14,29 @@ import {
   TrendingUp,
   PartyPopper,
   Sparkles,
+  Camera,
+  Music,
+  Utensils,
+  Palette,
+  Eye,
+  Filter,
+  Play,
+  ChevronRight,
+  Grid3X3,
+  Film,
+  Image as ImageIcon,
+  Search,
+  X,
+  ArrowRight,
+  Users,
+  Award,
+  MoreHorizontal,
+  Info,
+  MessageCircle,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -22,9 +45,184 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { authAPI } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { getAuthCookie } from "@/lib/cookies";
+// Register GSAP plugins
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export default function ClientDashboard() {
+  const [authToken, setAuthToken] = useState<string | undefined>(undefined);
+  const router = useRouter();
+
+  useEffect(() => {
+    const init = async () => {
+      const auth = await getAuthCookie();
+      setAuthToken(auth);
+    };
+
+    init();
+  }, []);
+
+  console.log("Auth token", authToken);
   const { user } = useAuth();
+
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [vendorsLoading, setVendorsLoading] = useState(true);
+  const [vendorsError, setVendorsError] = useState<string | null>(null);
+  const [galleryFilter, setGalleryFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [vendorFilter, setVendorFilter] = useState("all");
+  const [showMoreVendors, setShowMoreVendors] = useState(false);
+  const [showMoreGallery, setShowMoreGallery] = useState(false);
+  const [featuredLimit, setFeaturedLimit] = useState(4);
+
+  // Refs for GSAP animations
+  const heroRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const vendorsRef = useRef<HTMLDivElement>(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const eventsRef = useRef<HTMLDivElement>(null);
+
+  // GSAP animations on mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Hero animation
+    gsap.fromTo(
+      heroRef.current,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
+    );
+
+    // Stats animation
+    if (statsRef.current?.children) {
+      gsap.fromTo(
+        statsRef.current.children,
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: statsRef.current,
+            start: "top 80%",
+          },
+        }
+      );
+    }
+
+    // Vendors animation
+    if (vendorsRef.current?.children) {
+      gsap.fromTo(
+        vendorsRef.current.children,
+        { opacity: 0, scale: 0.9 },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: vendorsRef.current,
+            start: "top 80%",
+          },
+        }
+      );
+    }
+
+    // Gallery animation
+    if (galleryRef.current?.children) {
+      gsap.fromTo(
+        galleryRef.current.children,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.05,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: galleryRef.current,
+            start: "top 80%",
+          },
+        }
+      );
+    }
+
+    // Events animation
+    if (eventsRef.current?.children) {
+      gsap.fromTo(
+        eventsRef.current.children,
+        { opacity: 0, x: -20 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.6,
+          stagger: 0.08,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: eventsRef.current,
+            start: "top 80%",
+          },
+        }
+      );
+    }
+
+    // Fetch vendors data
+    const fetchVendors = async () => {
+      try {
+        setVendorsLoading(true);
+        setVendorsError(null);
+
+        const response = await authAPI.getVendors();
+        console.log("Vendors response:", response);
+
+        if (response.data && response.data.success) {
+          setVendors(response.data.data);
+          console.log("Vendors loaded:", response.data.data);
+        } else {
+          console.error("Invalid vendors response:", response);
+          setVendorsError("Invalid response format");
+        }
+      } catch (error: any) {
+        console.error("Error fetching vendors:", error);
+
+        let errorMessage = "Failed to load vendors";
+        if (error.response) {
+          console.error(
+            "Server error:",
+            error.response.status,
+            error.response.data
+          );
+          errorMessage =
+            error.response.data?.message ||
+            `Server error: ${error.response.status}`;
+        } else if (error.request) {
+          console.error("Network error:", error.request);
+          errorMessage = "Network error - please check your connection";
+        } else {
+          console.error("Error:", error.message);
+          errorMessage = error.message;
+        }
+
+        setVendorsError(errorMessage);
+      } finally {
+        setVendorsLoading(false);
+      }
+    };
+
+    fetchVendors();
+  }, []);
 
   const stats = [
     {
@@ -32,7 +230,7 @@ export default function ClientDashboard() {
       value: "8",
       change: "+2 this month",
       icon: Calendar,
-      color: "green",
+      colorClass: "text-emerald-500",
       description: "Active bookings",
     },
     {
@@ -40,7 +238,7 @@ export default function ClientDashboard() {
       value: "3",
       change: "Next: Dec 15",
       icon: Clock,
-      color: "blue",
+      colorClass: "text-blue-500",
       description: "Scheduled events",
     },
     {
@@ -48,7 +246,7 @@ export default function ClientDashboard() {
       value: "24",
       change: "+5 recently",
       icon: Heart,
-      color: "red",
+      colorClass: "text-red-500",
       description: "Favorited",
     },
     {
@@ -56,7 +254,7 @@ export default function ClientDashboard() {
       value: "KSh 180K",
       change: "+15% this year",
       icon: TrendingUp,
-      color: "purple",
+      colorClass: "text-purple-500",
       description: "All time",
     },
   ];
@@ -88,241 +286,847 @@ export default function ClientDashboard() {
     },
   ];
 
-  const favoriteVendors = [
+  // Default fallback images for different categories
+  const getCategoryFallbackImage = (category: string) => {
+    const categoryImages: Record<string, string> = {
+      Catering:
+        "https://images.unsplash.com/photo-1466978913421-dc2cf60dab96?w=600&h=400&fit=crop",
+      Photography:
+        "https://images.unsplash.com/photo-1542038784886-63d5b10c2c6e?w=600&h=400&fit=crop",
+      "Sound & DJ":
+        "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&h=400&fit=crop",
+      Decoration:
+        "https://images.unsplash.com/photo-1566576912321-d58ddd7a4907?w=600&h=400&fit=crop",
+      Music:
+        "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600&h=400&fit=crop",
+      Video:
+        "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600&h=400&fit=crop",
+      Planning:
+        "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&h=400&fit=crop",
+      default:
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=400&fit=crop",
+    };
+    return categoryImages[category] || categoryImages.default;
+  };
+
+  // Generate realistic service titles based on vendor category and name
+  const generateServiceTitle = (vendorName: string, category: string) => {
+    const serviceTemplates: Record<string, string[]> = {
+      Catering: [
+        "Premium Event Catering",
+        "Gourmet Food Service",
+        "Wedding Reception Catering",
+      ],
+      Photography: [
+        "Professional Event Photography",
+        "Wedding Photography Service",
+        "Corporate Event Coverage",
+      ],
+      "Sound & DJ": [
+        "Professional DJ Services",
+        "Sound System Rental",
+        "Wedding Entertainment",
+      ],
+      Decoration: [
+        "Event Decoration & Styling",
+        "Wedding Decor Service",
+        "Theme Party Setup",
+      ],
+      Music: [
+        "Live Music Performance",
+        "Band for Events",
+        "Musical Entertainment",
+      ],
+      Video: [
+        "Event Videography",
+        "Wedding Video Production",
+        "Professional Video Services",
+      ],
+      Planning: [
+        "Full Event Planning",
+        "Wedding Coordination",
+        "Corporate Event Management",
+      ],
+      default: [
+        "Professional Event Service",
+        "Quality Service Provider",
+        "Event Support Service",
+      ],
+    };
+
+    const templates = serviceTemplates[category] || serviceTemplates.default;
+    const randomTemplate =
+      templates[Math.floor(Math.random() * templates.length)];
+    return `${randomTemplate} by ${vendorName}`;
+  };
+
+  // Gallery items for successful events
+  const galleryItems = [
     {
-      name: "Sarah's Catering",
-      category: "Catering",
-      rating: 4.9,
-      reviews: 234,
+      id: 1,
+      title: "Luxury Wedding at Serena Hotel",
+      category: "wedding",
+      type: "image",
+      thumbnail:
+        "https://images.unsplash.com/photo-1519220540063-56045a915d6b?w=600&h=400&fit=crop",
+      vendor: "Elite Photographers",
+      date: "Oct 15, 2025",
+      description:
+        "A breathtaking wedding ceremony with elegant decorations and gourmet catering.",
     },
     {
-      name: "Elite Photographers",
-      category: "Photography",
-      rating: 4.8,
-      reviews: 189,
+      id: 2,
+      title: "Corporate Product Launch",
+      category: "corporate",
+      type: "video",
+      thumbnail:
+        "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&h=400&fit=crop",
+      vendor: "Sound Masters Pro",
+      date: "Sep 28, 2025",
+      description:
+        "A high-energy product launch event with professional sound and lighting.",
+      videoUrl: "#",
     },
     {
-      name: "Sound Masters Pro",
-      category: "Sound & DJ",
-      rating: 4.7,
-      reviews: 156,
+      id: 3,
+      title: "Birthday Extravaganza",
+      category: "birthday",
+      type: "image",
+      thumbnail:
+        "https://images.unsplash.com/photo-1530103862676-de8c9c2b4d85?w=600&h=400&fit=crop",
+      vendor: "Floral Dreams",
+      date: "Sep 10, 2025",
+      description:
+        "A vibrant birthday celebration with stunning floral arrangements.",
     },
     {
-      name: "Floral Dreams",
-      category: "Decoration",
-      rating: 4.9,
-      reviews: 201,
+      id: 4,
+      title: "Beach Wedding Ceremony",
+      category: "wedding",
+      type: "video",
+      thumbnail:
+        "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop",
+      vendor: "Sarah's Catering",
+      date: "Aug 22, 2025",
+      description:
+        "A romantic beach wedding with exquisite catering and ocean views.",
+      videoUrl: "#",
+    },
+    {
+      id: 5,
+      title: "Annual Charity Gala",
+      category: "corporate",
+      type: "image",
+      thumbnail:
+        "https://images.unsplash.com/photo-1540575467063-178f50002c4b?w=600&h=400&fit=crop",
+      vendor: "Elite Photographers",
+      date: "Jul 30, 2025",
+      description:
+        "An elegant charity gala that raised funds for community development.",
+    },
+    {
+      id: 6,
+      title: "Sweet 16 Celebration",
+      category: "birthday",
+      type: "video",
+      thumbnail:
+        "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=600&h=400&fit=crop",
+      vendor: "Sound Masters Pro",
+      date: "Jul 15, 2025",
+      description:
+        "A memorable Sweet 16 party with DJ, dancing, and entertainment.",
+      videoUrl: "#",
     },
   ];
 
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case "Catering":
+        return <Utensils className="h-4 w-4" />;
+      case "Photography":
+        return <Camera className="h-4 w-4" />;
+      case "Sound & DJ":
+        return <Music className="h-4 w-4" />;
+      case "Decoration":
+        return <Palette className="h-4 w-4" />;
+      default:
+        return <Sparkles className="h-4 w-4" />;
+    }
+  };
+
+  // Fixed filter functions
+  const filteredGalleryItems = galleryItems.filter(
+    (item) => galleryFilter === "all" || item.category === galleryFilter
+  );
+
+  // Helper function to normalize vendor data
+  const normalizeVendorData = (vendor: any) => {
+    // If it's from the API, transform it to match the expected structure
+    if (vendor.email && !vendor.recentWork) {
+      return {
+        id: vendor._id || vendor.id,
+        name: vendor.businessName || vendor.name,
+        category: vendor.category || "Service Provider",
+        rating: vendor.rating || 4.5,
+        reviews: vendor.reviewsCount || 0,
+        image:
+          vendor.profileImage ||
+          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=400&fit=crop",
+        recentWork: {
+          title: `Professional ${vendor.businessName || vendor.name} Service`,
+          image:
+            vendor.profileBackground ||
+            vendor.profileImage ||
+            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=400&fit=crop",
+          date: new Date(vendor.createdAt || Date.now()).toLocaleDateString(),
+        },
+        icon: Utensils, // Default icon, could be made dynamic based on category
+        isVerified: vendor.isVerified || false,
+        email: vendor.email,
+        phone: vendor.phone,
+      };
+    }
+    // If it's already in the expected format, return as-is
+    return vendor;
+  };
+
+  // Process API vendors data
+  const processedVendors =
+    vendors.length > 0 ? vendors.map(normalizeVendorData) : [];
+
+  const filteredVendors = processedVendors.filter((vendor) => {
+    const matchesFilter =
+      vendorFilter === "all" ||
+      (vendor.category &&
+        vendor.category.toLowerCase().includes(vendorFilter.toLowerCase())) ||
+      (vendor.name &&
+        vendor.name.toLowerCase().includes(vendorFilter.toLowerCase()));
+
+    const matchesSearch =
+      !searchQuery ||
+      (vendor.name &&
+        vendor.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (vendor.category &&
+        vendor.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (vendor.email &&
+        vendor.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (vendor.recentWork?.title &&
+        vendor.recentWork.title
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()));
+
+    return matchesFilter && matchesSearch;
+  });
+
+  // Simple hover effect without movement
+  const handleCardHover = () => {
+    // Removed annoying movement animations
+  };
+
+  // Handle messaging with vendor
+  const handleMessage = async (vendor: any) => {
+    try {
+      // Check if user is authenticated
+      if (!user?._id) {
+        toast.error("Please log in to start a conversation");
+        return; // Important: Exit the function here
+      }
+
+      // Store vendor data in session storage for the messages page
+      const vendorData = {
+        id: vendor.id,
+        name: vendor.name,
+        email: vendor.email,
+        image: vendor.recentWork?.image || vendor.image,
+        category: vendor.category,
+      };
+
+      sessionStorage.setItem(
+        "newConversationVendor",
+        JSON.stringify({
+          ...vendorData,
+          checkExisting: true, // Flag to indicate we should check for existing conversations
+        })
+      );
+
+      toast.success(`Starting conversation with ${vendor.name}`);
+
+      // Navigate to messages page
+      router.push("/client/messages");
+    } catch (error) {
+      console.error("Error starting conversation:", error);
+      toast.error("Failed to start conversation");
+    }
+  };
+
   return (
     <ProtectedRoute allowedRoles={["client"]}>
-      <div className="flex-1 min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/20 dark:from-gray-900 dark:via-blue-900/10 dark:to-gray-800">
-        <div className="max-w-7xl mx-auto p-4 lg:p-8 space-y-8">
-          {/* Fun Welcome Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-8 shadow-xl">
-            <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px]" />
-            <div className="absolute top-0 right-0 -mt-4 -mr-4">
-              <PartyPopper className="w-24 h-24 text-white/20 animate-bounce" />
-            </div>
-            <div className="relative flex items-center gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                  <Sparkles className="w-8 h-8 text-white animate-spin-slow" />
-                </div>
-              </div>
-              <div className="flex-1">
-                <h2 className="text-3xl font-bold text-white mb-2">
-                  Let's Plan Something Amazing! 🎉
-                </h2>
-                <p className="text-blue-50 text-lg">
-                  Welcome back, {user?.name || "Guest"}! Your dream event is
-                  just a click away.
-                </p>
-              </div>
+      <div className="flex-1 min-h-screen w-full bg-linear-to-br from-slate-50 to-emerald-50 dark:from-gray-900 dark:to-emerald-950">
+        {/* Hero Section with Professional Emerald Overlay and Rounded Corners */}
+        <div ref={heroRef} className="relative h-[60vh] w-full overflow-hidden">
+          <div className="absolute inset-0 rounded-lg overflow-hidden">
+            <Image
+              src="/herobg.png"
+              alt="Hero Background"
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-linear-to-r from-emerald-900/90 via-emerald-800/80 to-teal-900/70" />
+
+            {/* Animated gradient overlay */}
+            <div className="absolute inset-0 opacity-30">
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent animate-pulse" />
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <Card
-                  key={index}
-                  className="border-2 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white dark:bg-gray-800"
-                >
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      {stat.title}
-                    </CardDescription>
-                    <div
-                      className={`p-2 rounded-full ${
-                        stat.color === "green"
-                          ? "bg-green-100 dark:bg-green-900/20"
-                          : stat.color === "blue"
-                          ? "bg-blue-100 dark:bg-blue-900/20"
-                          : stat.color === "red"
-                          ? "bg-red-100 dark:bg-red-900/20"
-                          : "bg-purple-100 dark:bg-purple-900/20"
-                      }`}
-                    >
-                      <Icon
-                        className={`w-5 h-5 ${
-                          stat.color === "green"
-                            ? "text-green-600 dark:text-green-400"
-                            : stat.color === "blue"
-                            ? "text-blue-600 dark:text-blue-400"
-                            : stat.color === "red"
-                            ? "text-red-600 dark:text-red-400"
-                            : "text-purple-600 dark:text-purple-400"
-                        }`}
-                      />
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                        {stat.value}
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {stat.change}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-500">
-                        {stat.description}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+          <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
+              Welcome back, {user?.name || "Guest"}!
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mb-10">
+              Your dream event is just a click away. Let's create something
+              memorable together.
+            </p>
 
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Upcoming Events */}
-            <Card className="xl:col-span-2 border-2 bg-white dark:bg-gray-800">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
-                      Upcoming Events
-                    </CardTitle>
-                    <CardDescription className="text-gray-600 dark:text-gray-400">
-                      Your scheduled bookings
-                    </CardDescription>
+            <div className="flex flex-col sm:flex-row gap-6">
+              <Button
+                size="lg"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-12 py-4 shadow-xl font-semibold transition-all hover:shadow-2xl transform hover:-translate-y-1"
+              >
+                Explore Vendors
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white text-white bg-transparent hover:bg-white hover:text-emerald-900 rounded-full px-12 py-4 font-semibold transition-all hover:shadow-xl transform hover:-translate-y-1"
+              >
+                Plan My Event
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto p-6 md:p-10 space-y-12">
+          {/* Stats Section */}
+          <div
+            ref={statsRef}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            {stats.map((stat, index) => (
+              <Card
+                key={index}
+                className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`p-2 rounded-lg bg-gray-50 dark:bg-gray-700`}>
+                    <stat.icon className={`h-4 w-4 ${stat.colorClass}`} />
                   </div>
-                  <Calendar className="w-5 h-5 text-green-600" />
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {stat.value}
+                    </div>
+                    <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                      {stat.change}
+                    </div>
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {upcomingEvents.map((event, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-4 p-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500 transition-all bg-white dark:bg-gray-800"
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                    {stat.title}
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {stat.description}
+                  </p>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Featured Vendors Section */}
+          <div className="space-y-8">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/20 px-6 py-3 rounded-full mb-6">
+                <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-emerald-700 dark:text-emerald-300 font-semibold text-sm uppercase tracking-wider">
+                  Premium Vendors
+                </span>
+              </div>
+              <h2 className="text-5xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
+                Featured{" "}
+                <span className="text-emerald-600 dark:text-emerald-400">
+                  Event Partners
+                </span>
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-xl max-w-2xl mx-auto leading-relaxed">
+                Connect with top-rated professionals who bring your vision to
+                life.
+                <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                  {" "}
+                  Message them instantly
+                </span>{" "}
+                to start planning your perfect event.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-emerald-100 dark:border-emerald-900/30">
+              {/* Vendor Filter and Search */}
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center">
+                <div className="relative flex-1 sm:flex-none">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-400 w-5 h-5" />
+                  <Input
+                    placeholder="Search by vendor name..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setFeaturedLimit(4); // Reset to show fewer items when search changes
+                    }}
+                    className="pl-10 pr-10 py-3 w-full sm:w-72 border-2 border-emerald-200/50 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm transition-all"
+                  />
+                  {searchQuery && (
+                    <button
+                      title="Clear search"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors p-1 hover:bg-emerald-50 rounded-full"
                     >
-                      <div className="flex-shrink-0">
-                        <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex flex-col items-center justify-center text-white">
-                          <span className="text-xs font-medium">
-                            {event.date.split(" ")[0]}
-                          </span>
-                          <span className="text-2xl font-bold">
-                            {event.date.split(" ")[1].replace(",", "")}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                              {event.name}
-                            </h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                              {event.vendor}
-                            </p>
-                          </div>
-                          <Badge
-                            variant="outline"
-                            className={`${
-                              event.status === "confirmed"
-                                ? "border-green-500 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20"
-                                : "border-yellow-500 text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20"
-                            }`}
-                          >
-                            {event.status === "confirmed" ? (
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                            ) : (
-                              <Clock className="w-3 h-3 mr-1" />
-                            )}
-                            {event.status}
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                <select
+                  title="Select category filter"
+                  value={vendorFilter}
+                  onChange={(e) => {
+                    setVendorFilter(e.target.value);
+                    setFeaturedLimit(4); // Reset to show fewer items when filter changes
+                  }}
+                  className="px-5 py-3 border-2 border-emerald-200/50 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 font-medium text-sm transition-all cursor-pointer"
+                >
+                  <option value="all">🎯 All Categories</option>
+                  <option value="Catering">🍽️ Catering</option>
+                  <option value="Photography">📸 Photography</option>
+                  <option value="Sound & DJ">🎵 Sound & DJ</option>
+                  <option value="Decoration">🎨 Decoration</option>
+                </select>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 whitespace-nowrap px-6 py-3 rounded-xl font-semibold backdrop-blur-sm"
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Advanced
+                </Button>
+              </div>
+            </div>
+
+            {/* Loading State */}
+            {vendorsLoading && (
+              <div className="flex justify-center items-center py-20">
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Loading vendors...
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {vendorsError && !vendorsLoading && (
+              <div className="text-center py-20">
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 max-w-md mx-auto">
+                  <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
+                    Failed to Load Vendors
+                  </h3>
+                  <p className="text-red-600 dark:text-red-300 text-sm mb-4">
+                    {vendorsError}
+                  </p>
+                  <Button
+                    onClick={() => window.location.reload()}
+                    variant="outline"
+                    className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-300"
+                  >
+                    Retry
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* No Results State */}
+            {!vendorsLoading &&
+              !vendorsError &&
+              filteredVendors.length === 0 && (
+                <div className="text-center py-20">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 max-w-md mx-auto">
+                    <Search className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      No vendors found
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      {searchQuery
+                        ? `No vendors match "${searchQuery}"`
+                        : `No vendors found in "${vendorFilter}" category`}
+                    </p>
+                    <div className="flex gap-2 justify-center">
+                      {searchQuery && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSearchQuery("")}
+                        >
+                          Clear search
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setVendorFilter("all");
+                          setSearchQuery("");
+                        }}
+                      >
+                        View all vendors
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            {/* Vendors Grid */}
+            {!vendorsLoading && !vendorsError && filteredVendors.length > 0 && (
+              <>
+                <div
+                  ref={vendorsRef}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                >
+                  {filteredVendors.slice(0, featuredLimit).map((vendor) => (
+                    <Card
+                      key={vendor.id}
+                      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200 overflow-hidden"
+                    >
+                      {/* Compact Image Section */}
+                      <div className="relative h-32 overflow-hidden">
+                        <Image
+                          src={vendor.recentWork.image}
+                          alt={vendor.recentWork.title}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
+
+                        {/* Fixed Position Badges - No Movement */}
+                        <div className="absolute top-2 left-2">
+                          <Badge className="bg-emerald-600 text-white text-xs px-2 py-1">
+                            {vendor.category}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-4 mt-3 text-sm text-gray-600 dark:text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {event.time}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            {event.location}
-                          </span>
+
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          {vendor.isVerified && (
+                            <div className="bg-blue-600 rounded-full p-1">
+                              <Award className="h-3 w-3 text-white" />
+                            </div>
+                          )}
+                          <div className="bg-yellow-500 rounded px-2 py-1 flex items-center gap-1">
+                            <Star className="h-3 w-3 fill-white text-white" />
+                            <span className="text-xs font-bold text-white">
+                              {vendor.rating}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
+
+                      {/* Compact Content Section */}
+                      <div className="p-3">
+                        <div className="mb-2">
+                          <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1 truncate">
+                            {vendor.name}
+                          </h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                            {vendor.recentWork.title}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                            <Users className="h-3 w-3" />
+                            <span>{vendor.reviews} reviews</span>
+                          </div>
+                          {vendor.email && (
+                            <div className="flex items-center gap-1">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <span className="text-xs text-green-600 dark:text-green-400">
+                                Available
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Fixed Action Buttons - Always Visible */}
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/vendors/${vendor.id}`}
+                            className="flex-1"
+                          >
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full text-xs h-8 border-gray-200 dark:border-gray-600"
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              View
+                            </Button>
+                          </Link>
+                          <Button
+                            size="sm"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 px-3"
+                            onClick={() => handleMessage(vendor)}
+                          >
+                            <MessageCircle className="h-3 w-3 mr-1" />
+                            Chat
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
                   ))}
                 </div>
-                <button className="w-full mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors">
-                  View All Bookings
-                </button>
-              </CardContent>
-            </Card>
 
-            {/* Favorite Vendors */}
-            <Card className="border-2 bg-white dark:bg-gray-800">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
-                      Favorite Vendors
-                    </CardTitle>
-                    <CardDescription className="text-gray-600 dark:text-gray-400">
-                      Your saved vendors
-                    </CardDescription>
+                {/* Explore More Vendors Button */}
+                {filteredVendors.length > featuredLimit && (
+                  <div className="flex justify-center mt-6">
+                    <Button
+                      variant="outline"
+                      className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-full"
+                      onClick={() => {
+                        if (featuredLimit >= filteredVendors.length) {
+                          setFeaturedLimit(4);
+                        } else {
+                          setFeaturedLimit(featuredLimit + 4);
+                        }
+                      }}
+                    >
+                      {featuredLimit >= filteredVendors.length ? (
+                        <>
+                          Show Less
+                          <X className="h-4 w-4 ml-2" />
+                        </>
+                      ) : (
+                        <>
+                          Show More Vendors (
+                          {filteredVendors.length - featuredLimit} more)
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
                   </div>
-                  <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Gallery Section */}
+          <div className="space-y-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div>
+                <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
+                  Event Gallery
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 text-lg">
+                  Get inspired by our successful events
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="default"
+                className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-6"
+              >
+                <Grid3X3 className="h-5 w-5 mr-2" />
+                View All
+              </Button>
+            </div>
+
+            {/* Gallery Filter Tabs */}
+            <Tabs
+              value={galleryFilter}
+              onValueChange={setGalleryFilter}
+              className="w-full bg-transparent "
+            >
+              <TabsList className="grid w-full grid-cols-4 mb-8 bg-transparent   dark:bg-gray-800 p-1 rounded-xl ">
+                <TabsTrigger
+                  value="all"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg text-base py-3"
+                >
+                  All Events
+                </TabsTrigger>
+                <TabsTrigger
+                  value="wedding"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg text-base py-3"
+                >
+                  Weddings
+                </TabsTrigger>
+                <TabsTrigger
+                  value="corporate"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg text-base py-3"
+                >
+                  Corporate
+                </TabsTrigger>
+                <TabsTrigger
+                  value="birthday"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg text-base py-3"
+                >
+                  Birthdays
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value={galleryFilter} className="mt-0">
+                <div
+                  ref={galleryRef}
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                >
+                  {filteredGalleryItems
+                    .slice(0, showMoreGallery ? filteredGalleryItems.length : 6)
+                    .map((item) => (
+                      <div
+                        key={item.id}
+                        className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                      >
+                        <div className="relative h-64 overflow-hidden">
+                          <Image
+                            src={item.thumbnail}
+                            alt={item.title}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                          {/* Play button for videos */}
+                          {item.type === "video" && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="bg-emerald-500 rounded-full p-3 opacity-0 group-hover:opacity-100 transform group-hover:scale-110 transition-all duration-300">
+                                <Play className="h-6 w-6 text-white fill-white" />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Image icon */}
+                          {item.type === "image" && (
+                            <div className="absolute top-3 right-3 bg-white/90 rounded-full p-2">
+                              <ImageIcon className="h-4 w-4 text-gray-700" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Card content on hover */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <h3 className="text-lg font-bold mb-1">
+                            {item.title}
+                          </h3>
+                          <p className="text-sm text-white/80 mb-2">
+                            {item.vendor}
+                          </p>
+                          <p className="text-xs text-white/70">{item.date}</p>
+                        </div>
+                      </div>
+                    ))}
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {favoriteVendors.map((vendor, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-                  >
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold">
-                      {vendor.name.charAt(0)}
+
+                {/* Gallery See More Button */}
+                {filteredGalleryItems.length > 6 && (
+                  <div className="flex justify-center mt-6">
+                    <Button
+                      variant="outline"
+                      className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-full"
+                      onClick={() => setShowMoreGallery(!showMoreGallery)}
+                    >
+                      {showMoreGallery ? (
+                        <>
+                          Show Less
+                          <X className="h-4 w-4 ml-2" />
+                        </>
+                      ) : (
+                        <>
+                          See More Gallery ({filteredGalleryItems.length - 6}{" "}
+                          more)
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Upcoming Events Section */}
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
+                Your Upcoming Events
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
+                Stay on top of your upcoming bookings
+              </p>
+            </div>
+            <div
+              ref={eventsRef}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {upcomingEvents.map((event, index) => (
+                <Card
+                  key={index}
+                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200 p-4"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <Badge
+                      variant={
+                        event.status === "confirmed" ? "default" : "outline"
+                      }
+                      className={`text-xs ${
+                        event.status === "confirmed"
+                          ? "bg-emerald-600 text-white"
+                          : "border-amber-500 text-amber-700 dark:text-amber-400"
+                      }`}
+                    >
+                      {event.status === "confirmed" ? (
+                        <>
+                          <CheckCircle className="h-3 w-3 mr-1" /> Confirmed
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="h-3 w-3 mr-1" /> Pending
+                        </>
+                      )}
+                    </Badge>
+                    <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                      {event.time}
+                    </span>
+                  </div>
+
+                  <div className="mb-3">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
+                      {event.name}
+                    </h3>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                      {event.vendor}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-3 w-3 text-emerald-600" />
+                      <span>{event.date}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                        {vendor.name}
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        {vendor.category}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs">
-                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        {vendor.rating}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-3 w-3 text-emerald-600" />
+                      <span>{event.location}</span>
                     </div>
                   </div>
-                ))}
-                <button className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors">
-                  Browse Vendors
-                </button>
-              </CardContent>
-            </Card>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </div>

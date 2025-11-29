@@ -15,6 +15,7 @@ import {
   BarChart3,
   Bell,
   LogOut,
+  MessageCircle,
   User,
 } from "lucide-react";
 
@@ -50,7 +51,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: "Users", url: "/admin/users", icon: Users },
           { title: "Vendors", url: "/admin/vendors", icon: Briefcase },
           { title: "Bookings", url: "/admin/bookings", icon: Calendar },
-          { title: "Booking", url: "/admin/bookings", icon: Calendar },
+
           { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
         ],
       };
@@ -62,8 +63,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: "Dashboard", url: "/client", icon: LayoutDashboard },
           { title: "Browse Vendors", url: "/client/vendors", icon: Briefcase },
           { title: "My Bookings", url: "/client/bookings", icon: Calendar },
+          { title: "Messages", url: "/client/messages", icon: MessageCircle },
           { title: "Favorites", url: "/client/favorites", icon: Heart },
           { title: "Payments", url: "/client/payments", icon: DollarSign },
+          { title: "Profile", url: "/client/profile", icon: User },
         ],
       };
     }
@@ -74,7 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: "Dashboard", url: "/vendor", icon: LayoutDashboard },
           { title: "Services", url: "/vendor/services", icon: Package },
           { title: "Bookings", url: "/vendor/bookings", icon: Calendar },
-          { title: "Messages", url: "/vendor/messages", icon: Users },
+          { title: "Messages", url: "/vendor/messages", icon: MessageCircle },
           { title: "Reviews", url: "/vendor/reviews", icon: Star },
           { title: "Profile", url: "/vendor/profile", icon: User },
           { title: "Analytics", url: "/vendor/analytics", icon: BarChart3 },
@@ -94,7 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       collapsible="icon"
       variant="sidebar"
       {...props}
-      className="relative bg-slate-950 overflow-hidden !fixed !left-0 !top-0 !h-screen !border-r border-green-500/30 shadow-2xl shadow-black/50"
+      className="bg-slate-950 overflow-hidden fixed left-0 top-0 h-screen border-r border-green-500/30 shadow-2xl shadow-black/50"
     >
       {/* Background Image */}
       <div className={styles.sidebarBackground} />

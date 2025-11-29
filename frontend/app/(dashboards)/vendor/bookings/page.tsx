@@ -161,7 +161,7 @@ export default function VendorBookingsPage() {
 
   const handleStatusChange = async (bookingId: string, newStatus: string) => {
     try {
-      await bookingsAPI.update(bookingId, { status: newStatus });
+      await bookingsAPI.updateStatus(bookingId, newStatus);
       setBookings((prev) =>
         prev.map((b) =>
           b._id === bookingId ? { ...b, status: newStatus as any } : b
@@ -201,7 +201,7 @@ export default function VendorBookingsPage() {
   const animatedListItems = filtered.map((booking) => (
     <div key={booking._id} className="w-full">
       <div
-        className="p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-500 transition-all cursor-pointer shadow-sm hover:shadow-md"
+        className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-400 transition-all cursor-pointer shadow-sm hover:shadow-md"
         onClick={() => setSelectedBooking(booking)}
       >
         <div className="flex items-start justify-between gap-3">
@@ -349,7 +349,7 @@ export default function VendorBookingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-emerald-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Hero Section */}
         <motion.div
@@ -360,10 +360,10 @@ export default function VendorBookingsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent mb-2">
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 dark:from-emerald-400 dark:via-teal-400 dark:to-emerald-500 bg-clip-text text-transparent mb-2">
                 Bookings Hub
               </h1>
-              <p className="text-gray-600 text-lg">
+              <p className="text-gray-600 dark:text-gray-300 text-lg">
                 Manage bookings, track revenue, and grow your business
               </p>
             </div>
@@ -502,8 +502,8 @@ export default function VendorBookingsPage() {
                     Your Bookings
                   </CardTitle>
                   <CardDescription className="text-gray-500 mt-1">
-                    {filtered.length} booking{filtered.length !== 1 ? "s" : ""} •
-                    Click to view details
+                    {filtered.length} booking{filtered.length !== 1 ? "s" : ""}{" "}
+                    • Click to view details
                   </CardDescription>
                 </div>
               </div>
@@ -617,9 +617,7 @@ export default function VendorBookingsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card
-                  className="bg-white border-0 shadow-sm hover:shadow-lg transition-all relative overflow-hidden group"
-                >
+                <Card className="bg-white border-0 shadow-sm hover:shadow-lg transition-all relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                   <CardHeader className="relative z-10">

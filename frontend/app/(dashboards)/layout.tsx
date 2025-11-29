@@ -9,9 +9,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Bell, Settings, HelpCircle } from "lucide-react";
+import { Bell, Settings, HelpCircle, Sun, Moon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function DashboardLayout({
   children,
@@ -19,6 +20,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   // Get page title based on route
@@ -31,7 +33,8 @@ export default function DashboardLayout({
     if (pathname.includes("/client/"))
       return pathname.split("/").pop()?.replaceAll("-", " ") || "Client";
     if (pathname.includes("/vendor/"))
-      return pathname.split("/").pop()?.replaceAll("-", " ") || "Vendor";    return "Dashboard";
+      return pathname.split("/").pop()?.replaceAll("-", " ") || "Vendor";
+    return "Dashboard";
   };
 
   const handleNotifications = () => {
@@ -60,14 +63,35 @@ export default function DashboardLayout({
 
           {/* Top Right Actions */}
           <div className="flex items-center gap-2">
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="h-9 w-9 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title={
+                theme === "light"
+                  ? "Switch to dark mode"
+                  : "Switch to light mode"
+              }
+            >
+              {theme === "light" ? (
+                <Moon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+              ) : (
+                <Sun className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+              )}
+            </Button>
+
+            <Separator orientation="vertical" className="h-6" />
+
             {/* Notifications */}
             <Button
               variant="ghost"
               size="icon"
               onClick={handleNotifications}
-              className="relative h-9 w-9 rounded-lg hover:bg-gray-100"
+              className="relative h-9 w-9 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <Bell className="h-5 w-5 text-gray-600" />
+              <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full" />
             </Button>
 
@@ -76,9 +100,9 @@ export default function DashboardLayout({
               variant="ghost"
               size="icon"
               onClick={handleSettings}
-              className="h-9 w-9 rounded-lg hover:bg-gray-100"
+              className="h-9 w-9 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <Settings className="h-5 w-5 text-gray-600" />
+              <Settings className="h-5 w-5 text-gray-600 dark:text-gray-300" />
             </Button>
 
             {/* Help & Support */}
@@ -86,9 +110,9 @@ export default function DashboardLayout({
               variant="ghost"
               size="icon"
               onClick={handleSupport}
-              className="h-9 w-9 rounded-lg hover:bg-gray-100"
+              className="h-9 w-9 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <HelpCircle className="h-5 w-5 text-gray-600" />
+              <HelpCircle className="h-5 w-5 text-gray-600 dark:text-gray-300" />
             </Button>
           </div>
         </header>
