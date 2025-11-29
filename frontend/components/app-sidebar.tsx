@@ -77,7 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: "Dashboard", url: "/vendor", icon: LayoutDashboard },
           { title: "Services", url: "/vendor/services", icon: Package },
           { title: "Bookings", url: "/vendor/bookings", icon: Calendar },
-          { title: "Messages", url: "/vendor/messages", icon: MessageCircle},
+          { title: "Messages", url: "/vendor/messages", icon: MessageCircle },
           { title: "Reviews", url: "/vendor/reviews", icon: Star },
           { title: "Profile", url: "/vendor/profile", icon: User },
           { title: "Analytics", url: "/vendor/analytics", icon: BarChart3 },
@@ -97,7 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       collapsible="icon"
       variant="sidebar"
       {...props}
-      className="relative bg-slate-950 overflow-hidden !fixed !left-0 !top-0 !h-screen !border-r border-green-500/30 shadow-2xl shadow-black/50"
+      className="bg-slate-950 overflow-hidden fixed left-0 top-0 h-screen border-r border-green-500/30 shadow-2xl shadow-black/50"
     >
       {/* Background Image */}
       <div className={styles.sidebarBackground} />

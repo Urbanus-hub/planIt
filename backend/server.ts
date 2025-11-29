@@ -8,8 +8,12 @@ import handleGlobalError from "./middlewares/globalErrorsHandler.middleware";
 import servicesRouter from "./routes/service.route";
 import BookingRouter from "./routes/bookings.route";
 import galleryRouter from "./routes/gallery.route";
+import conversationsRouter from "./routes/conversations.route";
 import http from "http";
 import { Server } from "socket.io";
+import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "./configs/env";
 import { Message, Conversation } from "./models/messages.model";
 
 const app = express(); // express app instance
@@ -37,6 +41,13 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
     credentials: true,
   },
+  // Additional Socket.IO configuration for better stability
+  transports: ["polling", "websocket"],
+  allowEIO3: true,
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  upgradeTimeout: 30000,
+  maxHttpBufferSize: 1e6, // 1MB
 });
 
 // Store active user connections and typing indicators
@@ -52,18 +63,174 @@ app.use("/api/users", userRoutes); // user routes
 app.use("/api/services", servicesRouter);
 app.use("/api/bookings", BookingRouter);
 app.use("/api/gallery", galleryRouter);
+app.use("/api/conversations", conversationsRouter);
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (_req: Request, res: Response) => {
   res.json({ message: "API is running..." });
 });
+
+// Add global error handling for Socket.IO
+io.engine.on("connection_error", (err) => {
+  console.log("Socket.IO connection error:", err.req);
+  console.log("Error code:", err.code);
+  console.log("Error message:", err.message);
+  console.log("Error context:", err.context);
+});
+
 io.on("connection", (socket) => {
   console.log(`✓ User connected: ${socket.id}`);
 
-  socket.on("user:join", async ({ userId, conversationId }) => {
+  // Try to read auth token from the socket handshake cookies (httpOnly cookies)
+  const cookieHeader = socket.handshake.headers?.cookie || "";
+  const parseCookies = (cookieString: string) =>
+    cookieString.split("; ").reduce((acc: Record<string, string>, cur) => {
+      const [k, ...v] = cur.split("=");
+      if (!k) return acc;
+      acc[k] = decodeURIComponent(v.join("="));
+      return acc;
+    }, {});
+
+  const cookies = parseCookies(cookieHeader || "");
+  const token =
+    socket.handshake.auth?.token || cookies.authToken || cookies.token;
+
+  if (token) {
     try {
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      // Attach minimal user info to socket
+      socket.data.user = {
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role,
+      };
+      console.log(
+        `🔐 User connected with token (userId=${decoded.id}): ${socket.id}`
+      );
+    } catch (err) {
+      console.log(`⚠️ Invalid token on socket connection: ${socket.id}`);
+    }
+  } else {
+    console.log(`⚠️ User connected without auth token: ${socket.id}`);
+  }
+
+  // Handle disconnection with better logging
+  socket.on("disconnect", (reason) => {
+    console.log(`✗ User disconnected: ${socket.id} (${reason})`);
+
+    // Clean up user from maps
+    for (const [userId, socketId] of userSockets.entries()) {
+      if (socketId === socket.id) {
+        userSockets.delete(userId);
+
+        // Clean up from active conversations
+        if (socket.data.currentConversation) {
+          activeConversations
+            .get(socket.data.currentConversation)
+            ?.delete(userId);
+
+          // Notify others in the conversation that user went offline
+          socket.to(socket.data.currentConversation).emit("user:offline", {
+            userId,
+            timestamp: new Date(),
+          });
+        }
+
+        // Broadcast offline status to ALL conversations this user is part of
+        Conversation.find({ participants: userId, isActive: true })
+          .then((conversations) => {
+            conversations.forEach((conv: any) => {
+              socket.to(conv._id.toString()).emit("user:offline", {
+                userId,
+                timestamp: new Date(),
+              });
+              // Clean up from active conversations tracking
+              activeConversations.get(conv._id.toString())?.delete(userId);
+            });
+          })
+          .catch((err) =>
+            console.error("Error broadcasting offline status:", err)
+          );
+
+        console.log(`🧹 Cleaned up user mapping: ${userId}`);
+        break;
+      }
+    }
+  });
+
+  socket.on("connect_error", (error) => {
+    console.error(`❌ Connection error for ${socket.id}:`, error);
+  });
+
+  socket.on("error", (error) => {
+    console.error(`❌ Socket error for ${socket.id}:`, error);
+  });
+
+  // Handle transport errors
+  socket.conn.on("error", (error) => {
+    console.log(`⚠️ Transport error for ${socket.id}:`, error.message);
+  });
+
+  // Track user's current conversation to prevent duplicate joins
+  socket.data.currentConversation = null;
+
+  socket.on("user:join", async ({ userId, conversationId }) => {
+    console.log(
+      `🏠 User ${userId} attempting to join conversation: ${conversationId}`
+    );
+
+    try {
+      // Validate required parameters
+      if (!userId) {
+        socket.emit("conversation:error", {
+          error: "User ID is required to join conversation",
+        });
+        return;
+      }
+
+      if (!conversationId) {
+        socket.emit("conversation:error", {
+          error: "Conversation ID is required",
+        });
+        return;
+      }
+
+      // Prevent duplicate joins to the same conversation
+      if (socket.data.currentConversation === conversationId) {
+        console.log(
+          `⏭️ User ${userId} already in conversation ${conversationId}, skipping`
+        );
+        socket.emit("conversation:joined", {
+          conversationId,
+          userId,
+          message: "Already in conversation",
+        });
+        return;
+      }
+
+      // Check if conversationId is a valid ObjectId format
+      if (!mongoose.Types.ObjectId.isValid(conversationId)) {
+        console.log(`❌ Invalid conversation ID format: ${conversationId}`);
+        socket.emit("conversation:error", {
+          error:
+            "Invalid conversation ID format. Please create a conversation first.",
+        });
+        return;
+      }
+
       // Verify this is a TWO-PARTY conversation
       const conversation = await Conversation.findById(conversationId);
-      if (!conversation || conversation.participants.length !== 2) {
+      if (!conversation) {
+        console.log(`❌ Conversation not found: ${conversationId}`);
+        socket.emit("conversation:error", {
+          error: "Conversation not found",
+        });
+        return;
+      }
+
+      if (conversation.participants.length !== 2) {
+        console.log(
+          `❌ Invalid conversation participants: ${conversation.participants.length}`
+        );
         socket.emit("conversation:error", {
           error: "Invalid conversation: must be between exactly 2 participants",
         });
@@ -75,16 +242,42 @@ io.on("connection", (socket) => {
         (p) => p.toString() === userId
       );
       if (!isParticipant) {
+        console.log(
+          `❌ User ${userId} is not a participant in conversation ${conversationId}`
+        );
         socket.emit("conversation:error", {
           error: "Unauthorized: you are not part of this conversation",
         });
         return;
       }
 
+      // Leave previous conversation if any
+      if (socket.data.currentConversation) {
+        const prevConversation = socket.data.currentConversation;
+        socket.leave(prevConversation);
+        activeConversations.get(prevConversation)?.delete(userId);
+        console.log(
+          `👋 User ${userId} left previous conversation: ${prevConversation}`
+        );
+      }
+
       // Store the socket ID for this user for direct messaging
       userSockets.set(userId, socket.id);
-      // Join user to the conversation room
+
+      // Join user to the new conversation room
       socket.join(conversationId);
+      socket.data.currentConversation = conversationId;
+
+      console.log(
+        `✅ User ${userId} successfully joined conversation: ${conversationId}`
+      );
+
+      // Send confirmation back to client
+      socket.emit("conversation:joined", {
+        conversationId,
+        userId,
+        message: "Successfully joined conversation",
+      });
 
       // Track active participants in this conversation
       if (!activeConversations.has(conversationId)) {
@@ -103,6 +296,22 @@ io.on("connection", (socket) => {
         userId,
         otherParticipant: otherParticipant?.toString(),
         timestamp: new Date(),
+      });
+
+      // Also broadcast to ALL conversations this user is part of
+      // This ensures online status is visible across all conversations
+      const userConversations = await Conversation.find({
+        participants: userId,
+        isActive: true,
+      });
+
+      userConversations.forEach((conv: any) => {
+        if (conv._id.toString() !== conversationId) {
+          socket.to(conv._id.toString()).emit("user:online", {
+            userId,
+            timestamp: new Date(),
+          });
+        }
       });
 
       console.log(
@@ -126,6 +335,13 @@ io.on("connection", (socket) => {
       attachments,
       relatedBooking,
     }) => {
+      console.log(`🎯 RECEIVED MESSAGE:SEND EVENT:`);
+      console.log(`   - Conversation: ${conversationId}`);
+      console.log(`   - Sender: ${sender}`);
+      console.log(`   - Receiver: ${receiver}`);
+      console.log(`   - Content: "${content}"`);
+      console.log(`   - Socket ID: ${socket.id}`);
+
       try {
         // Verify this is a TWO-PARTY conversation with exact participants
         const conversation = await Conversation.findById(conversationId);

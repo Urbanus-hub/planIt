@@ -131,7 +131,9 @@ export default function VendorGalleryPage() {
       const mappedUploadedUrls = urls.map((url, index) => ({
         url,
         file: files[index],
-        mediaType: files[index].type.startsWith("video/") ? ("video" as const) : ("image" as const),
+        mediaType: files[index].type.startsWith("video/")
+          ? ("video" as const)
+          : ("image" as const),
       }));
 
       // Set state for adding metadata
@@ -261,10 +263,10 @@ export default function VendorGalleryPage() {
                 </Button>
               </Link>
               <div>
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                <h1 className="text-3xl sm:text-4xl font-bold bg-linear-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
                   Portfolio Gallery
                 </h1>
-                <p className="text-gray-600 mt-1">
+                <p className="text-gray-600 dark:text-gray-300 mt-1">
                   Showcase your best work and projects
                 </p>
               </div>

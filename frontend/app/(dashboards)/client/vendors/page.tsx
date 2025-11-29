@@ -31,6 +31,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { authAPI } from "@/lib/api";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,6 +58,7 @@ interface VendorType {
 
 export default function BrowseVendors() {
   const { user } = useAuth();
+  const router = useRouter();
   const [favorites, setFavorites] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -172,8 +174,33 @@ export default function BrowseVendors() {
     toast.info(`Starting booking process for ${vendor}`);
   };
 
-  const handleMessage = (vendor: string) => {
-    toast.info(`Opening conversation with ${vendor}`);
+  const handleMessage = (vendorName: string) => {
+    // Find the vendor object to get more details
+    const vendor = vendors.find((v) => v.name === vendorName);
+
+    if (!vendor) {
+      toast.error("Vendor not found");
+      return;
+    }
+
+    // Store vendor info in sessionStorage for the messages page to use
+    // The messages page will check for existing conversations first
+    sessionStorage.setItem(
+      "newConversationVendor",
+      JSON.stringify({
+        id: vendor.id,
+        name: vendor.name,
+        image: vendor.image,
+        category: vendor.category,
+        email: vendor.email,
+        checkExisting: true, // Flag to indicate we should check for existing conversations
+      })
+    );
+
+    // Navigate to messages page
+    router.push("/client/messages");
+
+    toast.success(`Opening conversation with ${vendorName}`);
   };
 
   // Filter vendors based on search term and selected category

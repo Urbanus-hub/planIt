@@ -2,6 +2,7 @@
 
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import {
   Calendar,
   Heart,
@@ -50,13 +51,29 @@ import { Input } from "@/components/ui/input";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { authAPI } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { getAuthCookie } from "@/lib/cookies";
 // Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
 export default function ClientDashboard() {
+  const [authToken, setAuthToken] = useState<string | undefined>(undefined);
+  const router = useRouter();
+
+  useEffect(() => {
+    const init = async () => {
+      const auth = await getAuthCookie();
+      setAuthToken(auth);
+    };
+
+    init();
+  }, []);
+
+  console.log("Auth token", authToken);
   const { user } = useAuth();
+
   const [vendors, setVendors] = useState<any[]>([]);
   const [vendorsLoading, setVendorsLoading] = useState(true);
   const [vendorsError, setVendorsError] = useState<string | null>(null);
@@ -64,6 +81,8 @@ export default function ClientDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [vendorFilter, setVendorFilter] = useState("all");
   const [showMoreVendors, setShowMoreVendors] = useState(false);
+  const [showMoreGallery, setShowMoreGallery] = useState(false);
+  const [featuredLimit, setFeaturedLimit] = useState(4);
 
   // Refs for GSAP animations
   const heroRef = useRef<HTMLDivElement>(null);
@@ -499,46 +518,64 @@ export default function ClientDashboard() {
     return matchesFilter && matchesSearch;
   });
 
-  // Card hover animation
-  const handleCardHover = (
-    e: React.MouseEvent<HTMLDivElement>,
-    isEntering: boolean
-  ) => {
-    const card = e.currentTarget;
-    if (isEntering) {
-      gsap.to(card, {
-        y: -5,
-        scale: 1.02,
-        duration: 0.3,
-        ease: "power2.out",
-      });
-    } else {
-      gsap.to(card, {
-        y: 0,
-        scale: 1,
-        duration: 0.3,
-        ease: "power2.out",
-      });
+  // Simple hover effect without movement
+  const handleCardHover = () => {
+    // Removed annoying movement animations
+  };
+
+  // Handle messaging with vendor
+  const handleMessage = async (vendor: any) => {
+    try {
+      // Check if user is authenticated
+      if (!user?._id) {
+        toast.error("Please log in to start a conversation");
+        return; // Important: Exit the function here
+      }
+
+      // Store vendor data in session storage for the messages page
+      const vendorData = {
+        id: vendor.id,
+        name: vendor.name,
+        email: vendor.email,
+        image: vendor.recentWork?.image || vendor.image,
+        category: vendor.category,
+      };
+
+      sessionStorage.setItem(
+        "newConversationVendor",
+        JSON.stringify({
+          ...vendorData,
+          checkExisting: true, // Flag to indicate we should check for existing conversations
+        })
+      );
+
+      toast.success(`Starting conversation with ${vendor.name}`);
+
+      // Navigate to messages page
+      router.push("/client/messages");
+    } catch (error) {
+      console.error("Error starting conversation:", error);
+      toast.error("Failed to start conversation");
     }
   };
 
   return (
     <ProtectedRoute allowedRoles={["client"]}>
-      <div className="flex-1 min-h-screen w-full bg-gradient-to-br from-slate-50 to-emerald-50 dark:from-gray-900 dark:to-emerald-950">
+      <div className="flex-1 min-h-screen w-full bg-linear-to-br from-slate-50 to-emerald-50 dark:from-gray-900 dark:to-emerald-950">
         {/* Hero Section with Professional Emerald Overlay and Rounded Corners */}
         <div ref={heroRef} className="relative h-[60vh] w-full overflow-hidden">
           <div className="absolute inset-0 rounded-lg overflow-hidden">
             <Image
-              src="/public/herobg.png"
+              src="/herobg.png"
               alt="Hero Background"
               fill
               className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/90 via-emerald-800/80 to-teal-900/70" />
+            <div className="absolute inset-0 bg-linear-to-r from-emerald-900/90 via-emerald-800/80 to-teal-900/70" />
 
             {/* Animated gradient overlay */}
             <div className="absolute inset-0 opacity-30">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent animate-pulse" />
             </div>
           </div>
 
@@ -579,28 +616,29 @@ export default function ClientDashboard() {
             {stats.map((stat, index) => (
               <Card
                 key={index}
-                className="overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-0"
-                onMouseEnter={(e) => handleCardHover(e, true)}
-                onMouseLeave={(e) => handleCardHover(e, false)}
+                className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200"
               >
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-bl-full" />
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {stat.title}
-                  </CardTitle>
-                  <stat.icon className={`h-5 w-5 ${stat.colorClass}`} />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                    {stat.value}
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`p-2 rounded-lg bg-gray-50 dark:bg-gray-700`}>
+                    <stat.icon className={`h-4 w-4 ${stat.colorClass}`} />
                   </div>
-                  <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 font-medium mt-1">
-                    {stat.change}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {stat.value}
+                    </div>
+                    <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                      {stat.change}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                    {stat.title}
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {stat.description}
                   </p>
-                </CardContent>
+                </div>
               </Card>
             ))}
           </div>
@@ -639,7 +677,10 @@ export default function ClientDashboard() {
                   <Input
                     placeholder="Search by vendor name..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setFeaturedLimit(4); // Reset to show fewer items when search changes
+                    }}
                     className="pl-10 pr-10 py-3 w-full sm:w-72 border-2 border-emerald-200/50 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm transition-all"
                   />
                   {searchQuery && (
@@ -656,7 +697,10 @@ export default function ClientDashboard() {
                 <select
                   title="Select category filter"
                   value={vendorFilter}
-                  onChange={(e) => setVendorFilter(e.target.value)}
+                  onChange={(e) => {
+                    setVendorFilter(e.target.value);
+                    setFeaturedLimit(4); // Reset to show fewer items when filter changes
+                  }}
                   className="px-5 py-3 border-2 border-emerald-200/50 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 font-medium text-sm transition-all cursor-pointer"
                 >
                   <option value="all">🎯 All Categories</option>
@@ -711,170 +755,168 @@ export default function ClientDashboard() {
               </div>
             )}
 
+            {/* No Results State */}
+            {!vendorsLoading &&
+              !vendorsError &&
+              filteredVendors.length === 0 && (
+                <div className="text-center py-20">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 max-w-md mx-auto">
+                    <Search className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      No vendors found
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      {searchQuery
+                        ? `No vendors match "${searchQuery}"`
+                        : `No vendors found in "${vendorFilter}" category`}
+                    </p>
+                    <div className="flex gap-2 justify-center">
+                      {searchQuery && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSearchQuery("")}
+                        >
+                          Clear search
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setVendorFilter("all");
+                          setSearchQuery("");
+                        }}
+                      >
+                        View all vendors
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             {/* Vendors Grid */}
-            {!vendorsLoading && !vendorsError && (
+            {!vendorsLoading && !vendorsError && filteredVendors.length > 0 && (
               <>
                 <div
                   ref={vendorsRef}
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
                 >
-                  {filteredVendors
-                    .slice(0, showMoreVendors ? filteredVendors.length : 4)
-                    .map((vendor) => (
-                      <Card
-                        key={vendor.id}
-                        className="overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 bg-white dark:bg-gray-800 group border-0 rounded-2xl transform hover:-translate-y-2"
-                        onMouseEnter={(e) => handleCardHover(e, true)}
-                        onMouseLeave={(e) => handleCardHover(e, false)}
-                      >
-                        <div className="relative h-56 overflow-hidden">
-                          <Image
-                            src={vendor.recentWork.image}
-                            alt={vendor.recentWork.title}
-                            fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-700"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+                  {filteredVendors.slice(0, featuredLimit).map((vendor) => (
+                    <Card
+                      key={vendor.id}
+                      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200 overflow-hidden"
+                    >
+                      {/* Compact Image Section */}
+                      <div className="relative h-32 overflow-hidden">
+                        <Image
+                          src={vendor.recentWork.image}
+                          alt={vendor.recentWork.title}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
-                          {/* Category Badge */}
-                          <div className="absolute top-4 left-4 bg-emerald-500/95 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-lg transform -translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                            <div className="flex items-center gap-1.5">
-                              <div className="text-white text-xs">
-                                {getCategoryIcon(vendor.category)}
-                              </div>
-                              <span className="text-white text-xs font-semibold">
-                                {vendor.category}
-                              </span>
-                            </div>
-                          </div>
+                        {/* Fixed Position Badges - No Movement */}
+                        <div className="absolute top-2 left-2">
+                          <Badge className="bg-emerald-600 text-white text-xs px-2 py-1">
+                            {vendor.category}
+                          </Badge>
+                        </div>
 
-                          {/* Verification Badge */}
+                        <div className="absolute top-2 right-2 flex gap-1">
                           {vendor.isVerified && (
-                            <div className="absolute top-4 right-4 bg-blue-500/95 backdrop-blur-sm rounded-full p-2 shadow-lg transform -translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-75">
+                            <div className="bg-blue-600 rounded-full p-1">
                               <Award className="h-3 w-3 text-white" />
                             </div>
                           )}
-
-                          {/* Rating Badge */}
-                          <div className="absolute bottom-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full px-3 py-1.5 shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 delay-100">
-                            <div className="flex items-center gap-1">
-                              <Star className="h-3.5 w-3.5 fill-white text-white" />
-                              <span className="text-sm font-bold text-white">
-                                {vendor.rating}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Hover Actions */}
-                          <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
-                            <div className="flex gap-2">
-                              <Link href={`/vendors/${vendor.id}`}>
-                                <Button
-                                  size="sm"
-                                  className="bg-white/95 hover:bg-white text-gray-900 font-semibold transition-all backdrop-blur-sm border-0 shadow-lg"
-                                >
-                                  <Eye className="h-4 w-4 mr-1.5" />
-                                  View
-                                </Button>
-                              </Link>
-                              <Link
-                                href={`/messaging?vendor=${
-                                  vendor.id
-                                }&name=${encodeURIComponent(vendor.name)}`}
-                              >
-                                <Button
-                                  size="sm"
-                                  className="bg-emerald-500/95 hover:bg-emerald-600 text-white font-semibold transition-all backdrop-blur-sm border-0 shadow-lg"
-                                >
-                                  <MessageCircle className="h-4 w-4 mr-1.5" />
-                                  Message
-                                </Button>
-                              </Link>
-                            </div>
+                          <div className="bg-yellow-500 rounded px-2 py-1 flex items-center gap-1">
+                            <Star className="h-3 w-3 fill-white text-white" />
+                            <span className="text-xs font-bold text-white">
+                              {vendor.rating}
+                            </span>
                           </div>
                         </div>
+                      </div>
 
-                        <CardHeader className="pb-4 px-6 pt-5">
-                          <div className="space-y-3">
-                            <CardTitle className="text-xl font-bold text-gray-900 dark:text-white leading-tight line-clamp-1">
-                              {vendor.name}
-                            </CardTitle>
+                      {/* Compact Content Section */}
+                      <div className="p-3">
+                        <div className="mb-2">
+                          <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1 truncate">
+                            {vendor.name}
+                          </h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                            {vendor.recentWork.title}
+                          </p>
+                        </div>
 
-                            <CardDescription className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2 min-h-10">
-                              {vendor.recentWork.title}
-                            </CardDescription>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                            <Users className="h-3 w-3" />
+                            <span>{vendor.reviews} reviews</span>
                           </div>
-                        </CardHeader>
-
-                        <CardContent className="pt-0 px-6 pb-6">
-                          <div className="flex items-center justify-between text-sm mb-4">
-                            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                              <Users className="h-4 w-4" />
-                              <span className="font-medium">
-                                {vendor.reviews} reviews
+                          {vendor.email && (
+                            <div className="flex items-center gap-1">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <span className="text-xs text-green-600 dark:text-green-400">
+                                Available
                               </span>
                             </div>
-                            <div className="text-gray-400 dark:text-gray-500 text-xs">
-                              {vendor.recentWork.date}
-                            </div>
-                          </div>
-
-                          {/* Contact Info for API vendors */}
-                          {vendor.email && (
-                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-lg">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                              <span>Available for new projects</span>
-                            </div>
                           )}
+                        </div>
 
-                          {/* Default Action Buttons (visible when not hovering) */}
-                          <div className="flex gap-2 mt-4 group-hover:opacity-0 transition-opacity duration-300">
-                            <Link
-                              href={`/vendors/${vendor.id}`}
-                              className="flex-1"
+                        {/* Fixed Action Buttons - Always Visible */}
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/vendors/${vendor.id}`}
+                            className="flex-1"
+                          >
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full text-xs h-8 border-gray-200 dark:border-gray-600"
                             >
-                              <Button
-                                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium transition-all border-0"
-                                size="sm"
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Profile
-                              </Button>
-                            </Link>
-                            <Link
-                              href={`/messaging?vendor=${
-                                vendor.id
-                              }&name=${encodeURIComponent(vendor.name)}`}
-                            >
-                              <Button
-                                className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium transition-all px-4"
-                                size="sm"
-                              >
-                                <MessageCircle className="h-4 w-4" />
-                              </Button>
-                            </Link>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                              <Eye className="h-3 w-3 mr-1" />
+                              View
+                            </Button>
+                          </Link>
+                          <Button
+                            size="sm"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 px-3"
+                            onClick={() => handleMessage(vendor)}
+                          >
+                            <MessageCircle className="h-3 w-3 mr-1" />
+                            Chat
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
                 </div>
 
                 {/* Explore More Vendors Button */}
-                {filteredVendors.length > 4 && (
-                  <div className="flex justify-center mt-4">
+                {filteredVendors.length > featuredLimit && (
+                  <div className="flex justify-center mt-6">
                     <Button
                       variant="outline"
                       className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-full"
-                      onClick={() => setShowMoreVendors(!showMoreVendors)}
+                      onClick={() => {
+                        if (featuredLimit >= filteredVendors.length) {
+                          setFeaturedLimit(4);
+                        } else {
+                          setFeaturedLimit(featuredLimit + 4);
+                        }
+                      }}
                     >
-                      {showMoreVendors ? (
+                      {featuredLimit >= filteredVendors.length ? (
                         <>
                           Show Less
                           <X className="h-4 w-4 ml-2" />
                         </>
                       ) : (
                         <>
-                          Explore More Vendors
+                          Show More Vendors (
+                          {filteredVendors.length - featuredLimit} more)
                           <ArrowRight className="h-4 w-4 ml-2" />
                         </>
                       )}
@@ -910,9 +952,9 @@ export default function ClientDashboard() {
             <Tabs
               value={galleryFilter}
               onValueChange={setGalleryFilter}
-              className="w-full"
+              className="w-full bg-transparent "
             >
-              <TabsList className="grid w-full grid-cols-4 mb-8 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+              <TabsList className="grid w-full grid-cols-4 mb-8 bg-transparent   dark:bg-gray-800 p-1 rounded-xl ">
                 <TabsTrigger
                   value="all"
                   className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg text-base py-3"
@@ -944,48 +986,76 @@ export default function ClientDashboard() {
                   ref={galleryRef}
                   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
-                  {filteredGalleryItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer"
-                    >
-                      <div className="relative h-64 overflow-hidden">
-                        <Image
-                          src={item.thumbnail}
-                          alt={item.title}
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {filteredGalleryItems
+                    .slice(0, showMoreGallery ? filteredGalleryItems.length : 6)
+                    .map((item) => (
+                      <div
+                        key={item.id}
+                        className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                      >
+                        <div className="relative h-64 overflow-hidden">
+                          <Image
+                            src={item.thumbnail}
+                            alt={item.title}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                        {/* Play button for videos */}
-                        {item.type === "video" && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="bg-emerald-500 rounded-full p-3 opacity-0 group-hover:opacity-100 transform group-hover:scale-110 transition-all duration-300">
-                              <Play className="h-6 w-6 text-white fill-white" />
+                          {/* Play button for videos */}
+                          {item.type === "video" && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="bg-emerald-500 rounded-full p-3 opacity-0 group-hover:opacity-100 transform group-hover:scale-110 transition-all duration-300">
+                                <Play className="h-6 w-6 text-white fill-white" />
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
 
-                        {/* Image icon */}
-                        {item.type === "image" && (
-                          <div className="absolute top-3 right-3 bg-white/90 rounded-full p-2">
-                            <ImageIcon className="h-4 w-4 text-gray-700" />
-                          </div>
-                        )}
-                      </div>
+                          {/* Image icon */}
+                          {item.type === "image" && (
+                            <div className="absolute top-3 right-3 bg-white/90 rounded-full p-2">
+                              <ImageIcon className="h-4 w-4 text-gray-700" />
+                            </div>
+                          )}
+                        </div>
 
-                      {/* Card content on hover */}
-                      <div className="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <h3 className="text-lg font-bold mb-1">{item.title}</h3>
-                        <p className="text-sm text-white/80 mb-2">
-                          {item.vendor}
-                        </p>
-                        <p className="text-xs text-white/70">{item.date}</p>
+                        {/* Card content on hover */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <h3 className="text-lg font-bold mb-1">
+                            {item.title}
+                          </h3>
+                          <p className="text-sm text-white/80 mb-2">
+                            {item.vendor}
+                          </p>
+                          <p className="text-xs text-white/70">{item.date}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
+
+                {/* Gallery See More Button */}
+                {filteredGalleryItems.length > 6 && (
+                  <div className="flex justify-center mt-6">
+                    <Button
+                      variant="outline"
+                      className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-full"
+                      onClick={() => setShowMoreGallery(!showMoreGallery)}
+                    >
+                      {showMoreGallery ? (
+                        <>
+                          Show Less
+                          <X className="h-4 w-4 ml-2" />
+                        </>
+                      ) : (
+                        <>
+                          See More Gallery ({filteredGalleryItems.length - 6}{" "}
+                          more)
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </div>
@@ -1007,62 +1077,53 @@ export default function ClientDashboard() {
               {upcomingEvents.map((event, index) => (
                 <Card
                   key={index}
-                  className="overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white dark:bg-gray-800"
-                  onMouseEnter={(e) => handleCardHover(e, true)}
-                  onMouseLeave={(e) => handleCardHover(e, false)}
+                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200 p-4"
                 >
-                  {/* Top accent bar instead of left border */}
-                  <div
-                    className={`h-2 w-full ${
-                      event.status === "confirmed"
-                        ? "bg-emerald-500"
-                        : "bg-amber-500"
-                    }`}
-                  />
+                  <div className="flex items-start justify-between mb-3">
+                    <Badge
+                      variant={
+                        event.status === "confirmed" ? "default" : "outline"
+                      }
+                      className={`text-xs ${
+                        event.status === "confirmed"
+                          ? "bg-emerald-600 text-white"
+                          : "border-amber-500 text-amber-700 dark:text-amber-400"
+                      }`}
+                    >
+                      {event.status === "confirmed" ? (
+                        <>
+                          <CheckCircle className="h-3 w-3 mr-1" /> Confirmed
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="h-3 w-3 mr-1" /> Pending
+                        </>
+                      )}
+                    </Badge>
+                    <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                      {event.time}
+                    </span>
+                  </div>
 
-                  <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <Badge
-                        variant={
-                          event.status === "confirmed" ? "default" : "outline"
-                        }
-                        className={`${
-                          event.status === "confirmed"
-                            ? "bg-emerald-600 hover:bg-emerald-700 px-3 py-1"
-                            : "border-amber-500 text-amber-700 dark:text-amber-400 px-3 py-1"
-                        }`}
-                      >
-                        {event.status === "confirmed" ? (
-                          <>
-                            <CheckCircle className="h-4 w-4 mr-1" /> Confirmed
-                          </>
-                        ) : (
-                          <>
-                            <AlertCircle className="h-4 w-4 mr-1" /> Pending
-                          </>
-                        )}
-                      </Badge>
-                      <span className="text-base font-semibold text-emerald-600 dark:text-emerald-400">
-                        {event.time}
-                      </span>
-                    </div>
-                    <CardTitle className="text-2xl text-gray-900 dark:text-white">
+                  <div className="mb-3">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
                       {event.name}
-                    </CardTitle>
-                    <CardDescription className="text-lg text-emerald-600 dark:text-emerald-400 font-medium mt-2">
+                    </h3>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                       {event.vendor}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-4 text-base text-gray-700 dark:text-gray-300 mb-4">
-                      <Calendar className="h-5 w-5 text-emerald-600" />
-                      <span className="font-medium">{event.date}</span>
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-3 w-3 text-emerald-600" />
+                      <span>{event.date}</span>
                     </div>
-                    <div className="flex items-center gap-4 text-base text-gray-700 dark:text-gray-300">
-                      <MapPin className="h-5 w-5 text-emerald-600" />
-                      <span className="font-medium">{event.location}</span>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-3 w-3 text-emerald-600" />
+                      <span>{event.location}</span>
                     </div>
-                  </CardContent>
+                  </div>
                 </Card>
               ))}
             </div>

@@ -3,6 +3,7 @@
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMessaging } from "@/hooks/useMessaging";
+import { conversationAPI } from "@/lib/api";
 import {
   MessageSquare,
   Search,
@@ -33,16 +34,68 @@ import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+// Interface for conversation data
+interface ConversationProps {
+  id: string;
+  vendor: string;
+  lastMessage: string;
+  time: string;
+  unread: number;
+  avatar: string;
+  online: boolean;
+  pinned: boolean;
+  vendorId: string;
+  category?: string;
+  email?: string;
+  isNew?: boolean;
+}
+
 export default function ClientMessages() {
   const { user } = useAuth();
-  const [selectedConversation, setSelectedConversation] = useState("1");
+  const [selectedConversation, setSelectedConversation] = useState<
+    string | null
+  >(null);
   const [messageInput, setMessageInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showChatOnMobile, setShowChatOnMobile] = useState(false);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
+  const [conversations, setConversations] = useState<ConversationProps[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+
   // Socket.IO messaging hook for real-time updates
+  const messagingResult = useMessaging({
+    userId: user?._id || "",
+    conversationId: selectedConversation || undefined,
+    onMessageReceived: (message) => {
+      console.log("📨 New message received in client:", message);
+      if (message.sender._id !== user?._id) {
+        toast.success(`New message from ${message.sender.name}`);
+      }
+      // Message already handled by useMessaging hook - no need to reload conversations
+    },
+    onTyping: (data) => {
+      // Only show typing for other users, not current user
+      if (data.userId !== user?._id) {
+        if (data.isTyping) {
+          setTypingUsers((prev) => new Set(prev).add(data.userId));
+          console.log("🟡 User started typing:", data.userId);
+        } else {
+          setTypingUsers((prev) => {
+            const next = new Set(prev);
+            next.delete(data.userId);
+            console.log("⚪ User stopped typing:", data.userId);
+            return next;
+          });
+        }
+      }
+    },
+    onUserOnline: (data) => {
+      console.log("🟢 User online:", data);
+    },
+  });
+
   const {
     isConnected,
     messages: socketMessages,
@@ -51,75 +104,230 @@ export default function ClientMessages() {
     isTyping,
     isUserOnline,
     setMessages,
-  } = useMessaging({
-    userId: user?._id || "",
-    conversationId: selectedConversation,
-    // Callback when message is received
-    onMessageReceived: (message) => {
-      console.log("📨 New message received:", message);
-      toast.success("New message from " + message.sender.name);
-    },
-    // Callback when user is typing
-    onTyping: (data) => {
-      if (data.isTyping) {
-        setTypingUsers((prev) => new Set(prev).add(data.userId));
+  } = messagingResult || {};
+
+  // Load messages for the selected conversation
+  const loadConversationMessages = async (conversationId: string) => {
+    if (!conversationId || !user?._id) return;
+
+    setIsLoadingMessages(true);
+    try {
+      console.log(`📚 Loading messages for conversation: ${conversationId}`);
+      const response = await conversationAPI.getConversationMessages(
+        conversationId
+      );
+
+      if (response.data?.success && response.data?.messages) {
+        console.log(`✅ Loaded ${response.data.messages.length} messages`);
+        if (setMessages) {
+          setMessages(response.data.messages);
+        }
+
+        // Mark messages as read
+        await conversationAPI.markMessagesAsRead(conversationId);
       } else {
-        setTypingUsers((prev) => {
-          const next = new Set(prev);
-          next.delete(data.userId);
-          return next;
-        });
+        console.log("No messages found, starting fresh conversation");
+        if (setMessages) {
+          setMessages([]);
+        }
       }
-    },
-    // Callback when user comes online
-    onUserOnline: (data) => {
-      toast.success("User is online");
-    },
-  });
+    } catch (error: any) {
+      console.error("Error loading messages:", error);
+      // Don't show error toast for 404 (no messages yet)
+      if (error.response?.status !== 404) {
+        toast.error("Failed to load messages");
+      }
+      if (setMessages) {
+        setMessages([]);
+      }
+    } finally {
+      setIsLoadingMessages(false);
+    }
+  };
 
-  // Sample conversations - in production, fetch from API
-  const conversations = [
-    {
-      id: "1",
-      vendor: "Elite Catering Co.",
-      lastMessage: "Thanks for choosing us! Your catering is confirmed.",
-      time: "2 hours ago",
-      unread: 0,
-      avatar:
-        "https://images.unsplash.com/photo-1555939594-58d7cb561522?w=100&h=100&fit=crop",
-      online: isUserOnline("vendor1"),
-      pinned: true,
-      vendorId: "vendor1",
-    },
-    {
-      id: "2",
-      vendor: "Pro Photographers",
-      lastMessage: "Can you confirm the timing for the event?",
-      time: "5 hours ago",
-      unread: 2,
-      avatar:
-        "https://images.unsplash.com/photo-1606011334315-76b8191da5f3?w=100&h=100&fit=crop",
-      online: isUserOnline("vendor2"),
-      pinned: false,
-      vendorId: "vendor2",
-    },
-    {
-      id: "3",
-      vendor: "Sound Masters Pro",
-      lastMessage: "Equipment will be delivered one day before the event",
-      time: "1 day ago",
-      unread: 0,
-      avatar:
-        "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop",
-      online: isUserOnline("vendor3"),
-      pinned: false,
-      vendorId: "vendor3",
-    },
-  ];
+  // Load messages when conversation is selected
+  useEffect(() => {
+    if (selectedConversation && isConnected) {
+      loadConversationMessages(selectedConversation);
+    }
+  }, [selectedConversation, isConnected]);
 
-  const currentConversation = conversations.find(
-    (c) => c.id === selectedConversation
-  );
+  // Load conversations function - moved outside useEffect for accessibility
+  const loadConversations = async () => {
+    try {
+      // Get current user ID from auth context
+      const currentUserId = user?._id;
+
+      if (!currentUserId) {
+        toast.error("User not authenticated");
+        return;
+      }
+
+      // Fetch conversations from API
+      let initialConversations: ConversationProps[] = [];
+      try {
+        const response = await conversationAPI.getUserConversations(
+          currentUserId
+        );
+        if (response.data?.success && response.data?.conversations) {
+          initialConversations = response.data.conversations.map(
+            (conv: any) => ({
+              id: conv._id,
+              vendor:
+                conv.participants.find((p: any) => p._id !== currentUserId)
+                  ?.name || "Unknown Vendor",
+              lastMessage: conv.lastMessage?.content || "No messages yet",
+              time: conv.lastMessageAt
+                ? new Date(conv.lastMessageAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "Recently",
+              unread: conv.unreadCount?.get?.(currentUserId) || 0,
+              avatar:
+                conv.participants.find((p: any) => p._id !== currentUserId)
+                  ?.avatar || "/placeholder-avatar.jpg",
+              online: false, // Will be updated by online status check
+              pinned: false,
+              vendorId:
+                conv.participants.find((p: any) => p._id !== currentUserId)
+                  ?._id || "",
+              category:
+                conv.participants.find((p: any) => p._id !== currentUserId)
+                  ?.businessType || undefined,
+              email:
+                conv.participants.find((p: any) => p._id !== currentUserId)
+                  ?.email || undefined,
+            })
+          );
+        }
+      } catch (error) {
+        console.log("No existing conversations found, starting fresh");
+      }
+
+      // Check if a new vendor conversation was initiated
+      const newConversationVendor = sessionStorage.getItem(
+        "newConversationVendor"
+      );
+      let selectedConvId: string | null = null;
+
+      if (newConversationVendor) {
+        try {
+          const vendorData = JSON.parse(newConversationVendor);
+
+          // Check if conversation already exists
+          let existingConversation = initialConversations.find(
+            (conv) => conv.vendorId === vendorData.id
+          );
+
+          if (existingConversation) {
+            // Use existing conversation - don't create a new one
+            selectedConvId = existingConversation.id;
+            console.log(
+              `✅ Found existing conversation with ${vendorData.name}:`,
+              existingConversation.id
+            );
+            toast.info(`Continuing conversation with ${vendorData.name}`);
+          } else {
+            // Create new conversation since none exists
+            console.log(
+              `🆕 Creating new conversation with vendor: ${vendorData.name}`
+            );
+
+            try {
+              const response = await conversationAPI.getOrCreateConversation(
+                vendorData.id
+              );
+
+              if (response.data?.success && response.data?.conversation) {
+                const newConv = response.data.conversation;
+                selectedConvId = newConv._id;
+
+                // Add the new conversation to our list
+                const newConversation: ConversationProps = {
+                  id: newConv._id,
+                  vendor: vendorData.name,
+                  lastMessage: "Start your conversation here",
+                  time: "Now",
+                  unread: 0,
+                  avatar: vendorData.avatar || "/placeholder-avatar.jpg",
+                  online: false,
+                  pinned: false,
+                  vendorId: vendorData.id,
+                  category: vendorData.businessType,
+                  email: vendorData.email,
+                };
+
+                initialConversations = [
+                  newConversation,
+                  ...initialConversations,
+                ];
+                console.log(
+                  `✅ Created new conversation: ${selectedConvId}`,
+                  newConversation
+                );
+                toast.success(`Started conversation with ${vendorData.name}`);
+              } else {
+                throw new Error("Failed to create conversation");
+              }
+            } catch (error) {
+              console.error("Error creating new conversation:", error);
+              toast.error(
+                `Failed to start conversation with ${vendorData.name}`
+              );
+            }
+          }
+
+          // Clear the session storage
+          sessionStorage.removeItem("newConversationVendor");
+        } catch (error) {
+          console.error("Error parsing vendor data from session:", error);
+          sessionStorage.removeItem("newConversationVendor");
+        }
+      }
+
+      // Update conversations with online status
+      const conversationsWithOnlineStatus = initialConversations.map(
+        (conv) => ({
+          ...conv,
+          online: isUserOnline(conv.vendorId),
+        })
+      );
+
+      setConversations(conversationsWithOnlineStatus);
+
+      // Auto-select conversation if specified
+      if (selectedConvId) {
+        const convToSelect = conversationsWithOnlineStatus.find(
+          (conv) => conv.id === selectedConvId
+        );
+        if (convToSelect) {
+          setSelectedConversation(convToSelect.id);
+          console.log(`🎯 Auto-selected conversation: ${selectedConvId}`);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading conversations:", error);
+      toast.error("Failed to load conversations");
+    }
+  };
+
+  // Real-time updates handled by Socket.IO - no need for polling  // Initialize conversations on mount
+  useEffect(() => {
+    if (user?._id) {
+      loadConversations();
+    }
+  }, [user?._id]);
+
+  // Update conversations with real-time online status in render (avoid useEffect loops)
+  const conversationsWithOnlineStatus = conversations.map((conv) => ({
+    ...conv,
+    online: isUserOnline ? isUserOnline(conv.vendorId) : false,
+  }));
+
+  const currentConversation = selectedConversation
+    ? conversationsWithOnlineStatus.find((c) => c.id === selectedConversation)
+    : null;
 
   /**
    * Handle sending a message
@@ -128,26 +336,44 @@ export default function ClientMessages() {
    * - Clear input field
    */
   const handleSendMessage = () => {
+    console.log(`🎯 HANDLE SEND MESSAGE CALLED:`);
+    console.log(`   - Message input: "${messageInput}"`);
+    console.log(`   - Current conversation:`, currentConversation);
+    console.log(`   - Is connected: ${isConnected}`);
+    console.log(`   - User ID: ${user?._id}`);
+
     if (!messageInput.trim()) {
+      console.error("❌ Message input is empty");
       toast.error("Message cannot be empty");
       return;
     }
 
     if (!currentConversation) {
+      console.error("❌ No conversation selected");
       toast.error("No conversation selected");
       return;
     }
 
     if (!isConnected) {
+      console.error("❌ Not connected to server");
       toast.error("Not connected to server. Please wait...");
       return;
     }
+
+    if (!sendMessage) {
+      console.error("❌ Send message function not available");
+      toast.error("Messaging not ready. Please wait...");
+      return;
+    }
+
+    console.log(`✅ All validations passed, sending message...`);
 
     // Send message through Socket.IO
     sendMessage(messageInput, currentConversation.vendorId);
 
     // Clear input
     setMessageInput("");
+    console.log(`✅ Message sent and input cleared`);
     toast.success("Message sent!");
   };
 
@@ -155,10 +381,25 @@ export default function ClientMessages() {
     toast.success("Conversation pinned");
   };
 
-  const handleSelectConversation = (id: string) => {
+  const handleSelectConversation = (id: string | null) => {
+    // Prevent rapid switching to the same conversation
+    if (id === selectedConversation) {
+      setShowChatOnMobile(true);
+      return;
+    }
+
+    console.log(`🔄 Switching to conversation: ${id}`);
+
+    // Clear current state
+    if (setMessages) {
+      setMessages([]);
+    }
+    // Clear typing indicators for new conversation
+    setTypingUsers(new Set());
+
+    // Set new conversation
     setSelectedConversation(id);
     setShowChatOnMobile(true);
-    setTypingUsers(new Set()); // Clear typing indicators when switching conversations
   };
 
   const handleBackToList = () => {
@@ -173,13 +414,13 @@ export default function ClientMessages() {
   // Handle typing with debounce
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessageInput(e.target.value);
-    if (e.target.value.trim()) {
+    if (e.target.value.trim() && handleTypingWithDebounce) {
       handleTypingWithDebounce();
     }
   };
 
   // Filter conversations based on search query
-  const filteredConversations = conversations.filter((conv) =>
+  const filteredConversations = conversationsWithOnlineStatus.filter((conv) =>
     conv.vendor.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -239,7 +480,7 @@ export default function ClientMessages() {
                         : "hover:bg-gray-100 dark:hover:bg-gray-700"
                     )}
                   >
-                    <div className="relative flex-shrink-0">
+                    <div className="relative shrink-0">
                       <Avatar className="h-12 w-12">
                         <AvatarImage src={conv.avatar} alt={conv.vendor} />
                         <AvatarFallback className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200">
@@ -269,7 +510,7 @@ export default function ClientMessages() {
                       </p>
                     </div>
                     {conv.unread > 0 && (
-                      <span className="flex-shrink-0 bg-emerald-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="shrink-0 bg-emerald-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                         {conv.unread}
                       </span>
                     )}
@@ -313,9 +554,21 @@ export default function ClientMessages() {
                       <h2 className="font-semibold text-gray-900 dark:text-white">
                         {currentConversation.vendor}
                       </h2>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {currentConversation.online ? "Active now" : "Offline"}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        {currentConversation.category && (
+                          <Badge
+                            variant="secondary"
+                            className="text-xs px-2 py-0 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200"
+                          >
+                            {currentConversation.category}
+                          </Badge>
+                        )}
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {currentConversation.online
+                            ? "Active now"
+                            : "Offline"}
+                        </p>
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -339,17 +592,52 @@ export default function ClientMessages() {
 
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {socketMessages.length === 0 ? (
+                  {isLoadingMessages ? (
                     <div className="flex items-center justify-center h-full">
                       <div className="text-center">
-                        <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                        <p className="text-gray-500 text-sm">
-                          No messages yet. Start the conversation!
+                        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto mb-2" />
+                        <p className="text-gray-500 dark:text-gray-400">
+                          Loading messages...
                         </p>
                       </div>
                     </div>
+                  ) : !socketMessages || socketMessages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center max-w-md mx-auto p-6">
+                        <Avatar className="h-16 w-16 mx-auto mb-4">
+                          <AvatarImage
+                            src={currentConversation?.avatar}
+                            alt={currentConversation?.vendor}
+                          />
+                          <AvatarFallback className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 text-lg">
+                            {currentConversation?.vendor?.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                          {currentConversation?.vendor}
+                        </h3>
+                        {currentConversation?.category && (
+                          <Badge
+                            variant="secondary"
+                            className="mb-3 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200"
+                          >
+                            {currentConversation.category}
+                          </Badge>
+                        )}
+                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                          {currentConversation?.isNew
+                            ? `Start a conversation with ${currentConversation.vendor}. Send them a message to discuss your event needs!`
+                            : "No messages yet. Start the conversation!"}
+                        </p>
+                        {currentConversation?.email && (
+                          <p className="text-xs text-gray-400 dark:text-gray-500">
+                            📧 {currentConversation.email}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   ) : (
-                    socketMessages.map((msg) => (
+                    (socketMessages || []).map((msg: any) => (
                       <div
                         key={msg._id}
                         className={`flex gap-3 ${
@@ -427,13 +715,18 @@ export default function ClientMessages() {
                 <div className="p-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex gap-2 items-center">
                     {/* Socket Status Indicator */}
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-2">
                       <div
-                        className={`w-2 h-2 rounded-full ${
+                        className={`w-2 h-2 rounded-full transition-colors ${
                           isConnected ? "bg-emerald-500" : "bg-red-500"
                         }`}
                         title={isConnected ? "Connected" : "Disconnected"}
                       />
+                      {!isConnected && (
+                        <span className="text-xs text-red-500">
+                          Connecting...
+                        </span>
+                      )}
                     </div>
 
                     <Button
@@ -446,16 +739,22 @@ export default function ClientMessages() {
                     <div className="flex-1 relative">
                       <Input
                         placeholder={
-                          isConnected
-                            ? "Type a message..."
-                            : "Connecting to server..."
+                          !isConnected
+                            ? "Connecting to server..."
+                            : isLoadingMessages
+                            ? "Loading messages..."
+                            : currentConversation?.isNew
+                            ? `Message ${currentConversation.vendor}...`
+                            : "Type a message..."
                         }
                         value={messageInput}
                         onChange={handleInputChange}
                         onKeyPress={(e) =>
-                          e.key === "Enter" && handleSendMessage()
+                          e.key === "Enter" &&
+                          !e.shiftKey &&
+                          handleSendMessage()
                         }
-                        disabled={!isConnected}
+                        disabled={!isConnected || isLoadingMessages}
                         className="bg-gray-100 dark:bg-gray-700 border-0 pr-10"
                       />
                       <Button
@@ -468,11 +767,15 @@ export default function ClientMessages() {
                     </div>
                     <Button
                       onClick={handleSendMessage}
-                      disabled={!isConnected || !messageInput.trim()}
+                      disabled={
+                        !isConnected ||
+                        !messageInput.trim() ||
+                        isLoadingMessages
+                      }
                       className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                       size="icon"
                     >
-                      {isConnected ? (
+                      {isConnected && !isLoadingMessages ? (
                         <Send className="w-4 h-4" />
                       ) : (
                         <Loader2 className="w-4 h-4 animate-spin" />

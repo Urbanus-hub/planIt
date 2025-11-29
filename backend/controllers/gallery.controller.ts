@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import Gallery from "../models/gallery.model";
 
 // Upload image to gallery
-export const uploadGalleryImage = async (req: Request, res: Response) => {
+export const uploadGalleryImage = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { vendorId } = req.params;
     const { url, title, description, mediaType } = req.body;
@@ -57,7 +60,10 @@ export const uploadGalleryImage = async (req: Request, res: Response) => {
 };
 
 // Get gallery images for a vendor
-export const getGalleryImages = async (req: Request, res: Response) => {
+export const getGalleryImages = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { vendorId } = req.params;
     const limit = parseInt(req.query.limit as string) || 12;
@@ -100,7 +106,10 @@ export const getGalleryImages = async (req: Request, res: Response) => {
 };
 
 // Delete image from gallery
-export const deleteGalleryImage = async (req: Request, res: Response) => {
+export const deleteGalleryImage = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { vendorId, imageId } = req.params;
 
@@ -129,7 +138,10 @@ export const deleteGalleryImage = async (req: Request, res: Response) => {
 };
 
 // Update gallery image info
-export const updateGalleryImage = async (req: Request, res: Response) => {
+export const updateGalleryImage = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   try {
     const { vendorId, imageId } = req.params;
     const { title, description } = req.body;

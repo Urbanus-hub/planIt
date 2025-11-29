@@ -24,13 +24,27 @@ api.interceptors.response.use(
       switch (status) {
         case 401:
           // Unauthorized - token expired or invalid
-          // Redirect to login only if not already on auth pages
+          // Only show "session expired" and redirect if:
+          // 1. Not already on auth pages
+          // 2. Not on public pages (home, landing)
+          // 3. User was actually trying to access protected content
           if (typeof window !== "undefined") {
             const currentPath = window.location.pathname;
-            if (
-              !currentPath.includes("/login") &&
-              !currentPath.includes("/register")
-            ) {
+            const isAuthPage =
+              currentPath.includes("/login") ||
+              currentPath.includes("/register");
+            const isPublicPage =
+              currentPath === "/" || currentPath.includes("/home");
+            const isCheckAuthRequest = error.config?.url?.includes("/users/me");
+
+            // Don't show error for initial auth check on public pages
+            if (isAuthPage || (isPublicPage && isCheckAuthRequest)) {
+              // Silent fail - don't show toast or redirect
+              break;
+            }
+
+            // Only show session expired for actual protected route access
+            if (!isPublicPage) {
               toast.error("Session expired", {
                 description: "Please log in again to continue",
               });
@@ -151,6 +165,35 @@ export const bookingsAPI = {
   cancel: (id: string) => api.patch(`/bookings/${id}/cancel`),
 
   delete: (id: string) => api.delete(`/bookings/${id}`),
+};
+
+// API methods for conversations and messages
+export const conversationAPI = {
+  // Get user's conversations
+  getUserConversations: async (userId: string) => {
+    return api.get(`/conversations/user/${userId}`);
+  },
+
+  // Get or create conversation between two users
+  getOrCreateConversation: async (participantId: string) => {
+    return api.post(`/conversations/create`, { participantId });
+  },
+
+  // Get messages in a conversation
+  getConversationMessages: async (
+    conversationId: string,
+    page: number = 1,
+    limit: number = 50
+  ) => {
+    return api.get(`/conversations/${conversationId}/messages`, {
+      params: { page, limit },
+    });
+  },
+
+  // Mark messages as read
+  markMessagesAsRead: async (conversationId: string) => {
+    return api.patch(`/conversations/${conversationId}/read`);
+  },
 };
 
 // API methods for gallery

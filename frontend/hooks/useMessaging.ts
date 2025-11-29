@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { initSocket, getSocket, disconnectSocket } from "@/lib/socketConfig";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { initSocket } from "@/lib/socketConfig";
 import { Socket } from "socket.io-client";
 
 export interface IMessage {
@@ -45,8 +45,8 @@ interface UseMessagingOptions {
 }
 
 /**
- * Custom hook for managing real-time messaging with Socket.IO
- * Handles message sending/receiving, typing indicators, and user presence
+ * FIXED: Prevents messages from reloading by using proper listener cleanup
+ * and functional setState to avoid stale closures
  */
 export const useMessaging = ({
   userId,
@@ -59,76 +59,154 @@ export const useMessaging = ({
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const messageUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [users, setUsers] = useState<Map<string, boolean>>(new Map()); // userId -> isOnline
+  const [users, setUsers] = useState<Map<string, boolean>>(new Map());
+  const currentConversationIdRef = useRef<string | undefined>(undefined);
 
   /**
-   * Initialize Socket.IO connection on mount
+   * FIX #1: Initialize socket ONCE with empty dependency array
    */
   useEffect(() => {
+    if (!userId) {
+      console.warn("⚠️ Socket.IO not initialized: userId is required");
+      return;
+    }
+
+    console.log(`🔄 Initializing socket for user: ${userId}`);
     socketRef.current = initSocket();
 
-    socketRef.current.on("connect", () => {
+    const socket = socketRef.current;
+
+    socket.on("connect", () => {
       setIsConnected(true);
-      console.log("Messaging socket connected");
+      console.log("✓ Socket connected");
     });
 
-    socketRef.current.on("disconnect", () => {
+    socket.on("disconnect", (reason) => {
       setIsConnected(false);
-      console.log("Messaging socket disconnected");
+      console.log(`✗ Socket disconnected (${reason})`);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("❌ Connection error:", error?.message);
+      setIsConnected(false);
     });
 
     return () => {
-      // Don't disconnect on unmount - let other components use the socket
-    };
-  }, []);
-
-  /**
-   * Join conversation room when conversationId changes
-   */
-  useEffect(() => {
-    if (!socketRef.current?.connected || !conversationId || !userId) return;
-
-    socketRef.current.emit("user:join", {
-      userId,
-      conversationId,
-    });
-
-    console.log(`Joined conversation: ${conversationId}`);
-
-    return () => {
-      if (socketRef.current && conversationId && userId) {
-        socketRef.current.emit("user:leave", {
-          userId,
-          conversationId,
-        });
+      console.log("🧹 Cleaning up socket connection");
+      if (socket.connected) {
+        socket.disconnect();
+      }
+      // Clear all timeouts
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      if (messageUpdateTimeoutRef.current) {
+        clearTimeout(messageUpdateTimeoutRef.current);
       }
     };
-  }, [conversationId, userId, isConnected]);
+  }, [userId]);
 
   /**
-   * Listen for incoming messages
+   * FIX #2: Setup listeners ONCE with proper cleanup
+   * This prevents duplicate listeners that cause message reloading
    */
   useEffect(() => {
-    if (!socketRef.current) return;
+    const socket = socketRef.current;
+    if (!socket) return;
 
+    console.log("📡 Setting up socket listeners");
+
+    // FIX: Use functional setState to avoid stale closures
     const handleMessageReceive = (message: IMessage) => {
-      setMessages((prev) => [...prev, message]);
+      console.log(
+        "⚡ Message received:",
+        message._id,
+        "from:",
+        message.sender._id,
+        "current user:",
+        userId
+      );
+
+      // Only add messages for the current conversation to prevent cross-conversation pollution
+      if (message.conversationId === currentConversationIdRef.current) {
+        // Don't add messages from current user via receive handler - they're handled optimistically
+        if (message.sender._id === userId) {
+          console.log(
+            "📤 Ignoring own message from receive handler (handled optimistically)"
+          );
+        } else {
+          setMessages((prev) => {
+            // Prevent duplicates
+            if (prev.some((m) => m._id === message._id)) {
+              console.log("⚠️ Duplicate message ignored:", message._id);
+              return prev;
+            }
+            console.log(
+              "📥 Adding received message from other user:",
+              message._id
+            );
+            return [...prev, message];
+          });
+        }
+      }
+
       onMessageReceived?.(message);
     };
 
+    const handleMessageConfirmed = (data: {
+      tempId: string;
+      message: IMessage;
+    }) => {
+      console.log("✅ Message confirmed:", data.tempId, "→", data.message._id);
+
+      setMessages((prev) => {
+        const updated = prev.map((msg) => {
+          if (msg._id === data.tempId) {
+            console.log(
+              "🔄 Replacing optimistic message:",
+              data.tempId,
+              "with confirmed:",
+              data.message._id
+            );
+            return data.message;
+          }
+          return msg;
+        });
+        return updated;
+      });
+    };
+
     const handleUserOnline = (data: { userId: string; timestamp: Date }) => {
-      setUsers((prev) => new Map(prev).set(data.userId, true));
+      console.log("🟢 User online:", data.userId);
+      setUsers((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(data.userId, true);
+        return newMap;
+      });
       onUserOnline?.(data);
     };
 
     const handleUserOffline = (data: { userId: string; timestamp: Date }) => {
-      setUsers((prev) => new Map(prev).set(data.userId, false));
+      console.log("🔴 User offline:", data.userId);
+      setUsers((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(data.userId, false);
+        return newMap;
+      });
     };
 
-    const handleTyping = (data: { userId: string; isTyping: boolean }) => {
-      onTyping?.(data);
+    const handleTyping = (data: {
+      userId: string;
+      isTyping: boolean;
+      conversationId?: string;
+    }) => {
+      // Only handle typing for current conversation
+      if (data.conversationId === currentConversationIdRef.current) {
+        onTyping?.(data);
+      }
     };
 
     const handleMessageRead = (data: { messageId: string; readAt: Date }) => {
@@ -142,101 +220,216 @@ export const useMessaging = ({
       onMessageRead?.(data);
     };
 
-    socketRef.current.on("message:receive", handleMessageReceive);
-    socketRef.current.on("user:online", handleUserOnline);
-    socketRef.current.on("user:offline", handleUserOffline);
-    socketRef.current.on("user:typing", handleTyping);
-    socketRef.current.on("message:read", handleMessageRead);
+    // Register all listeners
+    socket.on("message:receive", handleMessageReceive);
+    socket.on("message:confirmed", handleMessageConfirmed);
+    socket.on("user:online", handleUserOnline);
+    socket.on("user:offline", handleUserOffline);
+    socket.on("user:typing", handleTyping);
+    socket.on("message:read", handleMessageRead);
 
+    // FIX: Critical cleanup - remove ALL listeners on unmount
     return () => {
-      socketRef.current?.off("message:receive", handleMessageReceive);
-      socketRef.current?.off("user:online", handleUserOnline);
-      socketRef.current?.off("user:offline", handleUserOffline);
-      socketRef.current?.off("user:typing", handleTyping);
-      socketRef.current?.off("message:read", handleMessageRead);
+      console.log("🧹 Removing socket listeners");
+      socket.off("message:receive", handleMessageReceive);
+      socket.off("message:confirmed", handleMessageConfirmed);
+      socket.off("user:online", handleUserOnline);
+      socket.off("user:offline", handleUserOffline);
+      socket.off("user:typing", handleTyping);
+      socket.off("message:read", handleMessageRead);
     };
-  }, [onMessageReceived, onTyping, onUserOnline, onMessageRead]);
+  }, []); // Empty deps - setup once!
 
   /**
-   * Send a message to the receiver
-   * Saves message to DB via backend
+   * FIX #3: Join/leave conversations properly
    */
-  const sendMessage = (
-    content: string,
-    receiver: string,
-    attachments?: any[],
-    relatedBooking?: string
-  ) => {
-    if (!socketRef.current?.connected || !conversationId) {
-      console.error("Socket not connected or no conversation selected");
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket?.connected || !conversationId || !userId) {
       return;
     }
 
-    socketRef.current.emit("message:send", {
-      conversationId,
-      sender: userId,
-      receiver,
-      content,
-      attachments,
-      relatedBooking,
-    });
-  };
+    // Skip if already in this conversation
+    if (currentConversationIdRef.current === conversationId) {
+      return;
+    }
+
+    // Leave previous conversation and cleanup typing
+    if (currentConversationIdRef.current) {
+      console.log(`👋 Leaving: ${currentConversationIdRef.current}`);
+
+      // Stop typing in previous conversation
+      if (isTyping) {
+        socket.emit("user:stop-typing", {
+          userId,
+          conversationId: currentConversationIdRef.current,
+          isTyping: false,
+        });
+        setIsTyping(false);
+      }
+
+      // Clear typing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+
+      socket.emit("user:leave", {
+        userId,
+        conversationId: currentConversationIdRef.current,
+      });
+    }
+
+    // Join new conversation
+    console.log(`🏠 Joining: ${conversationId}`);
+
+    const handleJoinSuccess = (data: any) => {
+      if (data.conversationId === conversationId) {
+        console.log("✅ Joined successfully");
+        currentConversationIdRef.current = conversationId;
+      }
+    };
+
+    const handleJoinError = (error: any) => {
+      console.error("❌ Join failed:", error);
+    };
+
+    socket.once("conversation:joined", handleJoinSuccess);
+    socket.once("conversation:error", handleJoinError);
+
+    socket.emit("user:join", { userId, conversationId });
+
+    // Cleanup - leave on unmount or conversation change
+    return () => {
+      if (currentConversationIdRef.current === conversationId) {
+        console.log(`👋 Cleanup: leaving ${conversationId}`);
+
+        // Stop typing if currently typing
+        if (isTyping) {
+          socket.emit("user:stop-typing", {
+            userId,
+            conversationId,
+            isTyping: false,
+          });
+        }
+
+        // Clear typing timeout
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = null;
+        }
+
+        socket.emit("user:leave", { userId, conversationId });
+        currentConversationIdRef.current = undefined;
+      }
+    };
+  }, [conversationId, userId, isConnected]);
 
   /**
-   * Broadcast typing indicator to receiver
-   * Called when user starts typing
+   * FIX #4: Memoized sendMessage to prevent recreating on every render
    */
-  const broadcastTyping = () => {
-    if (!socketRef.current?.connected || !conversationId) return;
+  const sendMessage = useCallback(
+    (
+      content: string,
+      receiver: string,
+      attachments?: any[],
+      relatedBooking?: string
+    ) => {
+      const socket = socketRef.current;
+      if (!socket?.connected || !conversationId) {
+        console.error("❌ Cannot send: not connected");
+        return;
+      }
 
-    socketRef.current.emit("user:typing", {
-      userId,
-      conversationId,
-    });
-  };
+      const tempId = `temp_${Date.now()}_${Math.random()}`;
+
+      const optimisticMessage: IMessage = {
+        _id: tempId,
+        conversationId: conversationId,
+        sender: {
+          _id: userId,
+          name: "You",
+        },
+        receiver: receiver,
+        content: content,
+        messageType: "text",
+        attachments: attachments,
+        isRead: false,
+        createdAt: new Date(),
+      };
+
+      // Add optimistically (after removing any pending duplicates)
+      setMessages((prev) => {
+        // Remove any existing messages with similar content and timestamp to prevent duplicates
+        const filtered = prev.filter(
+          (msg) =>
+            !(
+              msg.content === content &&
+              msg.sender._id === userId &&
+              Math.abs(
+                new Date(msg.createdAt).getTime() - new Date().getTime()
+              ) < 1000
+            )
+        );
+        return [...filtered, optimisticMessage];
+      });
+
+      console.log(`📨 Sending message: ${tempId}`);
+
+      socket.emit("message:send", {
+        conversationId,
+        sender: userId,
+        receiver,
+        content,
+        attachments,
+        relatedBooking,
+        tempId, // Send tempId so server can confirm it
+      });
+    },
+    [conversationId, userId]
+  );
 
   /**
-   * Stop typing indicator after user finishes
-   * Called with debounce to reduce network traffic
+   * FIXED: Improved typing handler with longer timeout and proper state management
    */
-  const stopTyping = () => {
-    if (!socketRef.current?.connected || !conversationId) return;
+  const handleTypingWithDebounce = useCallback(() => {
+    const socket = socketRef.current;
+    if (!socket?.connected || !conversationId) return;
 
-    socketRef.current.emit("user:stop-typing", {
-      userId,
-      conversationId,
-    });
-  };
-
-  /**
-   * Debounced typing handler
-   * Shows "User is typing..." indicator with minimal network calls
-   */
-  const handleTypingWithDebounce = () => {
-    // Clear previous timeout
+    // Clear existing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    // Send typing if not already typing
+    // Send typing start event (only if not already typing)
     if (!isTyping) {
       setIsTyping(true);
-      broadcastTyping();
+      socket.emit("user:typing", {
+        userId,
+        conversationId,
+        isTyping: true,
+      });
+      console.log("🟡 Started typing in:", conversationId);
     }
 
-    // Stop typing after 3 seconds of inactivity
+    // Set timeout to stop typing (longer timeout for better UX)
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
-      stopTyping();
-    }, 3000);
-  };
+      socket.emit("user:stop-typing", {
+        userId,
+        conversationId,
+        isTyping: false,
+      });
+      console.log("⚪ Stopped typing in:", conversationId);
+    }, 2000); // Increased to 2 seconds for better UX
+  }, [conversationId, userId]); // Removed isTyping dependency
 
-  /**
-   * Get online status for a specific user
-   */
-  const isUserOnline = (userId: string): boolean => {
-    return users.get(userId) ?? false;
-  };
+  const isUserOnline = useCallback(
+    (checkUserId: string): boolean => {
+      return users.get(checkUserId) ?? false;
+    },
+    [users]
+  );
 
   return {
     isConnected,
@@ -245,6 +438,6 @@ export const useMessaging = ({
     handleTypingWithDebounce,
     isTyping,
     isUserOnline,
-    setMessages, // For loading initial messages
+    setMessages, // For loading initial messages from API
   };
 };

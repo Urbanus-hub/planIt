@@ -61,9 +61,7 @@ export default function ReviewsPage() {
 
   const { user } = useAuth();
 
-  const mockReviews: Review[] = [
-   
-  ];
+  const mockReviews: Review[] = [];
 
   const fetchReviews = async () => {
     setLoading(true);
@@ -155,7 +153,7 @@ export default function ReviewsPage() {
   const animatedListItems = filtered.map((review) => (
     <div className="w-full">
       <motion.div
-        className="p-4 bg-white rounded-lg border border-gray-200 hover:border-emerald-400 transition-all cursor-pointer shadow-sm hover:shadow-md"
+        className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-400 dark:hover:border-emerald-500 transition-all cursor-pointer shadow-sm hover:shadow-md"
         onClick={() => setSelectedReview(review)}
         whileHover={{ y: -2 }}
       >
@@ -281,7 +279,7 @@ export default function ReviewsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -291,10 +289,10 @@ export default function ReviewsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-2">
+              <h1 className="text-4xl md:text-5xl font-bold mb-2 bg-linear-to-r from-amber-600 to-orange-600 dark:from-amber-400 dark:to-orange-400 bg-clip-text text-transparent">
                 Reviews & Ratings
               </h1>
-              <p className="text-slate-600 text-lg">
+              <p className="text-slate-600 dark:text-gray-300 text-lg">
                 Build trust and credibility with client feedback
               </p>
             </div>
@@ -362,16 +360,15 @@ export default function ReviewsPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.06 }}
               >
-                <Card className="bg-white hover:shadow-md transition-all border border-gray-200">
+                <Card className="bg-white dark:bg-gray-800 hover:shadow-md transition-all border border-gray-200 dark:border-gray-700">
                   <CardContent className="pt-5 pb-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="text-gray-500 text-xs font-medium">
+                        <p className="text-gray-500 dark:text-gray-400 text-xs font-medium">
                           {stat.label}
                         </p>
-                        <p className="text-xl md:text-2xl font-bold text-gray-900 mt-2">
+                        <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mt-2">
                           {stat.value}
-                          {stat.suffix}
                         </p>
                       </div>
                       <div className={`${stat.bg} p-2 rounded-lg`}>
@@ -424,7 +421,7 @@ export default function ReviewsPage() {
           transition={{ duration: 0.4, delay: 0.3 }}
           className="mb-8"
         >
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
             <CardContent className="p-4">
               <div className="flex flex-col md:flex-row gap-3">
                 <div className="flex-1 relative">
@@ -455,7 +452,7 @@ export default function ReviewsPage() {
           transition={{ duration: 0.4, delay: 0.4 }}
           className="mb-10"
         >
-          <Card className="bg-white border border-gray-200 shadow-sm overflow-hidden">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
             <CardHeader className="border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
@@ -537,7 +534,6 @@ export default function ReviewsPage() {
                       displayScrollbar={true}
                       enableArrowNavigation={true}
                       showGradients={true}
-                   
                     />
                   )}
                 </TabsContent>
@@ -566,7 +562,7 @@ export default function ReviewsPage() {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    <div className="h-12 w-12 rounded-full bg-linear-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
                       {selectedReview.clientName?.[0]?.toUpperCase() || "U"}
                     </div>
                     <div className="flex-1 min-w-0">

@@ -27,6 +27,7 @@ import {
   Check,
   Eye,
   Menu,
+  RefreshCw,
 } from "lucide-react";
 import {
   Card,
@@ -39,7 +40,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -55,31 +56,32 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { bookingsAPI } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 
-// Define the Booking interface
+// Define the Booking interface to match backend
 interface Booking {
-  id: string;
-  vendor: string;
-  service: string;
-  date: string;
-  time: string;
-  location: string;
-  amount: string;
-  status: "confirmed" | "pending" | "completed" | "cancelled";
-  guests: number;
-  rating: number | null;
-  reviewed: boolean;
-  contact: {
-    name: string;
-    phone: string;
-    email: string;
-  };
-  paymentStatus: "paid" | "partial" | "unpaid";
-  eventDetails: {
-    type: string;
-    duration: string;
-    specialRequests: string;
-  };
+  _id: string;
+  clientName?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  serviceTitle?: string;
+  vendorName?: string;
+  vendorEmail?: string;
+  vendorPhone?: string;
+  date?: string;
+  time?: string;
+  status?: "pending" | "confirmed" | "completed" | "cancelled";
+  amount?: number;
+  location?: string;
+  guestCount?: number;
+  notes?: string;
+  paymentStatus?: "paid" | "partial" | "unpaid";
+  eventType?: string;
+  duration?: string;
+  specialRequests?: string;
+  rating?: number | null;
+  reviewed?: boolean;
 }
 
 // Define the MobileActionSheet props interface
@@ -90,132 +92,43 @@ interface MobileActionSheetProps {
 export default function ClientBookings() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const { user } = useAuth();
 
-  const [bookings] = useState<Booking[]>([
-    {
-      id: "1",
-      vendor: "Elite Catering Co.",
-      service: "Wedding Catering",
-      date: "2025-12-15",
-      time: "2:00 PM",
-      location: "Nairobi Convention Center",
-      amount: "KSh 150,000",
-      status: "confirmed",
-      guests: 250,
-      rating: null,
-      reviewed: false,
-      contact: {
-        name: "Sarah Johnson",
-        phone: "+254 712 345 678",
-        email: "sarah@elitecatering.co.ke",
-      },
-      paymentStatus: "paid",
-      eventDetails: {
-        type: "Wedding Reception",
-        duration: "6 hours",
-        specialRequests: "Vegetarian options for 50 guests",
-      },
-    },
-    {
-      id: "2",
-      vendor: "Pro Photographers",
-      service: "Corporate Photography",
-      date: "2026-01-10",
-      time: "6:00 PM",
-      location: "Safari Park, Mombasa",
-      amount: "KSh 85,000",
-      status: "pending",
-      guests: 0,
-      rating: null,
-      reviewed: false,
-      contact: {
-        name: "James Mwangi",
-        phone: "+254 734 567 890",
-        email: "james@prophotographers.co.ke",
-      },
-      paymentStatus: "partial",
-      eventDetails: {
-        type: "Corporate Gala",
-        duration: "4 hours",
-        specialRequests: "Group photos of 200+ attendees",
-      },
-    },
-    {
-      id: "3",
-      vendor: "Sound Masters Pro",
-      service: "DJ & Sound System",
-      date: "2025-11-28",
-      time: "4:00 PM",
-      location: "Grand Ballroom, Kisumu",
-      amount: "KSh 45,000",
-      status: "completed",
-      guests: 150,
-      rating: 5,
-      reviewed: true,
-      contact: {
-        name: "David Otieno",
-        phone: "+254 756 789 012",
-        email: "david@soundmasterspro.co.ke",
-      },
-      paymentStatus: "paid",
-      eventDetails: {
-        type: "Birthday Party",
-        duration: "5 hours",
-        specialRequests: "Mix of African and international music",
-      },
-    },
-    {
-      id: "4",
-      vendor: "Floral Dreams",
-      service: "Wedding Decoration",
-      date: "2025-12-20",
-      time: "10:00 AM",
-      location: "Garden Estate, Nairobi",
-      amount: "KSh 75,000",
-      status: "confirmed",
-      guests: 300,
-      rating: null,
-      reviewed: false,
-      contact: {
-        name: "Grace Wanjiru",
-        phone: "+254 723 456 789",
-        email: "grace@floraldreams.co.ke",
-      },
-      paymentStatus: "partial",
-      eventDetails: {
-        type: "Wedding Ceremony",
-        duration: "Full day setup",
-        specialRequests: "White and gold color scheme",
-      },
-    },
-    {
-      id: "5",
-      vendor: "Event Planners Plus",
-      service: "Full Event Coordination",
-      date: "2025-11-15",
-      time: "9:00 AM",
-      location: "Kempinski Hotel, Nairobi",
-      amount: "KSh 200,000",
-      status: "completed",
-      guests: 200,
-      rating: 4.5,
-      reviewed: true,
-      contact: {
-        name: "Michael Kariuki",
-        phone: "+254 745 678 901",
-        email: "michael@eventplannersplus.co.ke",
-      },
-      paymentStatus: "paid",
-      eventDetails: {
-        type: "Corporate Conference",
-        duration: "2 days",
-        specialRequests: "VIP handling for international guests",
-      },
-    },
-  ]);
+  const fetchBookings = async () => {
+    if (!user?._id) return;
+    
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await bookingsAPI.getAll({ clientId: user._id });
+      const data = response.data?.data || response.data || [];
+      setBookings(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.message || "Failed to fetch bookings");
+      toast.error("Failed to load bookings");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const handleCancelBooking = (id: string) => {
-    toast.error("Booking cancelled successfully");
+  useEffect(() => {
+    fetchBookings();
+  }, [user]);
+
+  const handleCancelBooking = async (id: string) => {
+    try {
+      await bookingsAPI.cancel(id);
+      setBookings(prev => prev.map(b => 
+        b._id === id ? { ...b, status: "cancelled" } : b
+      ));
+      toast.success("Booking cancelled successfully");
+    } catch (error) {
+      toast.error("Failed to cancel booking");
+    }
   };
 
   const handleReschedule = (id: string) => {
@@ -281,9 +194,9 @@ export default function ClientBookings() {
   const filteredBookings = bookings.filter((booking: Booking) => {
     const matchesTab = activeTab === "all" || booking.status === activeTab;
     const matchesSearch =
-      booking.vendor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.location.toLowerCase().includes(searchTerm.toLowerCase());
+      (booking.vendorName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (booking.serviceTitle || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (booking.location || "").toLowerCase().includes(searchTerm.toLowerCase());
 
     return matchesTab && matchesSearch;
   });
@@ -318,10 +231,10 @@ export default function ClientBookings() {
     <div className="space-y-3">
       <div className="text-center pb-3 border-b">
         <h3 className="font-semibold text-gray-900 dark:text-white">
-          {booking.vendor}
+          {booking.vendorName || "Unknown Vendor"}
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          {booking.service}
+          {booking.serviceTitle || "Unknown Service"}
         </p>
       </div>
 
@@ -428,11 +341,7 @@ export default function ClientBookings() {
                       Confirmed
                     </p>
                     <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                      {
-                        bookings.filter(
-                          (b: Booking) => b.status === "confirmed"
-                        ).length
-                      }
+                      {bookings.filter((b: Booking) => b.status === "confirmed").length}
                     </p>
                   </div>
                   <div className="p-2 sm:p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex-shrink-0">
@@ -492,14 +401,7 @@ export default function ClientBookings() {
                     <p className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-1">
                       KSh{" "}
                       {bookings
-                        .reduce(
-                          (sum, b: Booking) =>
-                            sum +
-                            parseInt(
-                              b.amount.replace("KSh ", "").replace(",", "")
-                            ),
-                          0
-                        )
+                        .reduce((sum, b: Booking) => sum + (b.amount || 0), 0)
                         .toLocaleString()}
                     </p>
                   </div>
@@ -624,7 +526,33 @@ export default function ClientBookings() {
 
           {/* Bookings List */}
           <div className="space-y-3 sm:space-y-4">
-            {filteredBookings.length > 0 ? (
+            {loading ? (
+              <Card className="bg-white dark:bg-gray-800 border-0">
+                <CardContent className="p-8">
+                  <div className="flex items-center justify-center">
+                    <RefreshCw className="h-6 w-6 animate-spin text-emerald-600 mr-2" />
+                    <span className="text-gray-600 dark:text-gray-400">Loading bookings...</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : error ? (
+              <Card className="bg-white dark:bg-gray-800 border-0">
+                <CardContent className="p-8 text-center">
+                  <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    Failed to load bookings
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+                  <Button 
+                    onClick={fetchBookings} 
+                    className="bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Try Again
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : filteredBookings.length > 0 ? (
               filteredBookings.map((booking: Booking) => (
                 <Card
                   key={booking.id}
@@ -637,10 +565,10 @@ export default function ClientBookings() {
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
                           <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">
-                            {booking.vendor}
+                            {booking.vendorName || "Unknown Vendor"}
                           </h3>
                           <p className="text-emerald-600 dark:text-emerald-400 font-medium text-sm">
-                            {booking.service}
+                            {booking.serviceTitle || "Unknown Service"}
                           </p>
                         </div>
                         <div className="flex flex-col gap-2 flex-shrink-0">
@@ -670,78 +598,88 @@ export default function ClientBookings() {
                       {/* Event Details */}
                       <div className="grid grid-cols-1 gap-2 text-sm">
                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <Calendar className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                          <span className="truncate">{booking.date}</span>
+                          <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span className="truncate">{booking.date ? new Date(booking.date).toLocaleDateString() : "—"}</span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <Clock className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                          <span className="truncate">{booking.time}</span>
+                          <Clock className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span className="truncate">{booking.time || "—"}</span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                          <span className="truncate">{booking.location}</span>
+                          <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span className="truncate">{booking.location || "—"}</span>
                         </div>
                       </div>
 
                       {/* Additional Info - Collapsible on Mobile */}
                       <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-3 space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600 dark:text-gray-400">
-                            Event Type:
-                          </span>
-                          <span className="text-xs font-medium text-gray-900 dark:text-white">
-                            {booking.eventDetails.type}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600 dark:text-gray-400">
-                            Duration:
-                          </span>
-                          <span className="text-xs font-medium text-gray-900 dark:text-white">
-                            {booking.eventDetails.duration}
-                          </span>
-                        </div>
-                        {booking.guests > 0 && (
+                        {booking.eventType && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                              Event Type:
+                            </span>
+                            <span className="text-xs font-medium text-gray-900 dark:text-white">
+                              {booking.eventType}
+                            </span>
+                          </div>
+                        )}
+                        {booking.duration && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                              Duration:
+                            </span>
+                            <span className="text-xs font-medium text-gray-900 dark:text-white">
+                              {booking.duration}
+                            </span>
+                          </div>
+                        )}
+                        {booking.guestCount && booking.guestCount > 0 && (
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-gray-600 dark:text-gray-400">
                               Guests:
                             </span>
                             <span className="text-xs font-medium text-gray-900 dark:text-white">
-                              {booking.guests} attendees
+                              {booking.guestCount} attendees
                             </span>
                           </div>
                         )}
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600 dark:text-gray-400">
-                            Contact:
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-gray-900 dark:text-white">
-                              {booking.contact.name}
+                        {(booking.vendorName || booking.vendorPhone || booking.vendorEmail) && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                              Contact:
                             </span>
-                            <a
-                              href={`tel:${booking.contact.phone}`}
-                              className="text-emerald-600 hover:text-emerald-700"
-                              title="Call vendor"
-                            >
-                              <Phone className="w-3 h-3" />
-                            </a>
-                            <a
-                              href={`mailto:${booking.contact.email}`}
-                              className="text-emerald-600 hover:text-emerald-700"
-                              title="Email vendor"
-                            >
-                              <Mail className="w-3 h-3" />
-                            </a>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-medium text-gray-900 dark:text-white">
+                                {booking.vendorName || "Vendor"}
+                              </span>
+                              {booking.vendorPhone && (
+                                <a
+                                  href={`tel:${booking.vendorPhone}`}
+                                  className="text-emerald-600 hover:text-emerald-700"
+                                  title="Call vendor"
+                                >
+                                  <Phone className="w-3 h-3" />
+                                </a>
+                              )}
+                              {booking.vendorEmail && (
+                                <a
+                                  href={`mailto:${booking.vendorEmail}`}
+                                  className="text-emerald-600 hover:text-emerald-700"
+                                  title="Email vendor"
+                                >
+                                  <Mail className="w-3 h-3" />
+                                </a>
+                              )}
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
 
                       {/* Price and Actions */}
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                            {booking.amount}
+                            KSh {(booking.amount || 0).toLocaleString()}
                           </p>
                           <p className="text-xs text-gray-600 dark:text-gray-400">
                             Total Cost

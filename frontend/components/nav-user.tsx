@@ -6,6 +6,8 @@ import {
   IconLogout,
   IconNotification,
   IconUserCircle,
+  IconSun,
+  IconMoon,
 } from "@tabler/icons-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,7 +26,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {useAuth} from '@/contexts/AuthContext';
+import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export function NavUser({
   user,
@@ -36,7 +39,8 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
-  const{logout} =useAuth();
+  const { logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <SidebarMenu>
@@ -100,7 +104,14 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={()=>logout()}>
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={toggleTheme}>
+                {theme === "light" ? <IconMoon /> : <IconSun />}
+                {theme === "light" ? "Dark mode" : "Light mode"}
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => logout()}>
               <IconLogout />
               Log out
             </DropdownMenuItem>
