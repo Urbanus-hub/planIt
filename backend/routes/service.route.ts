@@ -5,7 +5,7 @@ import {
   getServiceById,
   updateService,
   deleteService,
-  getProviderServices
+  getProviderServices,
 } from "../controllers/service.controller.js";
 import authorize from "../middlewares/authorize.middleware";
 import { authorizeRole } from "../middlewares/roleBasedAccess.middleware";
@@ -20,14 +20,11 @@ router.get("/", getServices);
 // Get single service by ID (public)
 router.get("/:id", getServiceById);
 
+// Get services by provider (public)
+router.get("/provider/:providerId", getProviderServices);
+
 // Create a new service (vendors only)
-router.post(
-  "/",
-  authorize,
-  authorizeRole("vendor", "admin"),
-  createService
-);
-router.get('/provider/:providerId/bookings', authorize, authorizeRole('vendor', 'admin'), getProviderServices);
+router.post("/", authorize, authorizeRole("vendor", "admin"), createService);
 
 // Update service (service owner or admin)
 router.patch(

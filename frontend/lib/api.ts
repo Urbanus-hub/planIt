@@ -135,6 +135,8 @@ export const authAPI = {
     api.patch(`/users/${id}/verify-vendor`, verify),
   getVendors: (params?: any) => api.get("/users/vendors", { params }),
 
+  getVendorById: (id: string) => api.get(`/users/vendors/${id}`),
+
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.put("/users/password", data),
 };
@@ -144,6 +146,9 @@ export const servicesAPI = {
   getAll: (params?: any) => api.get("/services", { params }),
 
   getById: (id: string) => api.get(`/services/${id}`),
+
+  getByProvider: (providerId: string) =>
+    api.get(`/services/provider/${providerId}`),
 
   create: (data: any) => api.post("/services", data),
 
@@ -157,12 +162,15 @@ export const bookingsAPI = {
   getAll: (params?: any) => api.get("/bookings", { params }),
 
   getById: (id: string) => api.get(`/bookings/${id}`),
+  getUserBookings: (userId: string) => api.get(`/bookings/user/${userId}`),
   getForVendor: (id: string) => api.get(`/bookings/provider/${id}/bookings`),
   create: (data: any) => api.post("/bookings", data),
 
-  update: (id: string, data: any) => api.put(`/bookings/${id}`, data),
+  update: (id: string, data: any) => api.patch(`/bookings/${id}`, data),
+  updateStatus: (id: string, status: string) =>
+    api.patch(`/bookings/${id}/status`, { status }),
 
-  cancel: (id: string) => api.patch(`/bookings/${id}/cancel`),
+  cancel: (id: string) => api.delete(`/bookings/${id}`),
 
   delete: (id: string) => api.delete(`/bookings/${id}`),
 };

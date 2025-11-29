@@ -438,7 +438,7 @@ export default function MessagesPage() {
             <h4 className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
               {message.client}
             </h4>
-            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 flex-shrink-0">
+            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 shrink-0">
               {message.time}
             </span>
           </div>
@@ -447,7 +447,7 @@ export default function MessagesPage() {
           </p>
         </div>
         {message.unread > 0 && (
-          <div className="flex-shrink-0 ml-2">
+          <div className="shrink-0 ml-2">
             <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-green-600 dark:bg-green-700 text-white text-xs font-bold shadow-lg">
               {message.unread}
             </span>

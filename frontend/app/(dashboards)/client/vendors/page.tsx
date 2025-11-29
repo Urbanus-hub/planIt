@@ -38,6 +38,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { bookingsAPI } from "@/lib/api";
 
 interface VendorType {
   id: string;
@@ -67,6 +76,17 @@ export default function BrowseVendors() {
   const [vendors, setVendors] = useState<VendorType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState<VendorType | null>(null);
+  const [bookingData, setBookingData] = useState({
+    date: "",
+    time: "",
+    location: "",
+    guestCount: "",
+    notes: "",
+    eventType: "",
+  });
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   // Fetch vendors from API
   useEffect(() => {
@@ -170,8 +190,58 @@ export default function BrowseVendors() {
     setFavorites(newFavorites);
   };
 
-  const handleBooking = (vendor: string) => {
-    toast.info(`Starting booking process for ${vendor}`);
+  const handleBooking = (vendorName: string) => {
+    const vendor = vendors.find((v) => v.name === vendorName);
+    if (vendor) {
+      // Navigate to vendor services page instead of opening dialog directly
+      router.push(`/client/vendors/${vendor.id}/services`);
+    }
+  };
+
+  const createBooking = async () => {
+    if (!selectedVendor || !user?._id) return;
+
+    setBookingLoading(true);
+    try {
+      const bookingPayload = {
+        serviceId: selectedVendor.id,
+        vendorId: selectedVendor.id, // In a real app, this would be separate
+        serviceTitle: selectedVendor.category,
+        vendorName: selectedVendor.name,
+        vendorEmail: "vendor@example.com", // This would come from vendor data
+        clientId: user._id,
+        clientName: user.name,
+        clientEmail: user.email,
+        date: bookingData.date,
+        time: bookingData.time,
+        location: bookingData.location || selectedVendor.location,
+        guestCount: parseInt(bookingData.guestCount) || 1,
+        eventType: bookingData.eventType,
+        notes: bookingData.notes,
+        amount: parseInt(selectedVendor.price.replace(/[^0-9]/g, "")) || 0,
+        status: "pending",
+      };
+
+      await bookingsAPI.create(bookingPayload);
+
+      toast.success("Booking created successfully!");
+      setBookingOpen(false);
+      setBookingData({
+        date: "",
+        time: "",
+        location: "",
+        guestCount: "",
+        notes: "",
+        eventType: "",
+      });
+
+      // Redirect to bookings page
+      router.push("/client/bookings");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to create booking");
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   const handleMessage = (vendorName: string) => {
@@ -281,7 +351,7 @@ export default function BrowseVendors() {
                 onClick={() =>
                   setViewMode(viewMode === "grid" ? "list" : "grid")
                 }
-                className="border-emerald-600 text-emerald-600"
+                className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
               >
                 {viewMode === "grid" ? (
                   <List className="w-4 h-4" />
@@ -292,7 +362,7 @@ export default function BrowseVendors() {
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className="border-emerald-600 text-emerald-600"
+                className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
               >
                 <Filter className="w-4 h-4 mr-2" />
                 Filters
@@ -416,7 +486,7 @@ export default function BrowseVendors() {
               {filteredVendors.map((vendor) => (
                 <Card
                   key={vendor.id}
-                  className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-800 border-0 group"
+                  className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 group"
                 >
                   {/* Image */}
                   <div className="relative h-48 overflow-hidden bg-gray-200 dark:bg-gray-700">
@@ -533,7 +603,7 @@ export default function BrowseVendors() {
               {filteredVendors.map((vendor) => (
                 <Card
                   key={vendor.id}
-                  className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-800 border-0"
+                  className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                 >
                   <div className="flex flex-col md:flex-row">
                     <div className="relative h-48 md:h-auto md:w-48 overflow-hidden bg-gray-200 dark:bg-gray-700">
@@ -675,6 +745,175 @@ export default function BrowseVendors() {
           )}
         </div>
       </div>
+
+      {/* Booking Dialog */}
+      <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Book Service</DialogTitle>
+            <DialogDescription>
+              {selectedVendor &&
+                `Book ${selectedVendor.category} with ${selectedVendor.name}`}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedVendor && (
+            <div className="space-y-4">
+              {/* Service Info */}
+              <div className="bg-gray-50 dark:bg-gray-900/20 p-4 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={selectedVendor.image} />
+                    <AvatarFallback>
+                      {selectedVendor.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      {selectedVendor.name}
+                    </h3>
+                    <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                      {selectedVendor.category}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {selectedVendor.price}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Booking Form */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="date">Date *</Label>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={bookingData.date}
+                      onChange={(e) =>
+                        setBookingData((prev) => ({
+                          ...prev,
+                          date: e.target.value,
+                        }))
+                      }
+                      min={new Date().toISOString().split("T")[0]}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="time">Time *</Label>
+                    <Input
+                      id="time"
+                      type="time"
+                      value={bookingData.time}
+                      onChange={(e) =>
+                        setBookingData((prev) => ({
+                          ...prev,
+                          time: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="eventType">Event Type *</Label>
+                  <Input
+                    id="eventType"
+                    placeholder="Wedding, Birthday, Corporate Event, etc."
+                    value={bookingData.eventType}
+                    onChange={(e) =>
+                      setBookingData((prev) => ({
+                        ...prev,
+                        eventType: e.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="location">Location</Label>
+                  <Input
+                    id="location"
+                    placeholder="Event location (optional)"
+                    value={bookingData.location}
+                    onChange={(e) =>
+                      setBookingData((prev) => ({
+                        ...prev,
+                        location: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="guestCount">Number of Guests</Label>
+                  <Input
+                    id="guestCount"
+                    type="number"
+                    min="1"
+                    placeholder="Expected number of guests"
+                    value={bookingData.guestCount}
+                    onChange={(e) =>
+                      setBookingData((prev) => ({
+                        ...prev,
+                        guestCount: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="notes">Special Requirements</Label>
+                  <textarea
+                    id="notes"
+                    className="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Any special requirements or notes..."
+                    value={bookingData.notes}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                      setBookingData((prev) => ({
+                        ...prev,
+                        notes: e.target.value,
+                      }))
+                    }
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setBookingOpen(false)}
+                  className="flex-1"
+                  disabled={bookingLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={createBooking}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                  disabled={
+                    bookingLoading ||
+                    !bookingData.date ||
+                    !bookingData.time ||
+                    !bookingData.eventType
+                  }
+                >
+                  {bookingLoading ? "Creating..." : "Create Booking"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </ProtectedRoute>
   );
 }

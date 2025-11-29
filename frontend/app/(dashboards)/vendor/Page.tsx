@@ -242,7 +242,7 @@ export default function VendorDashboard() {
         <div className="relative overflow-hidden">
           {/* Background Image with Overlay */}
           <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/90 via-emerald-800/80 to-teal-900/90" />
+            <div className="absolute inset-0 bg-linear-to-r from-emerald-900/90 via-emerald-800/80 to-teal-900/90" />
             <div
               className="absolute inset-0 opacity-20"
               style={{
@@ -501,7 +501,7 @@ export default function VendorDashboard() {
                         alt={service.name}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                       <div className="absolute bottom-2 left-2 right-2">
                         <p className="text-white text-sm font-medium line-clamp-2">
                           {service.name}

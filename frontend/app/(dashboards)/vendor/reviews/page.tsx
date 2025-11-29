@@ -160,7 +160,7 @@ export default function ReviewsPage() {
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-start gap-3 mb-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+              <div className="h-10 w-10 rounded-full bg-linear-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
                 {review.clientName?.[0]?.toUpperCase() || "U"}
               </div>
               <div className="flex-1 min-w-0">
@@ -220,7 +220,7 @@ export default function ReviewsPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             <Button
               variant="ghost"
               size="sm"

@@ -95,20 +95,24 @@ export default function ClientBookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { user } = useAuth();
 
   const fetchBookings = async () => {
     if (!user?._id) return;
-    
+
     setLoading(true);
     setError(null);
     try {
-      const response = await bookingsAPI.getAll({ clientId: user._id });
+      const response = await bookingsAPI.getUserBookings(user._id);
       const data = response.data?.data || response.data || [];
       setBookings(Array.isArray(data) ? data : []);
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || "Failed to fetch bookings");
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to fetch bookings"
+      );
       toast.error("Failed to load bookings");
     } finally {
       setLoading(false);
@@ -122,9 +126,9 @@ export default function ClientBookings() {
   const handleCancelBooking = async (id: string) => {
     try {
       await bookingsAPI.cancel(id);
-      setBookings(prev => prev.map(b => 
-        b._id === id ? { ...b, status: "cancelled" } : b
-      ));
+      setBookings((prev) =>
+        prev.map((b) => (b._id === id ? { ...b, status: "cancelled" } : b))
+      );
       toast.success("Booking cancelled successfully");
     } catch (error) {
       toast.error("Failed to cancel booking");
@@ -194,8 +198,12 @@ export default function ClientBookings() {
   const filteredBookings = bookings.filter((booking: Booking) => {
     const matchesTab = activeTab === "all" || booking.status === activeTab;
     const matchesSearch =
-      (booking.vendorName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (booking.serviceTitle || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (booking.vendorName || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (booking.serviceTitle || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       (booking.location || "").toLowerCase().includes(searchTerm.toLowerCase());
 
     return matchesTab && matchesSearch;
@@ -240,7 +248,7 @@ export default function ClientBookings() {
 
       <div className="space-y-2">
         <Button
-          onClick={() => handleMessage(booking.vendor)}
+          onClick={() => handleMessage(booking.vendorName || "Vendor")}
           variant="outline"
           size="sm"
           className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
@@ -251,7 +259,7 @@ export default function ClientBookings() {
 
         {booking.status === "completed" && !booking.reviewed && (
           <Button
-            onClick={() => handleReview(booking.id)}
+            onClick={() => handleReview(booking._id)}
             variant="outline"
             size="sm"
             className="w-full border-amber-600 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
@@ -264,7 +272,7 @@ export default function ClientBookings() {
         {booking.status !== "completed" && booking.status !== "cancelled" && (
           <>
             <Button
-              onClick={() => handleReschedule(booking.id)}
+              onClick={() => handleReschedule(booking._id)}
               variant="outline"
               size="sm"
               className="w-full border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
@@ -273,7 +281,7 @@ export default function ClientBookings() {
               Reschedule
             </Button>
             <Button
-              onClick={() => handleCancelBooking(booking.id)}
+              onClick={() => handleCancelBooking(booking._id)}
               variant="outline"
               size="sm"
               className="w-full border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
@@ -286,7 +294,7 @@ export default function ClientBookings() {
 
         {booking.paymentStatus === "partial" && (
           <Button
-            onClick={() => handleMakePayment(booking.id)}
+            onClick={() => handleMakePayment(booking._id)}
             size="sm"
             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
           >
@@ -328,6 +336,17 @@ export default function ClientBookings() {
                 <Calendar className="w-4 h-4 mr-2" />
                 New Booking
               </Button>
+              <Button
+                onClick={fetchBookings}
+                variant="outline"
+                className="w-full sm:w-auto"
+                disabled={loading}
+              >
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </Button>
             </div>
           </div>
 
@@ -341,10 +360,14 @@ export default function ClientBookings() {
                       Confirmed
                     </p>
                     <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                      {bookings.filter((b: Booking) => b.status === "confirmed").length}
+                      {
+                        bookings.filter(
+                          (b: Booking) => b.status === "confirmed"
+                        ).length
+                      }
                     </p>
                   </div>
-                  <div className="p-2 sm:p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex-shrink-0">
+                  <div className="p-2 sm:p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-full shrink-0">
                     <CheckCircle className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 </div>
@@ -364,7 +387,7 @@ export default function ClientBookings() {
                       }
                     </p>
                   </div>
-                  <div className="p-2 sm:p-3 bg-amber-100 dark:bg-amber-900/20 rounded-full flex-shrink-0">
+                  <div className="p-2 sm:p-3 bg-amber-100 dark:bg-amber-900/20 rounded-full shrink-0">
                     <Clock className="w-4 h-4 sm:w-6 sm:h-6 text-amber-600 dark:text-amber-400" />
                   </div>
                 </div>
@@ -385,7 +408,7 @@ export default function ClientBookings() {
                       }
                     </p>
                   </div>
-                  <div className="p-2 sm:p-3 bg-green-100 dark:bg-green-900/20 rounded-full flex-shrink-0">
+                  <div className="p-2 sm:p-3 bg-green-100 dark:bg-green-900/20 rounded-full shrink-0">
                     <Check className="w-4 h-4 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
                   </div>
                 </div>
@@ -405,7 +428,7 @@ export default function ClientBookings() {
                         .toLocaleString()}
                     </p>
                   </div>
-                  <div className="p-2 sm:p-3 bg-teal-100 dark:bg-teal-900/20 rounded-full flex-shrink-0">
+                  <div className="p-2 sm:p-3 bg-teal-100 dark:bg-teal-900/20 rounded-full shrink-0">
                     <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-teal-600 dark:text-teal-400" />
                   </div>
                 </div>
@@ -531,7 +554,9 @@ export default function ClientBookings() {
                 <CardContent className="p-8">
                   <div className="flex items-center justify-center">
                     <RefreshCw className="h-6 w-6 animate-spin text-emerald-600 mr-2" />
-                    <span className="text-gray-600 dark:text-gray-400">Loading bookings...</span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Loading bookings...
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -542,9 +567,11 @@ export default function ClientBookings() {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                     Failed to load bookings
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
-                  <Button 
-                    onClick={fetchBookings} 
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    {error}
+                  </p>
+                  <Button
+                    onClick={fetchBookings}
                     className="bg-emerald-600 hover:bg-emerald-700"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
@@ -555,7 +582,7 @@ export default function ClientBookings() {
             ) : filteredBookings.length > 0 ? (
               filteredBookings.map((booking: Booking) => (
                 <Card
-                  key={booking.id}
+                  key={booking._id}
                   className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-800 border-0"
                 >
                   <div className="p-4 sm:p-6">
@@ -571,20 +598,22 @@ export default function ClientBookings() {
                             {booking.serviceTitle || "Unknown Service"}
                           </p>
                         </div>
-                        <div className="flex flex-col gap-2 flex-shrink-0">
+                        <div className="flex flex-col gap-2 shrink-0">
                           <Badge
                             variant="outline"
-                            className={`${getStatusColor(booking.status)}`}
+                            className={`${getStatusColor(
+                              booking.status || "pending"
+                            )}`}
                           >
-                            {getStatusIcon(booking.status)}
+                            {getStatusIcon(booking.status || "pending")}
                             <span className="ml-1 capitalize text-xs">
-                              {booking.status}
+                              {booking.status || "pending"}
                             </span>
                           </Badge>
                           <Badge
                             variant="outline"
                             className={`${getPaymentStatusColor(
-                              booking.paymentStatus
+                              booking.paymentStatus || "unpaid"
                             )}`}
                           >
                             <CreditCard className="w-3 h-3 mr-1" />
@@ -599,15 +628,23 @@ export default function ClientBookings() {
                       <div className="grid grid-cols-1 gap-2 text-sm">
                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                           <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span className="truncate">{booking.date ? new Date(booking.date).toLocaleDateString() : "—"}</span>
+                          <span className="truncate">
+                            {booking.date
+                              ? new Date(booking.date).toLocaleDateString()
+                              : "—"}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                           <Clock className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span className="truncate">{booking.time || "—"}</span>
+                          <span className="truncate">
+                            {booking.time || "—"}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                           <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span className="truncate">{booking.location || "—"}</span>
+                          <span className="truncate">
+                            {booking.location || "—"}
+                          </span>
                         </div>
                       </div>
 
@@ -643,7 +680,9 @@ export default function ClientBookings() {
                             </span>
                           </div>
                         )}
-                        {(booking.vendorName || booking.vendorPhone || booking.vendorEmail) && (
+                        {(booking.vendorName ||
+                          booking.vendorPhone ||
+                          booking.vendorEmail) && (
                           <div className="flex justify-between items-center">
                             <span className="text-xs text-gray-600 dark:text-gray-400">
                               Contact:
@@ -701,7 +740,8 @@ export default function ClientBookings() {
                             <SheetHeader>
                               <SheetTitle>Booking Actions</SheetTitle>
                               <SheetDescription>
-                                Manage your booking for {booking.vendor}
+                                Manage your booking for{" "}
+                                {booking.vendorName || "Unknown Vendor"}
                               </SheetDescription>
                             </SheetHeader>
                             <div className="mt-6">
@@ -720,18 +760,20 @@ export default function ClientBookings() {
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                           <div>
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                              {booking.vendor}
+                              {booking.vendorName || "Unknown Vendor"}
                             </h3>
                             <p className="text-emerald-600 dark:text-emerald-400 font-medium">
-                              {booking.service}
+                              {booking.serviceTitle || "Unknown Service"}
                             </p>
                           </div>
                           <div className="flex gap-2 flex-wrap">
                             <Badge
                               variant="outline"
-                              className={`${getStatusColor(booking.status)}`}
+                              className={`${getStatusColor(
+                                booking.status || "pending"
+                              )}`}
                             >
-                              {getStatusIcon(booking.status)}
+                              {getStatusIcon(booking.status || "pending")}
                               <span className="ml-1 capitalize">
                                 {booking.status}
                               </span>
@@ -739,7 +781,7 @@ export default function ClientBookings() {
                             <Badge
                               variant="outline"
                               className={`${getPaymentStatusColor(
-                                booking.paymentStatus
+                                booking.paymentStatus || "unpaid"
                               )}`}
                             >
                               <CreditCard className="w-3 h-3 mr-1" />
@@ -752,70 +794,96 @@ export default function ClientBookings() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <Calendar className="w-4 h-4 text-emerald-600" />
-                            <span>{booking.date}</span>
+                            <span>
+                              {booking.date
+                                ? new Date(booking.date).toLocaleDateString()
+                                : "—"}
+                            </span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <Clock className="w-4 h-4 text-emerald-600" />
-                            <span>{booking.time}</span>
+                            <span>{booking.time || "—"}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <MapPin className="w-4 h-4 text-emerald-600" />
-                            <span>{booking.location}</span>
+                            <span>{booking.location || "—"}</span>
                           </div>
                         </div>
 
                         {/* Additional Info */}
                         <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-4 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              Event Type:
-                            </span>
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
-                              {booking.eventDetails.type}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              Duration:
-                            </span>
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
-                              {booking.eventDetails.duration}
-                            </span>
-                          </div>
-                          {booking.guests > 0 && (
+                          {booking.eventType && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                Event Type:
+                              </span>
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                {booking.eventType}
+                              </span>
+                            </div>
+                          )}
+                          {booking.duration && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                Duration:
+                              </span>
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                {booking.duration}
+                              </span>
+                            </div>
+                          )}
+                          {booking.guestCount && booking.guestCount > 0 && (
                             <div className="flex items-center justify-between">
                               <span className="text-sm text-gray-600 dark:text-gray-400">
                                 Guests:
                               </span>
                               <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                {booking.guests} attendees
+                                {booking.guestCount} attendees
                               </span>
                             </div>
                           )}
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              Contact:
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                {booking.contact.name}
+                          {(booking.vendorName ||
+                            booking.vendorPhone ||
+                            booking.vendorEmail) && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                Contact:
                               </span>
-                              <a
-                                href={`tel:${booking.contact.phone}`}
-                                className="text-emerald-600 hover:text-emerald-700"
-                                title="Call vendor"
-                              >
-                                <Phone className="w-3 h-3" />
-                              </a>
-                              <a
-                                href={`mailto:${booking.contact.email}`}
-                                className="text-emerald-600 hover:text-emerald-700"
-                                title="Email vendor"
-                              >
-                                <Mail className="w-3 h-3" />
-                              </a>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {booking.vendorName || "Vendor"}
+                                </span>
+                                {booking.vendorPhone && (
+                                  <a
+                                    href={`tel:${booking.vendorPhone}`}
+                                    className="text-emerald-600 hover:text-emerald-700"
+                                    title="Call vendor"
+                                  >
+                                    <Phone className="w-3 h-3" />
+                                  </a>
+                                )}
+                                {booking.vendorEmail && (
+                                  <a
+                                    href={`mailto:${booking.vendorEmail}`}
+                                    className="text-emerald-600 hover:text-emerald-700"
+                                    title="Email vendor"
+                                  >
+                                    <Mail className="w-3 h-3" />
+                                  </a>
+                                )}
+                              </div>
                             </div>
-                          </div>
+                          )}
+                          {booking.notes && (
+                            <div className="flex items-start justify-between">
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                Notes:
+                              </span>
+                              <span className="text-sm font-medium text-gray-900 dark:text-white text-right max-w-xs">
+                                {booking.notes}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -824,7 +892,7 @@ export default function ClientBookings() {
                         {/* Price */}
                         <div className="text-center lg:text-right">
                           <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                            {booking.amount}
+                            KSh {(booking.amount || 0).toLocaleString()}
                           </p>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                             Total Cost
@@ -834,7 +902,9 @@ export default function ClientBookings() {
                         {/* Actions */}
                         <div className="flex flex-col gap-2">
                           <Button
-                            onClick={() => handleMessage(booking.vendor)}
+                            onClick={() =>
+                              handleMessage(booking.vendorName || "Vendor")
+                            }
                             variant="outline"
                             size="sm"
                             className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 w-full"
@@ -846,7 +916,7 @@ export default function ClientBookings() {
                           {booking.status === "completed" &&
                             !booking.reviewed && (
                               <Button
-                                onClick={() => handleReview(booking.id)}
+                                onClick={() => handleReview(booking._id)}
                                 variant="outline"
                                 size="sm"
                                 className="border-amber-600 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 w-full"
@@ -860,7 +930,7 @@ export default function ClientBookings() {
                             booking.status !== "cancelled" && (
                               <>
                                 <Button
-                                  onClick={() => handleReschedule(booking.id)}
+                                  onClick={() => handleReschedule(booking._id)}
                                   variant="outline"
                                   size="sm"
                                   className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 w-full"
@@ -870,7 +940,7 @@ export default function ClientBookings() {
                                 </Button>
                                 <Button
                                   onClick={() =>
-                                    handleCancelBooking(booking.id)
+                                    handleCancelBooking(booking._id)
                                   }
                                   variant="outline"
                                   size="sm"
@@ -884,7 +954,7 @@ export default function ClientBookings() {
 
                           {booking.paymentStatus === "partial" && (
                             <Button
-                              onClick={() => handleMakePayment(booking.id)}
+                              onClick={() => handleMakePayment(booking._id)}
                               size="sm"
                               className="bg-emerald-600 hover:bg-emerald-700 text-white w-full"
                             >

@@ -161,7 +161,7 @@ export default function VendorBookingsPage() {
 
   const handleStatusChange = async (bookingId: string, newStatus: string) => {
     try {
-      await bookingsAPI.update(bookingId, { status: newStatus });
+      await bookingsAPI.updateStatus(bookingId, newStatus);
       setBookings((prev) =>
         prev.map((b) =>
           b._id === bookingId ? { ...b, status: newStatus as any } : b

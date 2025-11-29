@@ -815,7 +815,7 @@ export default function ClientDashboard() {
                           fill
                           className="object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
 
                         {/* Fixed Position Badges - No Movement */}
                         <div className="absolute top-2 left-2">

@@ -36,6 +36,9 @@ router.get("/", authorize, authorizeRole("admin"), getUsers);
 //get vendors (must be before /:id route)
 router.get("/vendors", getVendors);
 
+// Get vendor profile by ID (public)
+router.get("/vendors/:id", getUser);
+
 // Get user by ID (user themselves or admin)
 router.get("/:id", authorize, verifyUserOwnership, getUser);
 

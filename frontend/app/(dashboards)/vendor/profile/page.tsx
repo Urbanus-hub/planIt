@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import {
@@ -65,8 +65,20 @@ type ProfileImage = {
 };
 
 export default function VendorProfilePage() {
-  const { user } = useAuth();
+  const { user, refreshUser, loading } = useAuth();
   console.log("user data", user);
+
+  // Show loading state while user data is loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600 dark:text-gray-300">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverImageFileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -89,25 +101,48 @@ export default function VendorProfilePage() {
   });
 
   const [formData, setFormData] = useState<ProfileFormData>({
-    businessName: user?.businessName || "Your Business Name",
-    businessDescription:
-      user?.businessDescription || "Your business description",
-    email: user?.email || "",
-    phone: user?.phone || "",
-    address: user?.businessAddress || "",
-    city: user?.city || "",
-    state: user?.state || "",
-    website: user?.website || "",
-    serviceCategory: "Photography",
-    yearsOfExperience: user?.yearsOfExperience
-      ? String(user.yearsOfExperience)
-      : "0",
-    businessLicense: user?.taxId || "",
+    businessName: "",
+    businessDescription: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    website: "",
+    serviceCategory: "",
+    yearsOfExperience: "0",
+    businessLicense: "",
     specialties: [],
     certifications: [],
-    businessHours: "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM",
-    responseTime: "< 2 hours",
+    businessHours: "",
+    responseTime: "",
   });
+
+  // Update form data when user data changes or when entering edit mode
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        businessName: user.businessName || "Your Business Name",
+        businessDescription:
+          user.businessDescription || "Your business description",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.businessAddress || "",
+        city: user.city || "",
+        state: user.state || "",
+        website: user.website || "",
+        serviceCategory: user.serviceCategory || "Photography",
+        yearsOfExperience: user.yearsOfExperience
+          ? String(user.yearsOfExperience)
+          : "0",
+        businessLicense: user.taxId || user.businessLicense || "",
+        specialties: user.specialties || [],
+        certifications: user.certifications || [],
+        businessHours: user.businessHours || "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM",
+        responseTime: user.responseTime || "< 2 hours",
+      });
+    }
+  }, [user]);
 
   const [stats] = useState({
     totalReviews: 124,
@@ -258,6 +293,33 @@ export default function VendorProfilePage() {
     }
   };
 
+  const handleCancel = () => {
+    // Reset form data to current user data
+    if (user) {
+      setFormData({
+        businessName: user.businessName || "Your Business Name",
+        businessDescription:
+          user.businessDescription || "Your business description",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.businessAddress || "",
+        city: user.city || "",
+        state: user.state || "",
+        website: user.website || "",
+        serviceCategory: user.serviceCategory || "Photography",
+        yearsOfExperience: user.yearsOfExperience
+          ? String(user.yearsOfExperience)
+          : "0",
+        businessLicense: user.taxId || user.businessLicense || "",
+        specialties: user.specialties || [],
+        certifications: user.certifications || [],
+        businessHours: user.businessHours || "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM",
+        responseTime: user.responseTime || "< 2 hours",
+      });
+    }
+    setIsEditing(false);
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -287,6 +349,10 @@ export default function VendorProfilePage() {
       };
 
       await authAPI.updateProfile(user._id, updateData);
+
+      // Refresh user data to get the updated profile
+      await refreshUser();
+
       toast.success("Profile updated successfully!");
       setIsEditing(false);
     } catch (error) {
@@ -314,7 +380,7 @@ export default function VendorProfilePage() {
               alt="Cover"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
             {isEditing && (
               <>
                 <motion.button
@@ -348,8 +414,8 @@ export default function VendorProfilePage() {
             <CardContent className="p-6 sm:p-8">
               <div className="flex flex-col sm:flex-row sm:items-start gap-6">
                 {/* Avatar */}
-                <div className="relative group flex-shrink-0">
-                  <div className="h-32 w-32 rounded-xl overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-slate-100 to-slate-50">
+                <div className="relative group shrink-0">
+                  <div className="h-32 w-32 rounded-xl overflow-hidden border-4 border-white shadow-lg bg-linear-to-br from-slate-100 to-slate-50">
                     <img
                       src={images.avatar!}
                       alt="Avatar"
@@ -413,7 +479,7 @@ export default function VendorProfilePage() {
                             {isSaving ? "Saving..." : "Save"}
                           </Button>
                           <Button
-                            onClick={() => setIsEditing(false)}
+                            onClick={handleCancel}
                             variant="outline"
                             size="sm"
                             className="flex-1 sm:flex-none"
@@ -677,7 +743,7 @@ export default function VendorProfilePage() {
                         alt={item.title}
                         className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                      <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                         <p className="text-white text-sm font-medium">
                           {item.title}
                         </p>
@@ -739,7 +805,7 @@ export default function VendorProfilePage() {
                         key={index}
                         className="flex items-center gap-2 p-2 bg-gray-50 rounded-md"
                       >
-                        <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
                         <p className="text-gray-700 text-sm">{cert}</p>
                       </div>
                     ))}
@@ -926,7 +992,7 @@ export default function VendorProfilePage() {
                 {!isEditing && (
                   <div className="pt-2">
                     <div className="bg-gray-50 rounded-lg p-3 flex items-start gap-2">
-                      <MapPin className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <MapPin className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
                       <p className="text-sm text-gray-600">
                         {formData.address}, {formData.city}, {formData.state}
                       </p>
@@ -944,7 +1010,7 @@ export default function VendorProfilePage() {
             </Card>
 
             {/* Response Time */}
-            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-0 shadow-md">
+            <Card className="bg-linear-to-r from-blue-50 to-indigo-50 border-0 shadow-md">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
