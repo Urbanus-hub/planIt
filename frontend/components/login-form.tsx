@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { authAPI } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -19,6 +19,7 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const { login } = useAuth();
 
   const router = useRouter();
 
@@ -27,72 +28,41 @@ export function LoginForm({
     setIsLoading(true);
 
     try {
-      const response = await authAPI.login({ email, password });
+      const user = await login({ email, password });
 
-      // Check if user needs email verification (can be in error response)
-      if (
-        response.data.requiresVerification ||
-        (!response.data.success &&
-          response.data.requiresVerification !== undefined)
-      ) {
-        toast.info("Email verification required", {
-          description:
-            response.data.message ||
-            "Please verify your email to continue. A new verification code has been sent.",
-        });
-        router.push(
-          `/verify-otp?email=${encodeURIComponent(
-            response.data.email || email
-          )}`
-        );
-        return;
+      toast.success("Welcome back!", {
+        description: `You're now logged in as ${user.name}`,
+      });
+
+      // Redirect based on user role - use replace to avoid back button loop
+      let redirectUrl = "/";
+      switch (user.role) {
+        case "admin":
+          redirectUrl = "/admin";
+          break;
+        case "vendor":
+          redirectUrl = "/vendor";
+          break;
+        case "client":
+          redirectUrl = "/client";
+          break;
       }
 
-      if (response.data.success) {
-        const data = response.data.data;
-        const user = data.user || data;
-
-        toast.success("Welcome back!", {
-          description: `You're now logged in as ${user.name}`,
-        });
-
-        // Redirect based on user role - use replace to avoid back button loop
-        let redirectUrl = "/";
-        switch (user.role) {
-          case "admin":
-            redirectUrl = "/admin";
-            break;
-          case "vendor":
-            redirectUrl = "/vendor";
-            break;
-          case "client":
-            redirectUrl = "/client";
-            break;
-        }
-
-        // Use window.location for hard redirect to ensure proper auth state
-        window.location.href = redirectUrl;
-      }
+      // Use window.location for hard redirect to ensure proper auth state
+      window.location.href = redirectUrl;
     } catch (err: any) {
-      // Check if error response has verification requirement
-      if (err.response?.data?.requiresVerification) {
+      // Check if error message indicates verification needed
+      const errorMessage = err.message || "";
+      if (errorMessage.includes("verify") || errorMessage.includes("verification")) {
         toast.info("Email verification required", {
-          description:
-            err.response.data.message ||
-            "Please verify your email to continue. A new verification code has been sent.",
+          description: "Please verify your email to continue. Check your inbox for the verification code.",
         });
-        router.push(
-          `/verify-otp?email=${encodeURIComponent(
-            err.response.data.email || email
-          )}`
-        );
+        router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
         return;
       }
 
       toast.error("Login failed", {
-        description:
-          err.response?.data?.message ||
-          "Invalid email or password. Please try again.",
+        description: errorMessage || "Invalid email or password. Please try again.",
       });
     } finally {
       setIsLoading(false);

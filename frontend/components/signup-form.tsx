@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { authAPI } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -37,6 +37,7 @@ export function SignupForm({
     phone: "",
     businessName: "",
   });
+  const { register } = useAuth();
 
   const router = useRouter();
 
@@ -49,24 +50,20 @@ export function SignupForm({
     setIsLoading(true);
 
     try {
-      const response = await authAPI.register({
+      await register({
         ...formData,
         role: selectedRole,
         businessName:
           selectedRole === "vendor" ? formData.businessName : undefined,
       });
 
-      if (response.data.success) {
-        toast.success("Account created!", {
-          description: "Please check your email for the verification code.",
-        });
-        router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
-      }
+      toast.success("Account created!", {
+        description: "Please check your email for the verification code.",
+      });
+      router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
     } catch (err: any) {
       toast.error("Registration failed", {
-        description:
-          err.response?.data?.message ||
-          "Unable to create account. Please try again.",
+        description: err.message || "Unable to create account. Please try again.",
       });
     } finally {
       setIsLoading(false);
