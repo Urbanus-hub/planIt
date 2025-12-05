@@ -52,10 +52,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       setLoading(true);
       const response = await authAPI.login(data);
+      console.log("Login response:", response.data); // Debug log
       if (response.data.success) {
         // Store token in localStorage
         if (response.data.token) {
+          console.log("Storing token:", response.data.token); // Debug log
           localStorage.setItem("authToken", response.data.token);
+          console.log("Token stored in localStorage"); // Debug log
+        } else {
+          console.warn("No token in response"); // Debug log
         }
         setUser(response.data.data);
         return response.data.data;
