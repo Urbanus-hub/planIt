@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { PORT, CLIENT_URL } from "./configs/env.js";
+import { PORT } from "./configs/env.js";
 import connectDB from "./configs/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
