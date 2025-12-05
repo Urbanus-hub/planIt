@@ -64,35 +64,15 @@ export default function WhyChoosePlanIt() {
       // Cards stagger animation
       gsap.from(".feature-card", {
         opacity: 0,
-        y: 50,
-        scale: 0.95,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: "power3.out",
+        y: 20,
+        scale: 0.98,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "power2.out",
         scrollTrigger: {
           trigger: cardsRef.current,
           start: "top 75%",
         },
-      });
-
-      // Icons float animation
-      gsap.to(".feature-icon", {
-        y: -10,
-        duration: 2,
-        ease: "power1.inOut",
-        repeat: -1,
-        yoyo: true,
-        stagger: 0.2,
-      });
-
-      // Stat badges pulse
-      gsap.to(".stat-badge", {
-        scale: 1.05,
-        duration: 1.5,
-        ease: "power1.inOut",
-        repeat: -1,
-        yoyo: true,
-        stagger: 0.3,
       });
     }, sectionRef);
 
@@ -141,13 +121,8 @@ export default function WhyChoosePlanIt() {
   return (
     <section
       ref={sectionRef}
-      className="section-padding bg-gradient-to-b from-white dark:from-gray-900 via-green-50/30 dark:via-gray-900 to-white dark:to-gray-900 overflow-hidden relative transition-colors duration-300"
+      className="section-padding bg-white dark:bg-gray-900 overflow-hidden relative transition-colors duration-300"
     >
-      {/* Background decoration */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-green-200 dark:bg-green-500/10 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-20 dark:opacity-30 animate-blob"></div>
-      <div className="absolute top-40 right-10 w-72 h-72 bg-emerald-200 dark:bg-emerald-500/10 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-20 dark:opacity-30 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-teal-200 dark:bg-teal-500/10 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-20 dark:opacity-30 animate-blob animation-delay-4000"></div>
-
       <div className="container lg:w-[90%] mx-auto px-4 sm:px-6 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-16 sm:mb-20">
@@ -199,10 +174,6 @@ export default function WhyChoosePlanIt() {
                   dark:ring-1 dark:ring-green-500/10
                 `}
               >
-                {/* Decorative corner accent */}
-                <div className="absolute top-0 right-0 w-24 h-24 bg-white/30 dark:bg-green-500/5 rounded-bl-full"></div>
-                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-green-100/40 dark:bg-green-500/5 rounded-full blur-2xl"></div>
-
                 {/* Glow effect on hover - visible only in dark mode */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 dark:opacity-0 dark:group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
                   <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-emerald-500/5 rounded-2xl"></div>
@@ -211,7 +182,7 @@ export default function WhyChoosePlanIt() {
                 {/* Icon with gradient background */}
                 <div className="relative mb-6">
                   <div
-                    className={`feature-icon w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center shadow-xl rotate-6 group-hover:rotate-12 transition-transform duration-300`}
+                    className={`feature-icon w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center shadow-xl transition-all duration-300`}
                   >
                     <feature.icon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                   </div>
@@ -263,7 +234,7 @@ export default function WhyChoosePlanIt() {
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-800 bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white text-xs font-bold"
+                  className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-800 bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white text-xs font-bold shadow-lg"
                 >
                   {String.fromCharCode(64 + i)}
                 </div>

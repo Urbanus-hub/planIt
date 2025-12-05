@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import {
@@ -65,20 +65,8 @@ type ProfileImage = {
 };
 
 export default function VendorProfilePage() {
-  const { user, refreshUser, loading } = useAuth();
+  const { user } = useAuth();
   console.log("user data", user);
-
-  // Show loading state while user data is loading
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600 dark:text-gray-300">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverImageFileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -101,48 +89,25 @@ export default function VendorProfilePage() {
   });
 
   const [formData, setFormData] = useState<ProfileFormData>({
-    businessName: "",
-    businessDescription: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    website: "",
-    serviceCategory: "",
-    yearsOfExperience: "0",
-    businessLicense: "",
+    businessName: user?.businessName || "Your Business Name",
+    businessDescription:
+      user?.businessDescription || "Your business description",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    address: user?.businessAddress || "",
+    city: user?.city || "",
+    state: user?.state || "",
+    website: user?.website || "",
+    serviceCategory: "Photography",
+    yearsOfExperience: user?.yearsOfExperience
+      ? String(user.yearsOfExperience)
+      : "0",
+    businessLicense: user?.taxId || "",
     specialties: [],
     certifications: [],
-    businessHours: "",
-    responseTime: "",
+    businessHours: "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM",
+    responseTime: "< 2 hours",
   });
-
-  // Update form data when user data changes or when entering edit mode
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        businessName: user.businessName || "Your Business Name",
-        businessDescription:
-          user.businessDescription || "Your business description",
-        email: user.email || "",
-        phone: user.phone || "",
-        address: user.businessAddress || "",
-        city: user.city || "",
-        state: user.state || "",
-        website: user.website || "",
-        serviceCategory: user.serviceCategory || "Photography",
-        yearsOfExperience: user.yearsOfExperience
-          ? String(user.yearsOfExperience)
-          : "0",
-        businessLicense: user.taxId || user.businessLicense || "",
-        specialties: user.specialties || [],
-        certifications: user.certifications || [],
-        businessHours: user.businessHours || "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM",
-        responseTime: user.responseTime || "< 2 hours",
-      });
-    }
-  }, [user]);
 
   const [stats] = useState({
     totalReviews: 124,
@@ -293,8 +258,8 @@ export default function VendorProfilePage() {
     }
   };
 
-  const handleCancel = () => {
-    // Reset form data to current user data
+  const handleEditClick = () => {
+    // Preload current user data when entering edit mode
     if (user) {
       setFormData({
         businessName: user.businessName || "Your Business Name",
@@ -310,14 +275,24 @@ export default function VendorProfilePage() {
         yearsOfExperience: user.yearsOfExperience
           ? String(user.yearsOfExperience)
           : "0",
-        businessLicense: user.taxId || user.businessLicense || "",
+        businessLicense: user.taxId || "",
         specialties: user.specialties || [],
         certifications: user.certifications || [],
         businessHours: user.businessHours || "Mon-Fri: 9AM-6PM, Sat: 10AM-4PM",
         responseTime: user.responseTime || "< 2 hours",
       });
+
+      setImages({
+        avatar:
+          user.businessLogo ||
+          user.avatar ||
+          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+        coverImage:
+          user.profileBackground ||
+          "https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=400&fit=crop",
+      });
     }
-    setIsEditing(false);
+    setIsEditing(true);
   };
 
   const handleSave = async () => {
@@ -349,10 +324,6 @@ export default function VendorProfilePage() {
       };
 
       await authAPI.updateProfile(user._id, updateData);
-
-      // Refresh user data to get the updated profile
-      await refreshUser();
-
       toast.success("Profile updated successfully!");
       setIsEditing(false);
     } catch (error) {
@@ -479,7 +450,7 @@ export default function VendorProfilePage() {
                             {isSaving ? "Saving..." : "Save"}
                           </Button>
                           <Button
-                            onClick={handleCancel}
+                            onClick={() => setIsEditing(false)}
                             variant="outline"
                             size="sm"
                             className="flex-1 sm:flex-none"
@@ -502,7 +473,7 @@ export default function VendorProfilePage() {
                             </Button>
                           </Link>
                           <Button
-                            onClick={() => setIsEditing(true)}
+                            onClick={handleEditClick}
                             size="sm"
                             className="flex-1 sm:flex-none bg-slate-700 hover:bg-slate-800"
                           >

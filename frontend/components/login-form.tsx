@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { authAPI } from "@/lib/api";
@@ -18,6 +18,7 @@ export function LoginForm({
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const router = useRouter();
 
@@ -28,29 +29,66 @@ export function LoginForm({
     try {
       const response = await authAPI.login({ email, password });
 
+      // Check if user needs email verification (can be in error response)
+      if (
+        response.data.requiresVerification ||
+        (!response.data.success &&
+          response.data.requiresVerification !== undefined)
+      ) {
+        toast.info("Email verification required", {
+          description:
+            response.data.message ||
+            "Please verify your email to continue. A new verification code has been sent.",
+        });
+        router.push(
+          `/verify-otp?email=${encodeURIComponent(
+            response.data.email || email
+          )}`
+        );
+        return;
+      }
+
       if (response.data.success) {
-        const user = response.data.data;
+        const data = response.data.data;
+        const user = data.user || data;
 
         toast.success("Welcome back!", {
           description: `You're now logged in as ${user.name}`,
         });
 
-        // Redirect based on user role
+        // Redirect based on user role - use replace to avoid back button loop
+        let redirectUrl = "/";
         switch (user.role) {
           case "admin":
-            router.push("/admin");
+            redirectUrl = "/admin";
             break;
           case "vendor":
-            router.push("/vendor");
+            redirectUrl = "/vendor";
             break;
           case "client":
-            router.push("/client");
+            redirectUrl = "/client";
             break;
-          default:
-            router.push("/");
         }
+
+        // Use window.location for hard redirect to ensure proper auth state
+        window.location.href = redirectUrl;
       }
     } catch (err: any) {
+      // Check if error response has verification requirement
+      if (err.response?.data?.requiresVerification) {
+        toast.info("Email verification required", {
+          description:
+            err.response.data.message ||
+            "Please verify your email to continue. A new verification code has been sent.",
+        });
+        router.push(
+          `/verify-otp?email=${encodeURIComponent(
+            err.response.data.email || email
+          )}`
+        );
+        return;
+      }
+
       toast.error("Login failed", {
         description:
           err.response?.data?.message ||
@@ -121,13 +159,24 @@ export function LoginForm({
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 focus:border-green-500 dark:focus:border-green-400"
+                className="pl-10 pr-10 h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 focus:border-green-500 dark:focus:border-green-400"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
             </div>
           </Field>
 

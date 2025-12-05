@@ -41,9 +41,9 @@ export default function FeaturedVendors() {
       // Cards animation
       gsap.from(".vendor-card-item", {
         opacity: 0,
-        y: 50,
-        duration: 0.8,
-        stagger: 0.15,
+        y: 20,
+        duration: 0.6,
+        stagger: 0.1,
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top 70%",
@@ -149,14 +149,8 @@ export default function FeaturedVendors() {
     <section
       id="vendors"
       ref={sectionRef}
-      className="section-padding bg-gradient-to-b from-white dark:from-gray-900 via-gray-50 dark:via-gray-800 to-white dark:to-gray-900 relative overflow-hidden transition-colors duration-300"
+      className="section-padding bg-white dark:bg-gray-900 relative overflow-hidden transition-colors duration-300"
     >
-      {/* Background Decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-green-100 dark:bg-green-900/20 rounded-full blur-3xl opacity-20" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-100 dark:bg-purple-900/20 rounded-full blur-3xl opacity-20" />
-      </div>
-
       <div className="container relative z-10">
         <div className="section-header text-center mb-12 sm:mb-16">
           <motion.div

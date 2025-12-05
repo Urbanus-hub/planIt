@@ -31,10 +31,10 @@ export default function CategoryShowcase() {
           onEnter: (elements) => {
             gsap.from(elements, {
               opacity: 0,
-              y: 60,
-              stagger: 0.1,
-              duration: 0.8,
-              ease: "power3.out",
+              y: 20,
+              stagger: 0.08,
+              duration: 0.6,
+              ease: "power2.out",
             });
           },
           start: "top 80%",

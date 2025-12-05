@@ -118,13 +118,8 @@ export default function Testimonials() {
   return (
     <section
       ref={sectionRef}
-      className="section-padding bg-gradient-to-b from-gray-50 dark:from-gray-800 via-white dark:via-gray-900 to-gray-50 dark:to-gray-800 overflow-hidden relative transition-colors duration-300"
+      className="section-padding bg-white dark:bg-gray-900 overflow-hidden relative transition-colors duration-300"
     >
-      {/* Background Decoration */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-green-200 dark:bg-green-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-10 animate-blob"></div>
-      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-200 dark:bg-emerald-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
-      <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
-
       <div className="container lg:w-[90%] mx-auto px-4 sm:px-6 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-16 sm:mb-20">

@@ -139,6 +139,17 @@ export const authAPI = {
 
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.put("/users/password", data),
+
+  verifyOTP: (data: { email: string; otp: string }) =>
+    api.post("/users/verify-otp", data),
+
+  resendOTP: (data: { email: string }) => api.post("/users/resend-otp", data),
+
+  forgotPassword: (data: { email: string }) =>
+    api.post("/users/forgot-password", data),
+
+  resetPassword: (data: { token: string; password: string }) =>
+    api.post("/users/reset-password", data),
 };
 
 // API methods for services

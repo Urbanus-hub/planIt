@@ -12,6 +12,8 @@ export interface IUser extends Document {
   isVerified: boolean;
   isActive: boolean;
   verificationToken?: string;
+  verificationOTP?: string;
+  verificationOTPExpire?: Date;
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
   // Vendor-specific fields
@@ -83,6 +85,8 @@ const userSchema = new Schema<IUser>(
       index: true,
     },
     verificationToken: String,
+    verificationOTP: String,
+    verificationOTPExpire: Date,
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     // Vendor fields

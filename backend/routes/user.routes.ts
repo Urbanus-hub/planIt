@@ -11,6 +11,10 @@ import {
   toggleUserActive,
   verifyVendor,
   getVendors,
+  verifyOTP,
+  resendOTP,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/users.controller.js";
 
 import authorize from "../middlewares/authorize.middleware.js";
@@ -22,6 +26,12 @@ const router = Router();
 // Public routes (no authentication required)
 router.post("/register", registerUser);
 router.post("/login", loginUser);
+router.post("/verify-otp", verifyOTP);
+router.post("/resend-otp", resendOTP);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 // Protected routes
 // Get current logged-in user

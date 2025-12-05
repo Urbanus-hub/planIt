@@ -38,15 +38,31 @@ export function NavSecondary({
                   asChild
                   tooltip={item.title}
                   className={cn(
-                    "h-11 px-4 text-base",
+                    "h-10 px-4 text-md font-medium rounded-lg transition-all duration-300 group",
                     isActive
-                      ? "bg-green-500 text-white dark:bg-green-900/20 dark:text-white"
-                      : ""
+                      ? "text-green-400 font-semibold"
+                      : "text-slate-300 hover:text-green-400"
                   )}
                 >
-                  <Link href={item.url}>
-                    <item.icon className="h-5 w-5 mr-1" />
-                    <span>{item.title}</span>
+                  <Link href={item.url} className="flex items-center gap-3">
+                    <item.icon
+                      className={cn(
+                        "h-5 w-5 shrink-0 transition-all duration-300",
+                        isActive
+                          ? "text-green-400"
+                          : "text-slate-300 group-hover:text-green-400"
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        "font-medium transition-all duration-300",
+                        isActive
+                          ? "text-green-400"
+                          : "text-slate-300 group-hover:text-green-400"
+                      )}
+                    >
+                      {item.title}
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

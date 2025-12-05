@@ -12,6 +12,8 @@ import {
   Building2,
   ArrowRight,
   Phone,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -27,6 +29,7 @@ export function SignupForm({
 }: React.ComponentProps<"form">) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>("client");
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -54,12 +57,10 @@ export function SignupForm({
       });
 
       if (response.data.success) {
-        const user = response.data.data;
-
-        toast.success("Account created successfully!", {
-          description: `Welcome to PlanIt, ${user.name}! Redirecting to your dashboard...`,
-        })
-        router.push('/login');
+        toast.success("Account created!", {
+          description: "Please check your email for the verification code.",
+        });
+        router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
       }
     } catch (err: any) {
       toast.error("Registration failed", {
@@ -217,14 +218,25 @@ export function SignupForm({
               <Input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Min. 6 characters"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="pl-10 h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 focus:border-green-500 dark:focus:border-green-400"
+                className="pl-10 pr-10 h-12 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 focus:border-green-500 dark:focus:border-green-400"
                 minLength={6}
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
             </div>
           </Field>
 

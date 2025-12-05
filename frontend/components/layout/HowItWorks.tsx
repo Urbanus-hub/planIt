@@ -59,10 +59,10 @@ export default function HowItWorks() {
       // Cards stagger animation - slide up and fade in with stagger
       gsap.from(".how-it-works-cards > div > div", {
         opacity: 0,
-        y: 60,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: "power3.out",
+        y: 20,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "power2.out",
         scrollTrigger: {
           trigger: cardsRef.current,
           start: "top 75%",
@@ -79,19 +79,6 @@ export default function HowItWorks() {
         scrollTrigger: {
           trigger: ctaRef.current,
           start: "top 90%",
-        },
-      });
-
-      // Parallax effect on cards
-      gsap.to(".how-it-works-cards > div > div", {
-        y: -20,
-        duration: 1,
-        ease: "none",
-        scrollTrigger: {
-          trigger: cardsRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1,
         },
       });
     }, sectionRef);
@@ -138,7 +125,7 @@ export default function HowItWorks() {
     <section
       id="how-it-works"
       ref={sectionRef}
-      className="section-padding bg-gray-50 dark:bg-gray-800 overflow-hidden transition-colors duration-300"
+      className="section-padding bg-white dark:bg-gray-900 overflow-hidden transition-colors duration-300"
     >
       <div className="container lg:w-[90vw]">
         {/* Section Header */}

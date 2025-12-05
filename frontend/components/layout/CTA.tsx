@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   Sparkles,
@@ -104,24 +105,8 @@ export default function CTA() {
   return (
     <section
       ref={sectionRef}
-      className="section-padding bg-gradient-to-b from-white dark:from-gray-900 via-gray-50 dark:via-gray-800 to-white dark:to-gray-900 overflow-hidden relative transition-colors duration-300"
+      className="section-padding bg-white dark:bg-gray-950 overflow-hidden relative transition-colors duration-300"
     >
-      {/* Background Decorations */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="floating-sparkle absolute top-10 left-10 w-20 h-20 bg-green-200 dark:bg-green-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-xl opacity-30"></div>
-        <div className="floating-sparkle absolute top-20 right-20 w-32 h-32 bg-emerald-200 dark:bg-emerald-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-xl opacity-30"></div>
-        <div className="floating-sparkle absolute bottom-10 left-1/4 w-24 h-24 bg-teal-200 dark:bg-teal-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-xl opacity-30"></div>
-        <div className="floating-sparkle absolute bottom-20 right-1/4 w-28 h-28 bg-green-300 dark:bg-green-900/30 rounded-full mix-blend-multiply dark:mix-blend-lighten filter blur-xl opacity-30"></div>
-        <Sparkles
-          className="floating-sparkle absolute top-32 left-1/3 text-green-300 dark:text-green-700"
-          size={40}
-        />
-        <Sparkles
-          className="floating-sparkle absolute bottom-32 right-1/3 text-emerald-300 dark:text-emerald-700"
-          size={35}
-        />
-      </div>
-
       <div className="container lg:w-[90%] mx-auto px-4 sm:px-6 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-12 sm:mb-16">
@@ -155,10 +140,6 @@ export default function CTA() {
             className="relative"
           >
             <div className="h-full bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-8 sm:p-10 lg:p-12 shadow-2xl overflow-hidden relative">
-              {/* Decorative circles */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full -ml-16 -mb-16"></div>
-
               {/* Content */}
               <div className="relative z-10">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-lg">
@@ -181,7 +162,7 @@ export default function CTA() {
                       key={index}
                       className="flex items-center gap-3 text-white"
                     >
-                      <div className="check-icon w-6 h-6 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                         <CheckCircle2 className="w-4 h-4" />
                       </div>
                       <span className="text-sm sm:text-base">
@@ -193,13 +174,17 @@ export default function CTA() {
 
                 {/* CTA Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="flex-1 bg-white text-green-600 font-bold px-6 py-4 rounded-xl hover:bg-green-50 transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 text-base sm:text-lg">
-                    Start Planning
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
-                  <button className="flex-1 bg-white/10 backdrop-blur-sm text-white font-semibold px-6 py-4 rounded-xl border-2 border-white/30 hover:bg-white/20 transition-all duration-300 text-base sm:text-lg">
-                    Browse Vendors
-                  </button>
+                  <Link href="/register" className="flex-1">
+                    <button className="w-full bg-white text-green-600 font-bold px-6 py-4 rounded-xl hover:bg-green-50 transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 text-base sm:text-lg">
+                      Start Planning
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+                  </Link>
+                  <Link href="/vendors" className="flex-1">
+                    <button className="w-full bg-white/10 backdrop-blur-sm text-white font-semibold px-6 py-4 rounded-xl border-2 border-white/30 hover:bg-white/20 transition-all duration-300 text-base sm:text-lg">
+                      Browse Vendors
+                    </button>
+                  </Link>
                 </div>
 
                 <p className="text-xs sm:text-sm text-green-100 mt-4 text-center sm:text-left">
@@ -216,11 +201,7 @@ export default function CTA() {
             transition={{ duration: 0.3 }}
             className="relative"
           >
-            <div className="h-full bg-gradient-to-br from-gray-900 dark:from-gray-800 to-gray-800 dark:to-gray-700 rounded-3xl p-8 sm:p-10 lg:p-12 shadow-2xl overflow-hidden relative border border-gray-700 dark:border-gray-600">
-              {/* Decorative circles */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-green-500/10 rounded-full -mr-20 -mt-20"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-green-500/10 rounded-full -ml-16 -mb-16"></div>
-
+            <div className="h-full bg-white dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-700 rounded-3xl p-8 sm:p-10 lg:p-12 shadow-2xl overflow-hidden relative border border-gray-200 dark:border-gray-600">
               {/* Badge */}
               <div className="absolute top-6 right-6 sm:top-8 sm:right-8 px-3 py-1 bg-green-500 dark:bg-green-600 text-white text-xs sm:text-sm font-bold rounded-full">
                 Earn More
@@ -232,11 +213,11 @@ export default function CTA() {
                   <Store className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                 </div>
 
-                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
                   For Vendors
                 </h3>
 
-                <p className="text-base sm:text-lg text-gray-300 mb-6 leading-relaxed">
+                <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
                   List your services and connect with thousands of clients
                   actively looking for your expertise.
                 </p>
@@ -246,10 +227,10 @@ export default function CTA() {
                   {vendorFeatures.map((feature, index) => (
                     <li
                       key={index}
-                      className="flex items-center gap-3 text-white"
+                      className="flex items-center gap-3 text-gray-700 dark:text-white"
                     >
-                      <div className="check-icon w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                        <CheckCircle2 className="w-4 h-4 text-green-400" />
+                      <div className="w-6 h-6 bg-green-500/20 dark:bg-green-500/20 rounded-lg flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
                       </div>
                       <span className="text-sm sm:text-base">
                         {feature.text}
@@ -260,16 +241,20 @@ export default function CTA() {
 
                 {/* CTA Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-6 py-4 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 text-base sm:text-lg">
-                    Become a Vendor
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
-                  <button className="flex-1 bg-white/10 backdrop-blur-sm text-white font-semibold px-6 py-4 rounded-xl border-2 border-white/20 hover:bg-white/20 transition-all duration-300 text-base sm:text-lg">
-                    Learn More
-                  </button>
+                  <Link href="/register" className="flex-1">
+                    <button className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-6 py-4 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2 text-base sm:text-lg">
+                      Become a Vendor
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+                  </Link>
+                  <Link href="/vendors" className="flex-1">
+                    <button className="w-full bg-gray-100 dark:bg-white/10 dark:backdrop-blur-sm text-gray-900 dark:text-white font-semibold px-6 py-4 rounded-xl border-2 border-gray-200 dark:border-white/20 hover:bg-gray-200 dark:hover:bg-white/20 transition-all duration-300 text-base sm:text-lg">
+                      Learn More
+                    </button>
+                  </Link>
                 </div>
 
-                <p className="text-xs sm:text-sm text-gray-400 mt-4 text-center sm:text-left">
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-4 text-center sm:text-left">
                   ✓ Free to list • Commission-based pricing
                 </p>
               </div>

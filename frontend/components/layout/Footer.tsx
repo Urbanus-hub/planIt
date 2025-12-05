@@ -135,30 +135,24 @@ export default function Footer() {
   return (
     <footer
       ref={footerRef}
-      className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-gray-300 relative overflow-hidden"
+      className="bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 relative overflow-hidden border-t border-gray-200 dark:border-gray-800"
     >
-      {/* Decorative Background */}
-      <div className="absolute inset-0 pointer-events-none opacity-10">
-        <div className="absolute top-10 left-10 w-72 h-72 bg-green-500 rounded-full filter blur-3xl"></div>
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-emerald-500 rounded-full filter blur-3xl"></div>
-      </div>
-
       <div className="container lg:w-[90%] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Newsletter Section */}
-        <div className="newsletter-box py-12 sm:py-16 border-b border-gray-700">
+        <div className="newsletter-box py-12 sm:py-16 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-6 h-6 text-green-400" />
-                  <span className="text-green-400 font-semibold text-sm">
+                  <Sparkles className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  <span className="text-green-600 dark:text-green-400 font-semibold text-sm">
                     Stay Updated
                   </span>
                 </div>
-                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3">
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-3">
                   Get Event Planning Tips
                 </h3>
-                <p className="text-gray-400 text-sm sm:text-base">
+                <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
                   Subscribe to our newsletter for exclusive deals, tips, and
                   vendor spotlights
                 </p>
@@ -171,7 +165,7 @@ export default function Footer() {
                     <input
                       type="email"
                       placeholder="Enter your email"
-                      className="w-full pl-12 pr-4 py-4 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                      className="w-full pl-12 pr-4 py-4 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
                     />
                   </div>
                   <motion.button
@@ -201,10 +195,12 @@ export default function Footer() {
                 <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
                   <span className="text-white font-bold text-2xl">P</span>
                 </div>
-                <span className="text-3xl font-bold text-white">PlanIt</span>
+                <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                  PlanIt
+                </span>
               </div>
 
-              <p className="text-gray-400 mb-6 leading-relaxed max-w-sm">
+              <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed max-w-sm">
                 Your trusted partner for finding the best event vendors in
                 Kenya. Plan your perfect event with confidence and ease.
               </p>
@@ -213,15 +209,17 @@ export default function Footer() {
               <div className="space-y-2 mb-6">
                 {trustBadges.map((badge, index) => (
                   <div key={index} className="flex items-center gap-2 text-sm">
-                    <badge.icon className="w-4 h-4 text-green-400" />
-                    <span className="text-gray-400">{badge.text}</span>
+                    <badge.icon className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {badge.text}
+                    </span>
                   </div>
                 ))}
               </div>
 
               {/* Social Links */}
               <div className=" ">
-                <p className="text-sm font-semibold text-white mb-3 ">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-3 ">
                   Follow Us
                 </p>
                 <div className="flex gap-3 ">
@@ -229,12 +227,12 @@ export default function Footer() {
                     <motion.a
                       key={index}
                       href={social.href}
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      whileTap={{ scale: 0.9 }}
-                      className={`social-icon w-11 h-11  ${social.color} rounded-xl flex items-center justify-center transition-all duration-300 hover:shadow-lg group backdrop-blur-sm border-2 border-green-400 hover:border-white/40`}
+                      whileHover={{ scale: 1.1, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`social-icon w-10 h-10 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 ${social.color} rounded-lg flex items-center justify-center transition-all duration-300 hover:shadow-md group`}
                       aria-label={social.name}
                     >
-                      <social.icon className="w-5 h-5 text-white group-hover:text-white " />
+                      <social.icon className="w-5 h-5 text-gray-900 dark:text-gray-300 group-hover:text-white transition-colors" />
                     </motion.a>
                   ))}
                 </div>
@@ -247,7 +245,7 @@ export default function Footer() {
                 key={index}
                 className="footer-section w-[calc(50%-1rem)] sm:w-auto sm:flex-1 lg:w-[calc(20%-1.2rem)]"
               >
-                <h3 className="text-white font-bold mb-4 sm:mb-5 text-base sm:text-lg relative inline-block">
+                <h3 className="text-gray-900 dark:text-white font-bold mb-4 sm:mb-5 text-base sm:text-lg relative inline-block">
                   {section.title}
                   <div className="absolute -bottom-1 sm:-bottom-2 left-0 w-8 h-1 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full"></div>
                 </h3>
@@ -256,7 +254,7 @@ export default function Footer() {
                     <li key={linkIndex}>
                       <a
                         href={link.href}
-                        className="text-gray-300 hover:text-green-400 transition-colors flex items-center gap-2 group text-sm sm:text-base"
+                        className="text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors flex items-center gap-2 group text-sm sm:text-base"
                       >
                         <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity -ml-4 group-hover:ml-0 duration-300">
                           {link.icon}
@@ -274,11 +272,11 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 py-6 sm:py-8">
+        <div className="border-t border-gray-200 dark:border-gray-800 py-6 sm:py-8">
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
             {/* Copyright */}
             <div className="text-center lg:text-left">
-              <p className="text-gray-400 text-sm flex items-center justify-center lg:justify-start gap-1 flex-wrap">
+              <p className="text-gray-600 dark:text-gray-400 text-sm flex items-center justify-center lg:justify-start gap-1 flex-wrap">
                 © {new Date().getFullYear()} PlanIt. Made with
                 <Heart className="w-4 h-4 text-red-500 fill-current inline-block" />
                 in Kenya. All rights reserved.
@@ -289,21 +287,21 @@ export default function Footer() {
             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
               <a
                 href="mailto:hello@planit.co.ke"
-                className="flex items-center gap-2 text-gray-400 hover:text-green-400 transition-colors text-sm group"
+                className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors text-sm group"
               >
                 <Mail className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 <span>hello@planit.co.ke</span>
               </a>
-              <div className="hidden sm:block w-px h-4 bg-gray-700"></div>
+              <div className="hidden sm:block w-px h-4 bg-gray-300 dark:bg-gray-700"></div>
               <a
                 href="tel:+254700000000"
-                className="flex items-center gap-2 text-gray-400 hover:text-green-400 transition-colors text-sm group"
+                className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors text-sm group"
               >
                 <Phone className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 <span>+254 700 000 000</span>
               </a>
-              <div className="hidden sm:block w-px h-4 bg-gray-700"></div>
-              <div className="flex items-center gap-2 text-gray-400 text-sm">
+              <div className="hidden sm:block w-px h-4 bg-gray-300 dark:bg-gray-700"></div>
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm">
                 <MapPin className="w-4 h-4" />
                 <span>Nairobi, Kenya</span>
               </div>
@@ -313,14 +311,14 @@ export default function Footer() {
             <div className="flex items-center gap-4 text-sm">
               <a
                 href="#privacy"
-                className="text-gray-400 hover:text-green-400 transition-colors"
+                className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
               >
                 Privacy
               </a>
-              <span className="text-gray-700">•</span>
+              <span className="text-gray-300 dark:text-gray-700">•</span>
               <a
                 href="#terms"
-                className="text-gray-400 hover:text-green-400 transition-colors"
+                className="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
               >
                 Terms
               </a>

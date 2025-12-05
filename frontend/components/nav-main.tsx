@@ -51,10 +51,10 @@ export function NavMain({
                   tooltip={item.title}
                   isActive={isActive}
                   className={cn(
-                    "h-10 px-4 text-md font-medium rounded-lg transition-all duration-500 relative overflow-visible group bg-transparent! hover:bg-transparent! active:bg-transparent!",
+                    "h-10 px-4 text-md font-medium rounded-lg transition-all duration-300 relative overflow-visible group",
                     isActive
-                      ? "bg-linear-to-r from-green-500 to-green-600 text-white shadow-xl shadow-green-500/50 border border-green-300/60 font-semibold"
-                      : "text-slate-200 border border-transparent hover:text-white hover:bg-linear-to-r hover:from-green-500/60 hover:to-green-600/60 hover:border-green-400/40 hover:shadow-lg hover:shadow-green-500/30"
+                      ? "text-green-400 font-semibold"
+                      : "text-slate-300 hover:text-green-400"
                   )}
                 >
                   <Link
@@ -69,15 +69,22 @@ export function NavMain({
                     {item.icon && (
                       <item.icon
                         className={cn(
-                          "h-5 w-5 shrink-0 transition-all duration-300 font-bold",
+                          "h-5 w-5 shrink-0 transition-all duration-300",
                           isActive
-                            ? "text-white drop-shadow-lg"
-                            : "text-white group-hover:text-white group-hover:drop-shadow-md"
+                            ? "text-green-400"
+                            : "text-slate-300 group-hover:text-green-400"
                         )}
                       />
                     )}
                     {state !== "collapsed" && (
-                      <span className="text-white whitespace-nowrap font-medium">
+                      <span
+                        className={cn(
+                          "whitespace-nowrap font-medium transition-all duration-300",
+                          isActive
+                            ? "text-green-400"
+                            : "text-slate-300 group-hover:text-green-400"
+                        )}
+                      >
                         {item.title}
                       </span>
                     )}
