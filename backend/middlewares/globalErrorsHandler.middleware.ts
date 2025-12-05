@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { Error as MongooseError } from "mongoose";
 
 interface CustomError extends Error {
   statusCode?: number;
@@ -13,7 +12,7 @@ interface CustomError extends Error {
 
 const handleGlobalError = (
   err: CustomError,
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction
 ): void => {

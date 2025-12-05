@@ -223,7 +223,7 @@ export const getProviderBookings = async (
 };
 
 export const getAllBookings = async (
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -252,7 +252,7 @@ export const updateBookingStatus = async (
   try {
     const user = req.user as AuthUser;
     const { status } = req.body;
-    const { isProvider, isBookingOwner } = req.body;
+    const { isProvider } = req.body;
 
     const validStatuses = [
       "pending",

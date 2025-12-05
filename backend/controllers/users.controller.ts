@@ -202,9 +202,9 @@ export const loginUser = async (
 };
 
 export const logoutUser = async (
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): Promise<void> => {
   // Clear the auth cookie
   res.clearCookie("authToken", {

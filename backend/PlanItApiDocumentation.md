@@ -1,17 +1,34 @@
-# Event Services Platform API Documentation
+# PlanIt API Documentation
 
-## Base URL
-```
-http://localhost:3000/api/
-```
+## Overview
+
+The PlanIt API provides a comprehensive RESTful interface for managing event planning services, vendor listings, bookings, and user authentication. This API powers the PlanIt platform, connecting event organizers with verified service providers across Kenya.
+
+**Version:** 1.0.0  
+**Base URL (Development):** `http://localhost:5000/api/v1`  
+**Base URL (Production):** `https://your-api-url.onrender.com/api/v1`
+
+## Table of Contents
+
+1. [Authentication](#authentication)
+2. [User Management](#user-management)
+3. [Services](#services)
+4. [Bookings](#bookings)
+5. [Error Handling](#error-handling)
+6. [Rate Limiting](#rate-limiting)
+
+---
 
 ## Authentication
 
-Most endpoints require authentication using JWT (JSON Web Tokens). Include the token in the Authorization header:
+The PlanIt API uses JWT (JSON Web Tokens) for authentication. Tokens are stored in httpOnly cookies for enhanced security.
 
-```
-Authorization: Bearer <your_jwt_token>
-```
+### Authentication Flow
+
+1. Register or login to receive a JWT token
+2. Token is automatically stored in httpOnly cookie
+3. Token is included in subsequent requests via cookie
+4. Token expires after 7 days (configurable)
 
 ### Response Format
 
@@ -19,23 +36,31 @@ All API responses follow this structure:
 
 ```json
 {
-  "success": true/false,
-  "message": "Description of the result",
-  "data": {} // Response data (if applicable),
-  "count": 10 // Number of items (for list endpoints)
+  "success": true,
+  "message": "Operation successful",
+  "data": {},
+  "count": 10
+}
+```
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "message": "Error description",
+  "error": "Detailed error message"
 }
 ```
 
 ---
 
-## 1. User Endpoints
+## User Management
 
 ### 1.1 Register User
 
-**POST** `/users/register`
+Create a new user account with email verification.
 
-Create a new user account.
-
+**Endpoint:** `POST /auth/register`  
 **Authentication:** Not required
 
 **Request Body:**
@@ -43,51 +68,132 @@ Create a new user account.
 {
   "name": "John Doe",
   "email": "john@example.com",
-  "password": "password123",
-  "role": "client", // Optional: "client", "vendor", or "admin" (default: "client")
-  "phone": "+254712345678", // Optional
-  "businessName": "John's Photography" // Optional, for vendors
+  "password": "SecurePassword123!",
+  "role": "client",
+  "phone": "+254712345678",
+  "businessName": "John's Photography"
 }
 ```
 
-**Success Response (201):**
+**Field Descriptions:**
+- `name` (required): User's full name (3-50 characters)
+- `email` (required): Valid email address
+- `password` (required): Minimum 6 characters
+- `role` (optional): `client`, `vendor`, or `admin` (default: `client`)
+- `phone` (optional): Phone number with country code
+- `businessName` (optional): Required for vendors
+
+**Success Response (200):**
 ```json
 {
   "success": true,
-  "message": "User registered successfully",
+  "message": "Registration successful. Please check your email for OTP verification.",
   "data": {
-    "_id": "60f7b3b3b3b3b3b3b3b3b3b3",
+    "_id": "674f1234abcd5678efgh9012",
     "name": "John Doe",
     "email": "john@example.com",
     "role": "client",
     "phone": "+254712345678",
     "isActive": true,
     "isVerified": false,
-    "createdAt": "2024-01-01T00:00:00.000Z"
-  },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "createdAt": "2024-12-05T10:30:00.000Z"
+  }
 }
 ```
 
 **Error Responses:**
-- `400` - Missing required fields or email already registered
-- `500` - Server error
+- `400 Bad Request` - Missing required fields or invalid data
+- `409 Conflict` - Email already registered
+- `500 Internal Server Error` - Server error
+
+**Notes:**
+- OTP is sent to the provided email
+- User must verify email before accessing protected routes
+- Password is hashed using bcrypt before storage
 
 ---
 
-### 1.2 Login User
+### 1.2 Verify Email (OTP)
 
-**POST** `/users/login`
+Verify user email address using OTP sent during registration.
 
-Authenticate a user and receive a JWT token.
-
+**Endpoint:** `POST /auth/verify-otp`  
 **Authentication:** Not required
 
 **Request Body:**
 ```json
 {
   "email": "john@example.com",
-  "password": "password123"
+  "otp": "123456"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Email verified successfully",
+  "data": {
+    "user": {
+      "_id": "674f1234abcd5678efgh9012",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "role": "client",
+      "isVerified": true
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+**Error Responses:**
+- `400 Bad Request` - Missing email or OTP
+- `401 Unauthorized` - Invalid or expired OTP
+- `404 Not Found` - User not found
+
+---
+
+### 1.3 Resend OTP
+
+Request a new OTP for email verification.
+
+**Endpoint:** `POST /auth/resend-otp`  
+**Authentication:** Not required
+
+**Request Body:**
+```json
+{
+  "email": "john@example.com"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "OTP has been resent to your email"
+}
+```
+
+**Error Responses:**
+- `400 Bad Request` - Email is required or already verified
+- `404 Not Found` - User not found
+- `429 Too Many Requests` - Too many OTP requests (rate limited)
+
+---
+
+### 1.4 Login User
+
+Authenticate a user and receive a JWT token.
+
+**Endpoint:** `POST /auth/login`  
+**Authentication:** Not required
+
+**Request Body:**
+```json
+{
+  "email": "john@example.com",
+  "password": "SecurePassword123!"
 }
 ```
 
@@ -97,22 +203,222 @@ Authenticate a user and receive a JWT token.
   "success": true,
   "message": "Login successful",
   "data": {
-    "_id": "60f7b3b3b3b3b3b3b3b3b3b3",
-    "name": "John Doe",
-    "email": "john@example.com",
-    "role": "client"
-  },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    "user": {
+      "_id": "674f1234abcd5678efgh9012",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "role": "client",
+      "isVerified": true
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
 }
 ```
 
 **Error Responses:**
-- `400` - Missing email or password
-- `401` - Invalid credentials
-- `403` - Account deactivated
-- `500` - Server error
+- `400 Bad Request` - Missing email or password
+- `401 Unauthorized` - Invalid credentials
+- `403 Forbidden` - Email not verified or account deactivated
+- `500 Internal Server Error` - Server error
+
+**Notes:**
+- Unverified users are redirected to OTP verification
+- JWT token is stored in httpOnly cookie
+- Token expires after 7 days
 
 ---
+
+### 1.5 Forgot Password
+
+Request a password reset link via email.
+
+**Endpoint:** `POST /auth/forgot-password`  
+**Authentication:** Not required
+
+**Request Body:**
+```json
+{
+  "email": "john@example.com"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Password reset link sent to your email"
+}
+```
+
+**Error Responses:**
+- `400 Bad Request` - Email is required
+- `404 Not Found` - User not found
+- `500 Internal Server Error` - Email sending failed
+
+**Notes:**
+- Reset token expires after 10 minutes
+- Link format: `{CLIENT_URL}/reset-password?token={resetToken}`
+
+---
+
+### 1.6 Reset Password
+
+Reset user password using the token from email.
+
+**Endpoint:** `POST /auth/reset-password/:token`  
+**Authentication:** Not required
+
+**URL Parameters:**
+- `token` (required): Reset token from email
+
+**Request Body:**
+```json
+{
+  "password": "NewSecurePassword123!"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Password reset successful",
+  "data": {
+    "user": {
+      "_id": "674f1234abcd5678efgh9012",
+      "name": "John Doe",
+      "email": "john@example.com"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+**Error Responses:**
+- `400 Bad Request` - Invalid or expired token, or password too weak
+- `500 Internal Server Error` - Server error
+
+---
+
+### 1.7 Get Current User
+
+Get authenticated user's profile information.
+
+**Endpoint:** `GET /auth/me`  
+**Authentication:** Required
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "674f1234abcd5678efgh9012",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "client",
+    "phone": "+254712345678",
+    "isVerified": true,
+    "isActive": true,
+    "createdAt": "2024-12-05T10:30:00.000Z",
+    "updatedAt": "2024-12-05T11:00:00.000Z"
+  }
+}
+```
+
+**Error Responses:**
+- `401 Unauthorized` - Not authenticated
+- `404 Not Found` - User not found
+
+---
+
+### 1.8 Logout User
+
+Logout user and clear authentication token.
+
+**Endpoint:** `GET /auth/logout`  
+**Authentication:** Required
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "message": "Logged out successfully"
+}
+```
+
+---
+
+## Services
+
+### 2.1 Get All Services
+
+Retrieve a list of all services with optional filters.
+
+**Endpoint:** `GET /services`  
+**Authentication:** Not required
+
+**Query Parameters:**
+- `category` (optional): Filter by category
+- `location` (optional): Filter by location
+- `minPrice` (optional): Minimum price filter
+- `maxPrice` (optional): Maximum price filter
+- `rating` (optional): Minimum rating filter
+- `search` (optional): Search in title and description
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 10)
+- `sort` (optional): Sort field (e.g., `price`, `-rating`, `createdAt`)
+
+**Example:** `GET /services?category=photography&minPrice=10000&sort=-rating&page=1&limit=20`
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "count": 45,
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 45,
+    "pages": 3
+  },
+  "data": [
+    {
+      "_id": "674f5678abcd1234efgh5678",
+      "title": "Professional Wedding Photography",
+      "description": "Capture your special moments with professional photography",
+      "category": "Photography",
+      "pricing": {
+        "basePrice": 50000,
+        "currency": "KES"
+      },
+      "vendor": {
+        "_id": "674f1234abcd5678efgh9012",
+        "name": "John's Photography",
+        "rating": 4.8,
+        "totalReviews": 127
+      },
+      "location": "Nairobi, Kenya",
+      "rating": 4.9,
+      "images": ["url1.jpg", "url2.jpg"],
+      "createdAt": "2024-12-01T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### 2.2 Get Service by ID
+
+Retrieve detailed information about a specific service.
+
+**Endpoint:** `GET /services/:id`  
+**Authentication:** Not required
+
+**URL Parameters:**
+- `id` (required): Service ID
+
+**Success Response (200):**---
 
 ### 1.3 Get Current User
 

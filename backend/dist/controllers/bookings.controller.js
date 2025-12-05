@@ -1,0 +1,300 @@
+import Booking from "../models/bookings.model.js";
+import Service from "../models/services.model.js";
+export const createBooking = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { serviceId, date, notes, attendees } = req.body;
+        // Validation
+        if (!serviceId || !date) {
+            res.status(400).json({
+                success: false,
+                message: "Service ID and date are required",
+            });
+            return;
+        }
+        // Check for duplicate bookings
+        const existingBooking = await Booking.findOne({
+            user: user.id,
+            service: serviceId,
+            date: new Date(date),
+            status: { $nin: ["cancelled", "refunded"] },
+        });
+        if (existingBooking) {
+            res.status(400).json({
+                success: false,
+                message: "You have already booked this service for the selected date",
+            });
+            return;
+        }
+        // Verify service exists and is active
+        const service = await Service.findById(serviceId);
+        if (!service) {
+            res.status(404).json({
+                success: false,
+                message: "Service not found",
+            });
+            return;
+        }
+        if (!service.isActive) {
+            res.status(400).json({
+                success: false,
+                message: "This service is currently unavailable",
+            });
+            return;
+        }
+        // Check capacity if applicable
+        if (service.capacity) {
+            const bookingsOnDate = await Booking.countDocuments({
+                service: serviceId,
+                date: new Date(date),
+                status: { $nin: ["cancelled", "refunded"] },
+            });
+            if (bookingsOnDate >= service.capacity) {
+                res.status(400).json({
+                    success: false,
+                    message: "This service is fully booked for the selected date",
+                });
+                return;
+            }
+        }
+        // Create booking
+        const booking = await Booking.create({
+            user: user.id,
+            service: service._id,
+            provider: service.provider,
+            startDate: new Date(date),
+            notes,
+            attendees,
+            totalPrice: service.price,
+            status: "pending",
+            paymentStatus: "unpaid",
+        });
+        // Populate booking data
+        await booking.populate([
+            { path: "user", select: "name email" },
+            { path: "service", select: "title category price" },
+            { path: "provider", select: "name email businessName" },
+        ]);
+        res.status(201).json({
+            success: true,
+            message: "Booking created successfully",
+            data: booking,
+        });
+    }
+    catch (error) {
+        console.error("Create booking error:", error);
+        next(error);
+    }
+};
+export const deleteBooking = async (req, res, next) => {
+    try {
+        const booking = await Booking.findById(req.params.id);
+        if (!booking) {
+            res.status(404).json({
+                success: false,
+                message: "Booking not found",
+            });
+            return;
+        }
+        // Update status to cancelled instead of deleting
+        booking.status = "cancelled";
+        booking.cancelledAt = new Date();
+        booking.cancelledBy = req.user.id;
+        await booking.save();
+        res.status(200).json({
+            success: true,
+            message: "Booking cancelled successfully",
+            data: booking,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+export const getUserBookings = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const userId = req.params.userId || user.id;
+        // Check authorization (user can only view their own bookings unless admin)
+        if (userId !== user.id && user.role !== "admin") {
+            res.status(403).json({
+                success: false,
+                message: "Access denied",
+            });
+            return;
+        }
+        const bookings = await Booking.find({ user: userId })
+            .populate("service", "title category price location")
+            .populate("provider", "name businessName")
+            .sort({ createdAt: -1 });
+        res.status(200).json({
+            success: true,
+            count: bookings.length,
+            data: bookings,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+export const getServiceBookings = async (req, res, next) => {
+    try {
+        const bookings = await Booking.find({ service: req.params.serviceId })
+            .populate("user", "name email")
+            .populate("provider", "name businessName")
+            .sort({ startDate: -1 });
+        res.status(200).json({
+            success: true,
+            count: bookings.length,
+            data: bookings,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+export const getProviderBookings = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const providerId = req.params.providerId || user.id;
+        // Vendors can only view their own bookings unless admin
+        if (user.role === "vendor" && providerId !== user.id) {
+            res.status(403).json({
+                success: false,
+                message: "Access denied",
+            });
+            return;
+        }
+        const bookings = await Booking.find({ provider: providerId })
+            .populate("user", "name email phone")
+            .populate("service", "title category price")
+            .sort({ startDate: -1 });
+        res.status(200).json({
+            success: true,
+            count: bookings.length,
+            data: bookings,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+export const getAllBookings = async (_req, res, next) => {
+    try {
+        const bookings = await Booking.find()
+            .populate("user", "name email")
+            .populate("service", "title category price")
+            .populate("provider", "name businessName")
+            .sort({ createdAt: -1 });
+        res.status(200).json({
+            success: true,
+            count: bookings.length,
+            data: bookings,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+export const updateBookingStatus = async (req, res, next) => {
+    try {
+        const user = req.user;
+        const { status } = req.body;
+        const { isProvider } = req.body;
+        const validStatuses = [
+            "pending",
+            "confirmed",
+            "completed",
+            "cancelled",
+            "refunded",
+        ];
+        if (!validStatuses.includes(status)) {
+            res.status(400).json({
+                success: false,
+                message: "Invalid status",
+            });
+            return;
+        }
+        const booking = await Booking.findById(req.params.id);
+        if (!booking) {
+            res.status(404).json({
+                success: false,
+                message: "Booking not found",
+            });
+            return;
+        }
+        // Business logic for status updates
+        if (status === "confirmed" && !isProvider && user.role !== "admin") {
+            res.status(403).json({
+                success: false,
+                message: "Only the service provider can confirm bookings",
+            });
+            return;
+        }
+        if (status === "completed" && !isProvider && user.role !== "admin") {
+            res.status(403).json({
+                success: false,
+                message: "Only the service provider can mark bookings as completed",
+            });
+            return;
+        }
+        if (status === "cancelled") {
+            booking.cancelledAt = new Date();
+            booking.cancelledBy = user.id;
+        }
+        if (status === "confirmed") {
+            booking.confirmedAt = new Date();
+        }
+        if (status === "completed") {
+            booking.completedAt = new Date();
+        }
+        booking.status = status;
+        await booking.save();
+        res.status(200).json({
+            success: true,
+            message: `Booking status updated to ${status}`,
+            data: booking,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+export const updateBooking = async (req, res, next) => {
+    try {
+        const { date, notes, attendees } = req.body;
+        const booking = await Booking.findById(req.params.id);
+        if (!booking) {
+            res.status(404).json({
+                success: false,
+                message: "Booking not found",
+            });
+            return;
+        }
+        // Don't allow updates to confirmed/completed bookings
+        if (["completed", "cancelled", "refunded"].includes(booking.status)) {
+            res.status(400).json({
+                success: false,
+                message: `Cannot update ${booking.status} bookings`,
+            });
+            return;
+        }
+        // Update allowed fields
+        if (date)
+            booking.startDate = new Date(date);
+        if (notes !== undefined)
+            booking.notes = notes;
+        if (attendees !== undefined)
+            booking.attendees = attendees;
+        await booking.save();
+        res.status(200).json({
+            success: true,
+            message: "Booking updated successfully",
+            data: booking,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+//# sourceMappingURL=bookings.controller.js.map
