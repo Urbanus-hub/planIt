@@ -53,6 +53,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       const response = await authAPI.login(data);
       if (response.data.success) {
+        // Store token in localStorage
+        if (response.data.token) {
+          localStorage.setItem("authToken", response.data.token);
+        }
         setUser(response.data.data);
         return response.data.data;
       }
@@ -88,11 +92,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await authAPI.logout();
+      // Clear token from localStorage
+      localStorage.removeItem("authToken");
       setUser(null);
       toast.success("Logged out successfully", {
         description: "You have been signed out of your account",
       });
     } catch (err) {
+      // Clear token even if API call fails
+      localStorage.removeItem("authToken");
+      setUser(null);
       toast.error("Logout failed", {
         description: "There was a problem logging you out. Please try again.",
       });
