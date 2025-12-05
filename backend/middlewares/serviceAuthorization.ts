@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import Service from "../models/services.model";
-import { AuthUser } from "./authorize.middleware";
+import Service from "../models/services.model.js";
+import { AuthUser } from "./authorize.middleware.js";
 
 /**
  * Verify that the user owns the service or is an admin

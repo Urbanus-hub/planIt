@@ -7,9 +7,9 @@ import {
   deleteService,
   getProviderServices,
 } from "../controllers/service.controller.js";
-import authorize from "../middlewares/authorize.middleware";
-import { authorizeRole } from "../middlewares/roleBasedAccess.middleware";
-import { verifyServiceOwnership } from "../middlewares/serviceAuthorization";
+import authorize from "../middlewares/authorize.middleware.js";
+import { authorizeRole } from "../middlewares/roleBasedAccess.middleware.js";
+import { verifyServiceOwnership } from "../middlewares/serviceAuthorization.js";
 
 const router = Router();
 

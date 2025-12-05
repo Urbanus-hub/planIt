@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
-import { Conversation, Message } from "../models/messages.model";
-import User from "../models/user.model";
-import authorize from "../middlewares/authorize.middleware";
+import { Conversation, Message } from "../models/messages.model.js";
+import User from "../models/user.model.js";
+import authorize from "../middlewares/authorize.middleware.js";
 
 const router = Router();
 

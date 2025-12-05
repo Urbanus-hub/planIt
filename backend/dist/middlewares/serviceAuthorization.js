@@ -1,4 +1,4 @@
-import Service from "../models/services.model";
+import Service from "../models/services.model.js";
 /**
  * Verify that the user owns the service or is an admin
  */

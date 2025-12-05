@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import Booking from "../models/bookings.model";
-import { AuthUser } from "./authorize.middleware";
+import Booking from "../models/bookings.model.js";
+import { AuthUser } from "./authorize.middleware.js";
 
 /**
  * Verify that the user owns the booking or is an admin
@@ -84,7 +84,8 @@ export const verifyProviderAccess = async (
     if (!isProvider && !isBookingOwner) {
       res.status(403).json({
         success: false,
-        message: "Access denied. You don't have permission to modify this booking.",
+        message:
+          "Access denied. You don't have permission to modify this booking.",
       });
       return;
     }

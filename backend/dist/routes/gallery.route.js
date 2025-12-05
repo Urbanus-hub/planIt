@@ -1,6 +1,6 @@
 import express from "express";
-import { uploadGalleryImage, getGalleryImages, deleteGalleryImage, updateGalleryImage, clearGallery, } from "../controllers/gallery.controller";
-import authorize from "../middlewares/authorize.middleware";
+import { uploadGalleryImage, getGalleryImages, deleteGalleryImage, updateGalleryImage, clearGallery, } from "../controllers/gallery.controller.js";
+import authorize from "../middlewares/authorize.middleware.js";
 const router = express.Router();
 // Gallery Routes
 // Upload image to gallery

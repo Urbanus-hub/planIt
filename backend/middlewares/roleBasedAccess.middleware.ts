@@ -1,11 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-import { AuthUser } from "./authorize.middleware";
+import { AuthUser } from "./authorize.middleware.js";
 
 /**
  * Middleware to check if user has required role(s)
  * @param roles - Array of allowed roles
  */
-export const authorizeRole = (...roles: Array<"client" | "vendor" | "admin">) => {
+export const authorizeRole = (
+  ...roles: Array<"client" | "vendor" | "admin">
+) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({
@@ -44,7 +46,8 @@ export const authorizeOwnership = (resourceUserIdField: string = "userId") => {
     }
 
     const user = req.user as AuthUser;
-    const resourceUserId = req.params[resourceUserIdField] || req.body[resourceUserIdField];
+    const resourceUserId =
+      req.params[resourceUserIdField] || req.body[resourceUserIdField];
 
     // Admins can access any resource
     if (user.role === "admin") {

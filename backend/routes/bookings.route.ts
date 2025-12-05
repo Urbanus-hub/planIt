@@ -10,11 +10,11 @@ import {
   updateBooking,
 } from "../controllers/bookings.controller.js";
 import authorize from "../middlewares/authorize.middleware.js";
-import { authorizeRole } from "../middlewares/roleBasedAccess.middleware";
+import { authorizeRole } from "../middlewares/roleBasedAccess.middleware.js";
 import {
   verifyBookingOwnership,
   verifyProviderAccess,
-} from "../middlewares/bookingAuthorization";
+} from "../middlewares/bookingAuthorization.js";
 
 const router = Router();
 
@@ -49,12 +49,7 @@ router.get(
 );
 
 // Update booking details (booking owner only)
-router.patch(
-  "/:id",
-  authorize,
-  verifyBookingOwnership,
-  updateBooking
-);
+router.patch("/:id", authorize, verifyBookingOwnership, updateBooking);
 
 // Update booking status (provider can confirm/complete, user can cancel)
 router.patch(
@@ -65,11 +60,6 @@ router.patch(
 );
 
 // Delete/cancel booking (booking owner or admin)
-router.delete(
-  "/:id",
-  authorize,
-  verifyBookingOwnership,
-  deleteBooking
-);
+router.delete("/:id", authorize, verifyBookingOwnership, deleteBooking);
 
 export default router;

@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { registerUser, loginUser, logoutUser, getUsers, getUser, updateUser, deleteUser, getCurrentUser, toggleUserActive, verifyVendor, getVendors, verifyOTP, resendOTP, forgotPassword, resetPassword, } from "../controllers/users.controller.js";
 import authorize from "../middlewares/authorize.middleware.js";
-import { authorizeRole } from "../middlewares/roleBasedAccess.middleware";
-import { verifyUserOwnership } from "../middlewares/userAuthorization";
+import { authorizeRole } from "../middlewares/roleBasedAccess.middleware.js";
+import { verifyUserOwnership } from "../middlewares/userAuthorization.js";
 const router = Router();
 // Public routes (no authentication required)
 router.post("/register", registerUser);

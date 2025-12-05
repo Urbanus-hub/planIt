@@ -1,21 +1,20 @@
 import express, { Request, Response } from "express";
-import { PORT, CLIENT_URL } from "./configs/env";
-import connectDB from "./configs/db";
+import { PORT, CLIENT_URL } from "./configs/env.js";
+import connectDB from "./configs/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import userRoutes from "./routes/user.routes";
-import handleGlobalError from "./middlewares/globalErrorsHandler.middleware";
-import servicesRouter from "./routes/service.route";
-import BookingRouter from "./routes/bookings.route";
-import galleryRouter from "./routes/gallery.route";
-import conversationsRouter from "./routes/conversations.route";
+import userRoutes from "./routes/user.routes.js";
+import handleGlobalError from "./middlewares/globalErrorsHandler.middleware.js";
+import servicesRouter from "./routes/service.route.js";
+import BookingRouter from "./routes/bookings.route.js";
+import galleryRouter from "./routes/gallery.route.js";
+import conversationsRouter from "./routes/conversations.route.js";
 import http from "http";
 import { Server } from "socket.io";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "./configs/env";
-import { Message, Conversation } from "./models/messages.model";
-
+import { JWT_SECRET } from "./configs/env.js";
+import { Message, Conversation } from "./models/messages.model.js";
 const app = express(); // express app instance
 
 // CORS configuration to allow cookies

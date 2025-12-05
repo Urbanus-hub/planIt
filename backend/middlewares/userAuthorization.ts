@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { AuthUser } from "./authorize.middleware";
+import { AuthUser } from "./authorize.middleware.js";
 
 /**
  * Verify that the user is accessing their own profile or is an admin

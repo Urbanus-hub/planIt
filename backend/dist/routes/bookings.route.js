@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { createBooking, deleteBooking, getAllBookings, getUserBookings, getServiceBookings, getProviderBookings, updateBookingStatus, updateBooking, } from "../controllers/bookings.controller.js";
 import authorize from "../middlewares/authorize.middleware.js";
-import { authorizeRole } from "../middlewares/roleBasedAccess.middleware";
-import { verifyBookingOwnership, verifyProviderAccess, } from "../middlewares/bookingAuthorization";
+import { authorizeRole } from "../middlewares/roleBasedAccess.middleware.js";
+import { verifyBookingOwnership, verifyProviderAccess, } from "../middlewares/bookingAuthorization.js";
 const router = Router();
 // Create a new booking (authenticated users only)
 router.post("/", authorize, createBooking);

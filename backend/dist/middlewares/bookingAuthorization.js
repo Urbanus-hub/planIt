@@ -1,4 +1,4 @@
-import Booking from "../models/bookings.model";
+import Booking from "../models/bookings.model.js";
 /**
  * Verify that the user owns the booking or is an admin
  */

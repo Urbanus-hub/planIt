@@ -1,4 +1,4 @@
-import Gallery from "../models/gallery.model";
+import Gallery from "../models/gallery.model.js";
 // Upload image to gallery
 export const uploadGalleryImage = async (req, res) => {
     try {

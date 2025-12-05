@@ -5,8 +5,8 @@ import {
   deleteGalleryImage,
   updateGalleryImage,
   clearGallery,
-} from "../controllers/gallery.controller";
-import  authorize  from "../middlewares/authorize.middleware";
+} from "../controllers/gallery.controller.js";
+import authorize from "../middlewares/authorize.middleware.js";
 
 const router = express.Router();
 

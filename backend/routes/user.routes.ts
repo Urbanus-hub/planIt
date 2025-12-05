@@ -18,8 +18,8 @@ import {
 } from "../controllers/users.controller.js";
 
 import authorize from "../middlewares/authorize.middleware.js";
-import { authorizeRole } from "../middlewares/roleBasedAccess.middleware";
-import { verifyUserOwnership } from "../middlewares/userAuthorization";
+import { authorizeRole } from "../middlewares/roleBasedAccess.middleware.js";
+import { verifyUserOwnership } from "../middlewares/userAuthorization.js";
 
 const router = Router();
 
