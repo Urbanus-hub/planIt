@@ -20,7 +20,7 @@ const app = express(); // express app instance
 // CORS configuration to allow cookies
 app.use(
   cors({
-    origin: CLIENT_URL || "http://localhost:3000",
+    origin: true, // Allow all origins
     credentials: true,
   })
 );
@@ -36,7 +36,7 @@ app.use(cookieParser());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: CLIENT_URL || "http://localhost:3000",
+    origin: true, // Allow all origins
     methods: ["GET", "POST"],
     credentials: true,
   },
