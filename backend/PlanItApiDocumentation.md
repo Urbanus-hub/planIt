@@ -6,7 +6,7 @@ The PlanIt API provides a comprehensive RESTful interface for managing event pla
 
 **Version:** 1.0.0  
 **Base URL (Development):** `http://localhost:5000/api/v1`  
-**Base URL (Production):** `https://your-api-url.onrender.com/api/v1`
+**Base URL (Production):** `https://planit-backend-krfr.onrender.com/`
 
 ## Table of Contents
 
