@@ -102,7 +102,9 @@ export default function Navbar() {
             >
               Sign In
             </Link>
-            <Link className="btn-primary" href="/register">Get Started</Link>
+            <Link className="btn-primary" href="/register">
+              Get Started
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -142,13 +144,19 @@ export default function Navbar() {
                 <ThemeToggle />
               </div>
               <Link
-                href="#signin"
+                href="/login"
                 className="block font-medium text-gray-700 dark:text-gray-300 hover:text-green-main dark:hover:text-green-400"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Sign In
               </Link>
-              <button className="btn-primary w-full">Get Started</button>
+              <Link
+                href="/register"
+                className="btn-primary w-full block text-center"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Get Started
+              </Link>
             </div>
           </div>
         </div>
