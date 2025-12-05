@@ -180,13 +180,16 @@ export const loginUser = async (
       { expiresIn: "7d" }
     );
 
-    // Set cookie
-    res.cookie("authToken", token, {
+    // Set cookie with proper cross-origin settings
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: true, // Always true for production (HTTPS)
+      sameSite: "none" as const, // Required for cross-origin
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+      path: "/", // Available for all paths
+    };
+    
+    res.cookie("authToken", token, cookieOptions);
 
     // Return user without password
     const { password: _, ...userData } = user.toObject();
@@ -207,11 +210,12 @@ export const logoutUser = async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-  // Clear the auth cookie
+  // Clear the auth cookie with proper cross-origin settings
   res.clearCookie("authToken", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: true,
+    sameSite: "none" as const,
+    path: "/",
   });
 
   res.status(200).json({
@@ -600,13 +604,16 @@ export const verifyOTP = async (
       { expiresIn: "7d" }
     );
 
-    // Set cookie
-    res.cookie("authToken", token, {
+    // Set cookie with proper cross-origin settings
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: true, // Always true for production (HTTPS)
+      sameSite: "none" as const, // Required for cross-origin
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+      path: "/", // Available for all paths
+    };
+    
+    res.cookie("authToken", token, cookieOptions);
 
     // Return user without password
     const { password, ...userData } = user.toObject();
