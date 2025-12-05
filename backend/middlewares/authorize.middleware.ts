@@ -21,10 +21,19 @@ declare global {
 const authorize = (req: Request, res: Response, next: NextFunction): void => {
   try {
     // Extract token from cookies (primary) or Authorization header (fallback)
-    const token =
-      req.cookies?.authToken || req.headers.authorization?.split(" ")[1];
+    const cookieToken = req.cookies?.authToken;
+    const headerToken = req.headers.authorization?.split(" ")[1];
+    const token = cookieToken || headerToken;
+
+    // Debug logging
+    console.log("🔐 Authorization Debug:");
+    console.log("  - Cookie token:", cookieToken ? "Present" : "Missing");
+    console.log("  - Header token:", headerToken ? "Present" : "Missing");
+    console.log("  - Final token:", token ? "Present" : "Missing");
+    console.log("  - Authorization header:", req.headers.authorization);
 
     if (!token) {
+      console.log("  ❌ No token found");
       res.status(401).json({
         success: false,
         message: "Access denied. No token provided.",
@@ -35,9 +44,11 @@ const authorize = (req: Request, res: Response, next: NextFunction): void => {
     // Verify and decode token
     const decoded = jwt.verify(token, JWT_SECRET) as AuthUser;
     req.user = decoded;
+    console.log("  ✅ Token verified for user:", decoded.email);
 
     next();
   } catch (error) {
+    console.log("  ❌ Token verification failed:", error);
     // Handle specific JWT errors
     if (error instanceof jwt.TokenExpiredError) {
       res.status(401).json({

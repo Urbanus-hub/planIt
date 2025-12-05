@@ -188,7 +188,7 @@ export const loginUser = async (
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/", // Available for all paths
     };
-    
+
     res.cookie("authToken", token, cookieOptions);
 
     // Return user without password
@@ -612,7 +612,7 @@ export const verifyOTP = async (
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: "/", // Available for all paths
     };
-    
+
     res.cookie("authToken", token, cookieOptions);
 
     // Return user without password

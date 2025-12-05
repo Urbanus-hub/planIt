@@ -82,7 +82,7 @@ function VerifyOTPContent() {
         if (response.data.token) {
           localStorage.setItem("authToken", response.data.token);
         }
-        
+
         toast.success("Email verified successfully!");
 
         // Redirect based on user role - handle different response structures
