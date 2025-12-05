@@ -78,6 +78,11 @@ function VerifyOTPContent() {
       const response = await authAPI.verifyOTP({ email, otp: otpCode });
 
       if (response.data.success) {
+        // Store token in localStorage
+        if (response.data.token) {
+          localStorage.setItem("authToken", response.data.token);
+        }
+        
         toast.success("Email verified successfully!");
 
         // Redirect based on user role - handle different response structures

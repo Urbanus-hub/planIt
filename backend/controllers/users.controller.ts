@@ -615,6 +615,7 @@ export const verifyOTP = async (
       success: true,
       message: "Email verified successfully",
       data: userData,
+      token, // Send token in response for cross-origin setups
     });
   } catch (error) {
     next(error);
