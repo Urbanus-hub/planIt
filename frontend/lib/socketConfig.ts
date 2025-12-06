@@ -2,7 +2,7 @@ import io, { Socket } from "socket.io-client";
 
 // Extract base URL without /api for Socket.IO connection
 const getSocketUrl = () => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://planit-backend-krfr.onrender.com/api";
   // Remove /api suffix if present
   return apiUrl.replace(/\/api$/, "");
 };
