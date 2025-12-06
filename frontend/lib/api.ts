@@ -27,7 +27,8 @@ export const authAPI = {
 
   getUserById: (id: string) => apiClient.get(`/users/${id}`),
 
-  updateProfile: (id: string, data: any) => apiClient.patch(`/users/${id}`, data),
+  updateProfile: (id: string, data: any) =>
+    apiClient.patch(`/users/${id}`, data),
   deleteUser: (id: string) => apiClient.delete(`/users/${id}`),
   toggleUserActiveness: (id: string, active: any) => {
     // backend expects the raw boolean in the body (req.body === true/false)
@@ -50,7 +51,8 @@ export const authAPI = {
   verifyOTP: (data: { email: string; otp: string }) =>
     apiClient.post("/users/verify-otp", data),
 
-  resendOTP: (data: { email: string }) => apiClient.post("/users/resend-otp", data),
+  resendOTP: (data: { email: string }) =>
+    apiClient.post("/users/resend-otp", data),
 
   forgotPassword: (data: { email: string }) =>
     apiClient.post("/users/forgot-password", data),
@@ -80,8 +82,10 @@ export const bookingsAPI = {
   getAll: (params?: any) => apiClient.get("/bookings", { params }),
 
   getById: (id: string) => apiClient.get(`/bookings/${id}`),
-  getUserBookings: (userId: string) => apiClient.get(`/bookings/user/${userId}`),
-  getForVendor: (id: string) => apiClient.get(`/bookings/provider/${id}/bookings`),
+  getUserBookings: (userId: string) =>
+    apiClient.get(`/bookings/user/${userId}`),
+  getForVendor: (id: string) =>
+    apiClient.get(`/bookings/provider/${id}/bookings`),
   create: (data: any) => apiClient.post("/bookings", data),
 
   update: (id: string, data: any) => apiClient.patch(`/bookings/${id}`, data),
@@ -159,7 +163,10 @@ export const galleryAPI = {
     title?: string,
     description?: string
   ) => {
-    return apiClient.put(`/gallery/${vendorId}/${imageId}`, { title, description });
+    return apiClient.put(`/gallery/${vendorId}/${imageId}`, {
+      title,
+      description,
+    });
   },
 
   // Clear entire gallery

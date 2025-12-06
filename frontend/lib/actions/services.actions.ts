@@ -7,7 +7,7 @@ import apiClient from "@/lib/instances/axios.instance";
 async function getAuthHeaders() {
   const cookieStore = await cookies();
   const token = cookieStore.get("authToken")?.value;
-  
+
   if (token) {
     return {
       Authorization: `Bearer ${token}`,
@@ -40,10 +40,14 @@ export async function getServiceById(id: string) {
 export async function getServicesByProvider(providerId: string) {
   try {
     const headers = await getAuthHeaders();
-    const response = await apiClient.get(`/services/provider/${providerId}`, { headers });
+    const response = await apiClient.get(`/services/provider/${providerId}`, {
+      headers,
+    });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to get provider services");
+    throw new Error(
+      error.response?.data?.message || "Failed to get provider services"
+    );
   }
 }
 
@@ -53,7 +57,9 @@ export async function createService(data: any) {
     const response = await apiClient.post("/services", data, { headers });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to create service");
+    throw new Error(
+      error.response?.data?.message || "Failed to create service"
+    );
   }
 }
 
@@ -63,7 +69,9 @@ export async function updateService(id: string, data: any) {
     const response = await apiClient.put(`/services/${id}`, data, { headers });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to update service");
+    throw new Error(
+      error.response?.data?.message || "Failed to update service"
+    );
   }
 }
 
@@ -73,6 +81,8 @@ export async function deleteService(id: string) {
     const response = await apiClient.delete(`/services/${id}`, { headers });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to delete service");
+    throw new Error(
+      error.response?.data?.message || "Failed to delete service"
+    );
   }
 }

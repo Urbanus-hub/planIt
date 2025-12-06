@@ -7,7 +7,7 @@ import apiClient from "@/lib/instances/axios.instance";
 async function getAuthHeaders() {
   const cookieStore = await cookies();
   const token = cookieStore.get("authToken")?.value;
-  
+
   if (token) {
     return {
       Authorization: `Bearer ${token}`,
@@ -20,20 +20,30 @@ async function getAuthHeaders() {
 export async function getUserConversations(userId: string) {
   try {
     const headers = await getAuthHeaders();
-    const response = await apiClient.get(`/conversations/user/${userId}`, { headers });
+    const response = await apiClient.get(`/conversations/user/${userId}`, {
+      headers,
+    });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to get conversations");
+    throw new Error(
+      error.response?.data?.message || "Failed to get conversations"
+    );
   }
 }
 
 export async function getOrCreateConversation(participantId: string) {
   try {
     const headers = await getAuthHeaders();
-    const response = await apiClient.post("/conversations/create", { participantId }, { headers });
+    const response = await apiClient.post(
+      "/conversations/create",
+      { participantId },
+      { headers }
+    );
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to create conversation");
+    throw new Error(
+      error.response?.data?.message || "Failed to create conversation"
+    );
   }
 }
 
@@ -44,10 +54,13 @@ export async function getConversationMessages(
 ) {
   try {
     const headers = await getAuthHeaders();
-    const response = await apiClient.get(`/conversations/${conversationId}/messages`, {
-      params: { page, limit },
-      headers,
-    });
+    const response = await apiClient.get(
+      `/conversations/${conversationId}/messages`,
+      {
+        params: { page, limit },
+        headers,
+      }
+    );
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to get messages");
@@ -57,9 +70,15 @@ export async function getConversationMessages(
 export async function markMessagesAsRead(conversationId: string) {
   try {
     const headers = await getAuthHeaders();
-    const response = await apiClient.patch(`/conversations/${conversationId}/read`, {}, { headers });
+    const response = await apiClient.patch(
+      `/conversations/${conversationId}/read`,
+      {},
+      { headers }
+    );
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to mark messages as read");
+    throw new Error(
+      error.response?.data?.message || "Failed to mark messages as read"
+    );
   }
 }

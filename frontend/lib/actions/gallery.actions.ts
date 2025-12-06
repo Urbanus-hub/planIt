@@ -7,7 +7,7 @@ import apiClient from "@/lib/instances/axios.instance";
 async function getAuthHeaders() {
   const cookieStore = await cookies();
   const token = cookieStore.get("authToken")?.value;
-  
+
   if (token) {
     return {
       Authorization: `Bearer ${token}`,
@@ -55,14 +55,18 @@ export async function getGalleryImages(
     });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to get gallery images");
+    throw new Error(
+      error.response?.data?.message || "Failed to get gallery images"
+    );
   }
 }
 
 export async function deleteGalleryImage(vendorId: string, imageId: string) {
   try {
     const headers = await getAuthHeaders();
-    const response = await apiClient.delete(`/gallery/${vendorId}/${imageId}`, { headers });
+    const response = await apiClient.delete(`/gallery/${vendorId}/${imageId}`, {
+      headers,
+    });
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to delete image");
@@ -91,7 +95,9 @@ export async function updateGalleryImage(
 export async function clearGallery(vendorId: string) {
   try {
     const headers = await getAuthHeaders();
-    const response = await apiClient.delete(`/gallery/clear/${vendorId}`, { headers });
+    const response = await apiClient.delete(`/gallery/clear/${vendorId}`, {
+      headers,
+    });
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to clear gallery");

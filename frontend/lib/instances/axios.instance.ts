@@ -46,8 +46,7 @@ apiClient.interceptors.response.use(
           // Unauthorized - token expired or invalid
           const currentPath = window.location.pathname;
           const isAuthPage =
-            currentPath.includes("/login") ||
-            currentPath.includes("/register");
+            currentPath.includes("/login") || currentPath.includes("/register");
           const isPublicPage =
             currentPath === "/" || currentPath.includes("/home");
           const isCheckAuthRequest = error.config?.url?.includes("/users/me");

@@ -7,7 +7,7 @@ import apiClient from "@/lib/instances/axios.instance";
 async function getAuthHeaders() {
   const cookieStore = await cookies();
   const token = cookieStore.get("authToken")?.value;
-  
+
   if (token) {
     return {
       Authorization: `Bearer ${token}`,
@@ -88,7 +88,9 @@ export async function updateUserProfile(id: string, data: any) {
     const response = await apiClient.patch(`/users/${id}`, data, { headers });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to update profile");
+    throw new Error(
+      error.response?.data?.message || "Failed to update profile"
+    );
   }
 }
 
@@ -110,17 +112,25 @@ export async function toggleUserActiveness(id: string, active: any) {
         : active;
 
     const headers = await getAuthHeaders();
-    const response = await apiClient.patch(`/users/${id}/toggle-active`, body, { headers });
+    const response = await apiClient.patch(`/users/${id}/toggle-active`, body, {
+      headers,
+    });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to toggle user status");
+    throw new Error(
+      error.response?.data?.message || "Failed to toggle user status"
+    );
   }
 }
 
 export async function verifyVendor(id: string, verify: any) {
   try {
     const headers = await getAuthHeaders();
-    const response = await apiClient.patch(`/users/${id}/verify-vendor`, verify, { headers });
+    const response = await apiClient.patch(
+      `/users/${id}/verify-vendor`,
+      verify,
+      { headers }
+    );
     return response.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to verify vendor");
@@ -156,7 +166,9 @@ export async function changePassword(data: {
     const response = await apiClient.put("/users/password", data, { headers });
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to change password");
+    throw new Error(
+      error.response?.data?.message || "Failed to change password"
+    );
   }
 }
 
@@ -183,7 +195,9 @@ export async function forgotPassword(data: { email: string }) {
     const response = await apiClient.post("/users/forgot-password", data);
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to send reset email");
+    throw new Error(
+      error.response?.data?.message || "Failed to send reset email"
+    );
   }
 }
 
@@ -192,6 +206,8 @@ export async function resetPassword(data: { token: string; password: string }) {
     const response = await apiClient.post("/users/reset-password", data);
     return response.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to reset password");
+    throw new Error(
+      error.response?.data?.message || "Failed to reset password"
+    );
   }
 }
