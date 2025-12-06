@@ -7,7 +7,7 @@ import {
   useContext,
   ReactNode,
 } from "react";
-import { authAPI } from "@/lib/api";
+import apiClient from "@/lib/instances/axios.instance";
 import { User, LoginData, RegisterData } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const response = await authAPI.getCurrentUser();
+      const response = await apiClient.get("/users/me");
       if (response.data.success) {
         setUser(response.data.data);
       }
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setError(null);
       setLoading(true);
-      const response = await authAPI.login(data);
+      const response = await apiClient.post("/users/login", data);
       if (response.data.success) {
         // Store token in localStorage
         if (response.data.token) {
@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setError(null);
       setLoading(true);
-      const response = await authAPI.register(data);
+      const response = await apiClient.post("/users/register", data);
       if (response.data.success) {
         setUser(response.data.data);
         return response.data.data;
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await authAPI.logout();
+      await apiClient.post("/users/logout");
       // Clear token from localStorage
       localStorage.removeItem("authToken");
       setUser(null);
