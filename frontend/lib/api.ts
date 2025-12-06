@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true, // Important: This allows cookies to be sent
   headers: {
     "Content-Type": "application/json",
