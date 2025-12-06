@@ -1,9 +1,30 @@
 import axios from "axios";
 import { toast } from "sonner";
 
+// Get API URL from environment variable with proper fallback
+const getApiUrl = () => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  const fallbackUrl = "https://planit-backend-krfr.onrender.com/api";
+
+  // Use environment variable if it exists and is not empty
+  if (envUrl && envUrl.trim() !== "") {
+    return envUrl;
+  }
+
+  return fallbackUrl;
+};
+
+const API_URL = getApiUrl();
+
+// Log for debugging (only in development)
+if (process.env.NODE_ENV === "development") {
+  console.log("API Base URL:", API_URL);
+  console.log("Environment Variable:", process.env.NEXT_PUBLIC_API_URL);
+}
+
 // Create axios instance with base configuration
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: API_URL,
   withCredentials: true, // Important: This allows cookies to be sent
   headers: {
     "Content-Type": "application/json",
