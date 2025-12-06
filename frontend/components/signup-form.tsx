@@ -63,7 +63,8 @@ export function SignupForm({
       router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
     } catch (err: any) {
       toast.error("Registration failed", {
-        description: err.message || "Unable to create account. Please try again.",
+        description:
+          err.message || "Unable to create account. Please try again.",
       });
     } finally {
       setIsLoading(false);

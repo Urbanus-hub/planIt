@@ -53,16 +53,21 @@ export function LoginForm({
     } catch (err: any) {
       // Check if error message indicates verification needed
       const errorMessage = err.message || "";
-      if (errorMessage.includes("verify") || errorMessage.includes("verification")) {
+      if (
+        errorMessage.includes("verify") ||
+        errorMessage.includes("verification")
+      ) {
         toast.info("Email verification required", {
-          description: "Please verify your email to continue. Check your inbox for the verification code.",
+          description:
+            "Please verify your email to continue. Check your inbox for the verification code.",
         });
         router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
         return;
       }
 
       toast.error("Login failed", {
-        description: errorMessage || "Invalid email or password. Please try again.",
+        description:
+          errorMessage || "Invalid email or password. Please try again.",
       });
     } finally {
       setIsLoading(false);
