@@ -278,7 +278,7 @@ export const sendWelcomeEmail = async (
               
               <div style="text-align: center;">
                 <a href="${
-                  process.env.FRONTEND_URL || "http://localhost:3000"
+                  process.env.FRONTEND_URL || "https://plan-it-delta.vercel.app"
                 }/login" class="btn">Get Started</a>
               </div>
               
