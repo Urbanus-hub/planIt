@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -43,7 +44,6 @@ export default function Navbar() {
     if (navbarRef.current) {
       gsap.from(navbarRef.current, {
         y: -100,
-        opacity: 0,
         duration: 0.8,
         ease: "power3.out",
       });
@@ -79,9 +79,6 @@ export default function Navbar() {
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-11 h-11 bg-linear-to-br from-green-main to-green-dark rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-300">
-              <span className="text-white font-bold text-xl">P</span>
-            </div>
             <span
               className={`text-2xl font-bold transition-colors duration-300 ${
                 isScrolled

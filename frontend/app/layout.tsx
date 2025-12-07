@@ -22,7 +22,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "PlanIt",
+  title: "Plan-It",
   description: "Connect with top-tier event professionals across Kenya",
 };
 
