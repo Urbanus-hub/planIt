@@ -19,7 +19,13 @@ export default function Navbar() {
       setIsScrolled(window.scrollY > 50);
 
       // Detect active section based on scroll position
-      const sections = ["home", "services", "how-it-works", "vendors", "contact"];
+      const sections = [
+        "home",
+        "services",
+        "how-it-works",
+        "vendors",
+        "contact",
+      ];
       const current = sections.find((section) => {
         const element = document.getElementById(section);
         if (element) {

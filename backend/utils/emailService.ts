@@ -3,16 +3,50 @@ import { config } from "dotenv";
 
 config();
 
-// Create transporter
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// Check if email service is properly configured
+const isEmailConfigured = () => {
+  return !!(process.env.SMTP_USER && process.env.SMTP_PASS);
+};
+
+// Create transporter with timeout configuration
+const createTransporter = () => {
+  if (!isEmailConfigured()) {
+    console.warn("⚠️  Email service not configured. Emails will not be sent.");
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: parseInt(process.env.SMTP_PORT || "587"),
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000, // 10 seconds
+    socketTimeout: 10000, // 10 seconds
+    pool: true, // Use connection pooling
+    maxConnections: 5,
+    maxMessages: 10,
+  });
+};
+
+const transporter = createTransporter();
+
+// Verify transporter configuration on startup
+if (transporter) {
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error("❌ Email transporter configuration error:", error.message);
+      console.log("📧 Email service will be unavailable. Please check SMTP settings.");
+    } else {
+      console.log("✅ Email service is ready to send messages");
+    }
+  });
+} else {
+  console.log("📧 Email service disabled - SMTP credentials not provided");
+}
 
 // Generate 6-digit OTP
 export const generateOTP = (): string => {
@@ -25,6 +59,12 @@ export const sendOTPEmail = async (
   otp: string,
   name: string
 ): Promise<boolean> => {
+  // If email is not configured, log and return true to not block registration
+  if (!transporter) {
+    console.log(`⚠️  Email not configured - OTP would be sent to ${email}: ${otp}`);
+    return true; // Return true to not block the registration flow
+  }
+
   try {
     const mailOptions = {
       from: `"PlanIt Events" <${process.env.SMTP_USER}>`,
@@ -126,9 +166,12 @@ export const sendOTPEmail = async (
     };
 
     await transporter.sendMail(mailOptions);
+    console.log(`✅ OTP email sent successfully to ${email}`);
     return true;
-  } catch (error) {
-    console.error("Error sending OTP email:", error);
+  } catch (error: any) {
+    console.error("Error sending OTP email:", error.message || error);
+    // Don't throw error - just log it and return false
+    // This prevents the entire registration from failing
     return false;
   }
 };
@@ -139,6 +182,12 @@ export const sendWelcomeEmail = async (
   name: string,
   role: string
 ): Promise<boolean> => {
+  // If email is not configured, log and return true
+  if (!transporter) {
+    console.log(`⚠️  Email not configured - Welcome email would be sent to ${email}`);
+    return true;
+  }
+
   try {
     const mailOptions = {
       from: `"PlanIt Events" <${process.env.SMTP_USER}>`,
@@ -255,9 +304,10 @@ export const sendWelcomeEmail = async (
     };
 
     await transporter.sendMail(mailOptions);
+    console.log(`✅ Welcome email sent successfully to ${email}`);
     return true;
-  } catch (error) {
-    console.error("Error sending welcome email:", error);
+  } catch (error: any) {
+    console.error("Error sending welcome email:", error.message || error);
     return false;
   }
 };
@@ -268,6 +318,12 @@ export const sendPasswordResetEmail = async (
   resetToken: string,
   name: string
 ): Promise<boolean> => {
+  // If email is not configured, log and return true
+  if (!transporter) {
+    console.log(`⚠️  Email not configured - Password reset would be sent to ${email}`);
+    return true;
+  }
+
   try {
     const resetUrl = `${
       process.env.FRONTEND_URL || "http://localhost:3000"
@@ -343,9 +399,11 @@ export const sendPasswordResetEmail = async (
     };
 
     await transporter.sendMail(mailOptions);
+    console.log(`✅ Password reset email sent successfully to ${email}`);
     return true;
-  } catch (error) {
-    console.error("Error sending password reset email:", error);
+  } catch (error: any) {
+    console.error("Error sending password reset email:", error.message || error);
+    // Don't throw error - just log it and return false
     return false;
   }
 };
