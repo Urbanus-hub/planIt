@@ -41,7 +41,9 @@ if (resend) {
   transporter.verify((error) => {
     if (error) {
       console.error("❌ SMTP configuration error:", error.message);
-      console.log("📧 Email service will be unavailable. Consider using Resend API.");
+      console.log(
+        "📧 Email service will be unavailable. Consider using Resend API."
+      );
     } else {
       console.log("✅ Email service ready (SMTP)");
     }
