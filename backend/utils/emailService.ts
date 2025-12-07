@@ -9,13 +9,6 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-// Check if email service is properly configured
-const isEmailConfigured = () => {
-  // Prefer Resend, fallback to SMTP
-  if (resend) return true;
-  return !!(process.env.SMTP_USER && process.env.SMTP_PASS);
-};
-
 // Create transporter with timeout configuration (SMTP fallback)
 const createTransporter = () => {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -427,8 +420,7 @@ export const sendPasswordResetEmail = async (
     </table>
   </body>
 </html>
-      `,
-    };
+      `;
 
     // Try Resend first, fallback to SMTP
     if (resend) {

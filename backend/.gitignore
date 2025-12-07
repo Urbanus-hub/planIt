@@ -1,4 +1,4 @@
 node_modules
 .env.*.mode
 .DS_Store
-dist/*
+dist
