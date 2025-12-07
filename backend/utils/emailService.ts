@@ -36,7 +36,7 @@ const transporter = createTransporter();
 
 // Verify transporter configuration on startup
 if (transporter) {
-  transporter.verify((error, success) => {
+  transporter.verify((error) => {
     if (error) {
       console.error("❌ Email transporter configuration error:", error.message);
       console.log(
