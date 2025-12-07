@@ -1,6 +1,19 @@
 import dotenv from "dotenv";
+import { existsSync } from "fs";
+import { resolve } from "path";
 
-dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}.mode` });
+// Try to load environment-specific file first, then fall back to .env
+const envFile = `.env.${process.env.NODE_ENV || "development"}.mode`;
+const envPath = resolve(process.cwd(), envFile);
+const defaultEnvPath = resolve(process.cwd(), ".env");
+
+if (existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+} else if (existsSync(defaultEnvPath)) {
+  dotenv.config({ path: defaultEnvPath });
+} else {
+  dotenv.config(); // Let dotenv use default behavior
+}
 
 interface EnvConfig {
   PORT: string;
