@@ -1,32 +1,39 @@
 import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { config } from "dotenv";
 
 config();
 
+// Initialize Resend (works on Render, no SMTP blocking)
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
+
 // Check if email service is properly configured
 const isEmailConfigured = () => {
+  // Prefer Resend, fallback to SMTP
+  if (resend) return true;
   return !!(process.env.SMTP_USER && process.env.SMTP_PASS);
 };
 
-// Create transporter with timeout configuration
+// Create transporter with timeout configuration (SMTP fallback)
 const createTransporter = () => {
-  if (!isEmailConfigured()) {
-    console.warn("⚠️  Email service not configured. Emails will not be sent.");
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     return null;
   }
 
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
     port: parseInt(process.env.SMTP_PORT || "587"),
-    secure: false, // true for 465, false for other ports
+    secure: false,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000, // 10 seconds
-    socketTimeout: 10000, // 10 seconds
-    pool: true, // Use connection pooling
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
+    pool: true,
     maxConnections: 5,
     maxMessages: 10,
   });
@@ -34,20 +41,20 @@ const createTransporter = () => {
 
 const transporter = createTransporter();
 
-// Verify transporter configuration on startup
-if (transporter) {
+// Verify email configuration on startup
+if (resend) {
+  console.log("✅ Email service ready (Resend API)");
+} else if (transporter) {
   transporter.verify((error) => {
     if (error) {
-      console.error("❌ Email transporter configuration error:", error.message);
-      console.log(
-        "📧 Email service will be unavailable. Please check SMTP settings."
-      );
+      console.error("❌ SMTP configuration error:", error.message);
+      console.log("📧 Email service will be unavailable. Consider using Resend API.");
     } else {
-      console.log("✅ Email service is ready to send messages");
+      console.log("✅ Email service ready (SMTP)");
     }
   });
 } else {
-  console.log("📧 Email service disabled - SMTP credentials not provided");
+  console.log("⚠️  Email service disabled - No API key or SMTP credentials");
 }
 
 // Generate 6-digit OTP
@@ -62,7 +69,7 @@ export const sendOTPEmail = async (
   name: string
 ): Promise<boolean> => {
   // If email is not configured, log and return true to not block registration
-  if (!transporter) {
+  if (!resend && !transporter) {
     console.log(
       `⚠️  Email not configured - OTP would be sent to ${email}: ${otp}`
     );
@@ -70,11 +77,7 @@ export const sendOTPEmail = async (
   }
 
   try {
-    const mailOptions = {
-      from: `"PlanIt Events" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: "Verify Your Email - PlanIt",
-      html: `
+    const htmlContent = `
         <!DOCTYPE html>
 <html>
   <head>
@@ -165,11 +168,25 @@ export const sendOTPEmail = async (
 
   </body>
 </html>
+`;
 
-      `,
-    };
+    // Use Resend if available, otherwise fallback to SMTP
+    if (resend) {
+      await resend.emails.send({
+        from: "PlanIt Events <onboarding@resend.dev>", // Change this after domain verification
+        to: email,
+        subject: "Verify Your Email - PlanIt",
+        html: htmlContent,
+      });
+    } else if (transporter) {
+      await transporter.sendMail({
+        from: `"PlanIt Events" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: "Verify Your Email - PlanIt",
+        html: htmlContent,
+      });
+    }
 
-    await transporter.sendMail(mailOptions);
     console.log(`✅ OTP email sent successfully to ${email}`);
     return true;
   } catch (error: any) {
@@ -187,7 +204,7 @@ export const sendWelcomeEmail = async (
   role: string
 ): Promise<boolean> => {
   // If email is not configured, log and return true
-  if (!transporter) {
+  if (!resend && !transporter) {
     console.log(
       `⚠️  Email not configured - Welcome email would be sent to ${email}`
     );
@@ -195,11 +212,7 @@ export const sendWelcomeEmail = async (
   }
 
   try {
-    const mailOptions = {
-      from: `"PlanIt Events" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: "Welcome to PlanIt! 🎉",
-      html: `
+    const htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -306,10 +319,25 @@ export const sendWelcomeEmail = async (
           </div>
         </body>
         </html>
-      `,
-    };
+      `;
 
-    await transporter.sendMail(mailOptions);
+    // Use Resend if available, otherwise fallback to SMTP
+    if (resend) {
+      await resend.emails.send({
+        from: "PlanIt Events <onboarding@resend.dev>",
+        to: email,
+        subject: "Welcome to PlanIt! 🎉",
+        html: htmlContent,
+      });
+    } else if (transporter) {
+      await transporter.sendMail({
+        from: `"PlanIt Events" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: "Welcome to PlanIt! 🎉",
+        html: htmlContent,
+      });
+    }
+
     console.log(`✅ Welcome email sent successfully to ${email}`);
     return true;
   } catch (error: any) {
@@ -325,7 +353,7 @@ export const sendPasswordResetEmail = async (
   name: string
 ): Promise<boolean> => {
   // If email is not configured, log and return true
-  if (!transporter) {
+  if (!resend && !transporter) {
     console.log(
       `⚠️  Email not configured - Password reset would be sent to ${email}`
     );
@@ -337,11 +365,7 @@ export const sendPasswordResetEmail = async (
       process.env.FRONTEND_URL || "http://localhost:3000"
     }/reset-password?token=${resetToken}`;
 
-    const mailOptions = {
-      from: `"PlanIt Events" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: "Password Reset Request - PlanIt",
-      html: `
+    const htmlContent = `
         <!DOCTYPE html>
 <html>
   <head>
@@ -406,7 +430,23 @@ export const sendPasswordResetEmail = async (
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    // Try Resend first, fallback to SMTP
+    if (resend) {
+      await resend.emails.send({
+        from: "PlanIt Events <onboarding@resend.dev>",
+        to: email,
+        subject: "Password Reset Request - PlanIt",
+        html: htmlContent,
+      });
+    } else if (transporter) {
+      await transporter.sendMail({
+        from: `"PlanIt Events" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: "Password Reset Request - PlanIt",
+        html: htmlContent,
+      });
+    }
+
     console.log(`✅ Password reset email sent successfully to ${email}`);
     return true;
   } catch (error: any) {
