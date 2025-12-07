@@ -4,7 +4,7 @@ import { toast } from "sonner";
 // Get API URL from environment variable with proper fallback
 const getApiUrl = () => {
   const envUrl = process.env.NEXT_PUBLIC_API_URL;
-  const fallbackUrl = "https://planit-backend-krfr.onrender.com/api";
+  const fallbackUrl = "https://api.contuor.app/api";
 
   // Use environment variable if it exists and is not empty
   if (envUrl && envUrl.trim() !== "") {
