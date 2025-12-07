@@ -39,7 +39,9 @@ if (transporter) {
   transporter.verify((error, success) => {
     if (error) {
       console.error("❌ Email transporter configuration error:", error.message);
-      console.log("📧 Email service will be unavailable. Please check SMTP settings.");
+      console.log(
+        "📧 Email service will be unavailable. Please check SMTP settings."
+      );
     } else {
       console.log("✅ Email service is ready to send messages");
     }
@@ -61,7 +63,9 @@ export const sendOTPEmail = async (
 ): Promise<boolean> => {
   // If email is not configured, log and return true to not block registration
   if (!transporter) {
-    console.log(`⚠️  Email not configured - OTP would be sent to ${email}: ${otp}`);
+    console.log(
+      `⚠️  Email not configured - OTP would be sent to ${email}: ${otp}`
+    );
     return true; // Return true to not block the registration flow
   }
 
@@ -184,7 +188,9 @@ export const sendWelcomeEmail = async (
 ): Promise<boolean> => {
   // If email is not configured, log and return true
   if (!transporter) {
-    console.log(`⚠️  Email not configured - Welcome email would be sent to ${email}`);
+    console.log(
+      `⚠️  Email not configured - Welcome email would be sent to ${email}`
+    );
     return true;
   }
 
@@ -320,7 +326,9 @@ export const sendPasswordResetEmail = async (
 ): Promise<boolean> => {
   // If email is not configured, log and return true
   if (!transporter) {
-    console.log(`⚠️  Email not configured - Password reset would be sent to ${email}`);
+    console.log(
+      `⚠️  Email not configured - Password reset would be sent to ${email}`
+    );
     return true;
   }
 
@@ -402,7 +410,10 @@ export const sendPasswordResetEmail = async (
     console.log(`✅ Password reset email sent successfully to ${email}`);
     return true;
   } catch (error: any) {
-    console.error("Error sending password reset email:", error.message || error);
+    console.error(
+      "Error sending password reset email:",
+      error.message || error
+    );
     // Don't throw error - just log it and return false
     return false;
   }
