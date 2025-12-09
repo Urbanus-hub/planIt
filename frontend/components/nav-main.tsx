@@ -57,7 +57,7 @@ export function NavMain({
                       ? "justify-center px-2"
                       : "justify-start gap-3",
                     // Active state
-                    isActive && "bg-green-500/20",
+                    isActive && "bg-transparent",
                     // Hover state (only for non-active items)
                     !isActive && isHovered && "bg-white/5",
                     // Focus state for accessibility
@@ -73,7 +73,7 @@ export function NavMain({
                           ? "text-green-400"
                           : isHovered
                           ? "text-green-400"
-                          : "text-gray-400"
+                          : "text-white"
                       )}
                       aria-hidden="true"
                     />
@@ -86,7 +86,7 @@ export function NavMain({
                           ? "text-green-400 font-semibold"
                           : isHovered
                           ? "text-green-400"
-                          : "text-gray-300"
+                          : "text-white"
                       )}
                     >
                       {item.title}
