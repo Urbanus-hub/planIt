@@ -10,7 +10,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
@@ -25,6 +24,7 @@ export function NavSecondary({
   }[];
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   const pathname = usePathname();
+  const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
 
   return (
     <SidebarGroup {...props}>
@@ -32,39 +32,49 @@ export function NavSecondary({
         <SidebarMenu className="gap-2">
           {items.map((item) => {
             const isActive = pathname?.startsWith(item.url);
+            const isHovered = hoveredItem === item.title;
+
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={item.title}
+                <Link
+                  href={item.url}
+                  onMouseEnter={() => setHoveredItem(item.title)}
+                  onMouseLeave={() => setHoveredItem(null)}
                   className={cn(
-                    "h-10 px-4 text-md font-medium rounded-lg transition-all duration-300 group",
-                    isActive
-                      ? "text-green-400 font-semibold"
-                      : "text-slate-300 hover:text-green-400"
+                    "flex items-center h-10 px-4 text-md font-medium rounded-lg transition-all duration-300 gap-3",
+                    // Active state
+                    isActive && "bg-green-500/20",
+                    // Hover state (only for non-active items)
+                    !isActive && isHovered && "bg-white/5",
+                    // Focus state for accessibility
+                    "focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-950"
                   )}
+                  aria-current={isActive ? "page" : undefined}
                 >
-                  <Link href={item.url} className="flex items-center gap-3">
-                    <item.icon
-                      className={cn(
-                        "h-5 w-5 shrink-0 transition-all duration-300",
-                        isActive
-                          ? "text-green-400"
-                          : "text-slate-300 group-hover:text-green-400"
-                      )}
-                    />
-                    <span
-                      className={cn(
-                        "font-medium transition-all duration-300",
-                        isActive
-                          ? "text-green-400"
-                          : "text-slate-300 group-hover:text-green-400"
-                      )}
-                    >
-                      {item.title}
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
+                  <item.icon
+                    className={cn(
+                      "h-5 w-5 shrink-0 transition-all duration-300",
+                      isActive
+                        ? "text-green-400"
+                        : isHovered
+                        ? "text-green-400"
+                        : "text-gray-400"
+                    )}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className={cn(
+                      "font-medium transition-all duration-300",
+                      isActive
+                        ? "text-green-400 font-semibold"
+                        : isHovered
+                        ? "text-green-400"
+                        : "text-gray-300"
+                    )}
+                  >
+                    {item.title}
+                  </span>
+                </Link>
               </SidebarMenuItem>
             );
           })}

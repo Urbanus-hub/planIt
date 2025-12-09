@@ -4,12 +4,12 @@ import { type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
@@ -25,6 +25,7 @@ export function NavMain({
 }) {
   const pathname = usePathname();
   const { state } = useSidebar();
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   return (
     <SidebarGroup>
@@ -41,60 +42,64 @@ export function NavMain({
           )}
         >
           {items.map((item) => {
-            // Consider a route active when the current pathname starts with the item's url
-            // so `/admin/users` keeps `/admin` highlighted.
             const isActive = pathname?.startsWith(item.url);
+            const isHovered = hoveredItem === item.title;
+
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={item.title}
-                  isActive={isActive}
+                <Link
+                  href={item.url}
+                  onMouseEnter={() => setHoveredItem(item.title)}
+                  onMouseLeave={() => setHoveredItem(null)}
                   className={cn(
-                    "h-10 px-4 text-md font-medium rounded-lg transition-all duration-300 relative overflow-visible group",
-                    isActive
-                      ? "text-green-400 font-semibold"
-                      : "text-slate-300 hover:text-green-400"
+                    "flex items-center h-10 px-4 text-md font-medium rounded-lg transition-all duration-300 relative overflow-visible group",
+                    state === "collapsed"
+                      ? "justify-center px-2"
+                      : "justify-start gap-3",
+                    // Active state
+                    isActive && "bg-green-500/20",
+                    // Hover state (only for non-active items)
+                    !isActive && isHovered && "bg-white/5",
+                    // Focus state for accessibility
+                    "focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-950"
                   )}
+                  aria-current={isActive ? "page" : undefined}
                 >
-                  <Link
-                    href={item.url}
-                    className={cn(
-                      "flex items-center w-full transition-all",
-                      state === "collapsed"
-                        ? "justify-center px-0 py-1"
-                        : "justify-start px-0 gap-3"
-                    )}
-                  >
-                    {item.icon && (
-                      <item.icon
-                        className={cn(
-                          "h-5 w-5 shrink-0 transition-all duration-300",
-                          isActive
-                            ? "text-green-400"
-                            : "text-slate-300 group-hover:text-green-400"
-                        )}
-                      />
-                    )}
-                    {state !== "collapsed" && (
-                      <span
-                        className={cn(
-                          "whitespace-nowrap font-medium transition-all duration-300",
-                          isActive
-                            ? "text-green-400"
-                            : "text-slate-300 group-hover:text-green-400"
-                        )}
-                      >
-                        {item.title}
-                      </span>
-                    )}
-                    {state === "collapsed" && (
-                      <span className="absolute left-12 bg-green-500/80 text-white px-2 py-1 rounded-md text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none whitespace-nowrap">
-                        {item.title}
-                      </span>
-                    )}
-                  </Link>
-                </SidebarMenuButton>
+                  {item.icon && (
+                    <item.icon
+                      className={cn(
+                        "h-5 w-5 shrink-0 transition-all duration-300",
+                        isActive
+                          ? "text-green-400"
+                          : isHovered
+                          ? "text-green-400"
+                          : "text-gray-400"
+                      )}
+                      aria-hidden="true"
+                    />
+                  )}
+                  {state !== "collapsed" && (
+                    <span
+                      className={cn(
+                        "whitespace-nowrap font-medium transition-all duration-300",
+                        isActive
+                          ? "text-green-400 font-semibold"
+                          : isHovered
+                          ? "text-green-400"
+                          : "text-gray-300"
+                      )}
+                    >
+                      {item.title}
+                    </span>
+                  )}
+                  {/* Tooltip for collapsed state */}
+                  {state === "collapsed" && isHovered && (
+                    <span className="absolute left-14 bg-gray-900 dark:bg-gray-800 text-white px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap z-50 shadow-lg border border-gray-700">
+                      {item.title}
+                      <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800" />
+                    </span>
+                  )}
+                </Link>
               </SidebarMenuItem>
             );
           })}
