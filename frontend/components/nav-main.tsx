@@ -14,7 +14,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-
 export function NavMain({
   items,
 }: {
@@ -62,7 +61,7 @@ export function NavMain({
                     // Hover state (only for non-active items)
                     !isActive && isHovered && "bg-white/5",
                     // Focus state for accessibility
-                    "focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-950"
+                    "focus:outline-none"
                   )}
                   aria-current={isActive ? "page" : undefined}
                 >
