@@ -242,7 +242,7 @@ export default function VendorGalleryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-emerald-50/30 to-gray-50 dark:from-gray-950 dark:via-emerald-950/20 dark:to-gray-950">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <motion.div
@@ -252,31 +252,31 @@ export default function VendorGalleryPage() {
           className="mb-8"
         >
           <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <Link href="/vendor/profile">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="hover:bg-emerald-100"
+                  className="hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
               <div>
-                <h1 className="text-3xl sm:text-4xl font-bold bg-linear-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100">
                   Portfolio Gallery
                 </h1>
-                <p className="text-gray-600 dark:text-gray-300 mt-1">
-                  Showcase your best work and projects
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  Showcase your best work and attract more clients
                 </p>
               </div>
             </div>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-emerald-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="h-5 w-5" />
               Add Media
@@ -302,24 +302,24 @@ export default function VendorGalleryPage() {
           transition={{ duration: 0.4, delay: 0.1 }}
           className="mb-8"
         >
-          <Card className="bg-white border-0 shadow-md">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex items-center gap-3">
+          <Card className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
                 <div className="flex-shrink-0">
-                  <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-gradient-to-br from-emerald-100 to-emerald-50">
-                    <Grid3x3 className="h-6 w-6 text-emerald-600" />
+                  <div className="flex items-center justify-center h-14 w-14 rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
+                    <Grid3x3 className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">
-                    Total Images
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Total Media Items
                   </p>
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">
                     {images.length}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-500">
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {images.length > 0
                       ? "Great portfolio! Keep adding more"
                       : "Start building your portfolio"}
@@ -349,24 +349,24 @@ export default function VendorGalleryPage() {
             className="text-center py-20"
           >
             <div className="flex justify-center mb-6">
-              <div className="rounded-full bg-gradient-to-br from-emerald-100 to-emerald-50 p-6">
-                <Upload className="h-12 w-12 text-emerald-600" />
+              <div className="rounded-2xl bg-emerald-100 dark:bg-emerald-900/50 p-8">
+                <Upload className="h-16 w-16 text-emerald-600 dark:text-emerald-400" />
               </div>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
-              No images yet
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              No media yet
             </h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+            <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
               Start building your portfolio by uploading your best work. Click
               the "Add Media" button to get started.
             </p>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => fileInputRef.current?.click()}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-emerald-200 transition-all"
             >
-              Upload First Image
+              Upload First Media
             </motion.button>
           </motion.div>
         )}
@@ -377,7 +377,7 @@ export default function VendorGalleryPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
             <AnimatePresence>
               {images.map((image, index) => (
@@ -386,104 +386,103 @@ export default function VendorGalleryPage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.3 }}
-                  className="group relative"
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="group"
                 >
-                  <Card className="overflow-hidden bg-white border-0 shadow-md hover:shadow-xl transition-all duration-300 h-full">
-                    <CardContent className="p-0 relative">
-                      {/* Media Container */}
-                      <div className="relative w-full h-64 overflow-hidden bg-gray-100">
-                        {image.mediaType === "video" ? (
-                          // Video Player with enhanced styling
-                          <div className="relative w-full h-full bg-black">
-                            <video
-                              src={image.url}
-                              controls
-                              preload="metadata"
-                              className="w-full h-full object-contain"
-                              playsInline
-                              onLoadedMetadata={(e) => {
-                                // Set video to show first frame
-                                e.currentTarget.currentTime = 0.1;
-                              }}
-                            />
-                            {/* Video overlay indicator */}
-                            <div className="absolute top-3 right-3 bg-black/80 text-white px-2 py-1 rounded-md text-xs font-medium backdrop-blur-sm pointer-events-none z-10">
-                              <Film className="h-3 w-3 inline mr-1" />
-                              VIDEO
-                            </div>
-                          </div>
-                        ) : (
-                          // Image
-                          <img
+                  <div className="h-full flex flex-col">
+                    {/* Image Container - Separate, no borders */}
+                    <div className="relative w-full aspect-square overflow-hidden rounded-t-xl bg-gray-100 dark:bg-gray-800">
+                      {image.mediaType === "video" ? (
+                        <div className="relative w-full h-full bg-black">
+                          <video
                             src={image.url}
-                            alt={image.title || "Gallery image"}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            preload="metadata"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            playsInline
+                            muted
+                            onLoadedMetadata={(e) => {
+                              e.currentTarget.currentTime = 0.1;
+                            }}
                           />
-                        )}
-
-                        {/* Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4">
-                          {/* Action Buttons */}
-                          <div className="flex justify-end gap-2">
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => openImagePreview(image)}
-                              className="bg-white/90 hover:bg-white p-2 rounded-lg transition-all shadow-md"
-                              title="View details"
-                            >
-                              <ZoomIn className="h-4 w-4 text-gray-800" />
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => {
-                                if (image._id) {
-                                  handleDeleteImage(image._id);
-                                }
-                              }}
-                              className="bg-red-500/90 hover:bg-red-600 p-2 rounded-lg transition-all shadow-md"
-                              title="Delete media"
-                            >
-                              <Trash2 className="h-4 w-4 text-white" />
-                            </motion.button>
-                          </div>
-
-                          {/* Title */}
-                          <div className="text-white">
-                            {image.title && (
-                              <p className="font-semibold text-sm line-clamp-2">
-                                {image.title}
-                              </p>
-                            )}
-                            {image.description && (
-                              <p className="text-xs text-white/80 line-clamp-1 mt-1">
-                                {image.description}
-                              </p>
-                            )}
+                          {/* Video Badge */}
+                          <div className="absolute top-3 left-3 bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold backdrop-blur-sm flex items-center gap-1 shadow-lg">
+                            <Film className="h-3 w-3" />
+                            VIDEO
                           </div>
                         </div>
-                      </div>
+                      ) : (
+                        <img
+                          src={image.url}
+                          alt={image.title || "Gallery image"}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      )}
 
-                      {/* Info Section */}
-                      <div className="p-4">
-                        <p className="font-semibold text-gray-900 line-clamp-1">
-                          {image.title || "Untitled"}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(image.uploadedAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
+                      {/* Hover Overlay with Actions */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => openImagePreview(image)}
+                          className="bg-white hover:bg-emerald-50 p-3 rounded-xl transition-all shadow-lg"
+                          title="View details"
+                        >
+                          <ZoomIn className="h-5 w-5 text-emerald-600" />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => {
+                            if (image._id) {
+                              handleDeleteImage(image._id);
                             }
-                          )}
-                        </p>
+                          }}
+                          className="bg-white hover:bg-red-50 p-3 rounded-xl transition-all shadow-lg"
+                          title="Delete media"
+                        >
+                          <Trash2 className="h-5 w-5 text-red-600" />
+                        </motion.button>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+
+                    {/* Card with Text Content - Below Image */}
+                    <Card className="flex-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-lg transition-all duration-300 rounded-t-none rounded-b-xl">
+                      <CardContent className="p-4 flex flex-col h-full">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base line-clamp-2 mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                            {image.title || "Untitled"}
+                          </h3>
+                          {image.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                              {image.description}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Footer Info */}
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <ImageIcon className="h-3.5 w-3.5" />
+                            <span>
+                              {new Date(image.uploadedAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                }
+                              )}
+                            </span>
+                          </div>
+                          {image.mediaType === "video" && (
+                            <div className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                              <Film className="h-3.5 w-3.5" />
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -504,30 +503,35 @@ export default function VendorGalleryPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6"
+              className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-gray-200 dark:border-gray-800"
             >
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {selectedFiles.length > 1
-                  ? `Uploading ${selectedFiles.length} Files`
-                  : "Uploading File"}
-              </h2>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-shrink-0 h-10 w-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                  <Upload className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  {selectedFiles.length > 1
+                    ? `Uploading ${selectedFiles.length} Files`
+                    : "Uploading File"}
+                </h2>
+              </div>
 
               {selectedFiles.length > 0 && (
                 <div className="mb-6">
-                  <p className="text-sm text-gray-600 mb-3">Files to upload:</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Files to upload:</p>
                   <div className="max-h-32 overflow-y-auto space-y-2">
                     {selectedFiles.map((file, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-2 text-xs bg-gray-50 p-2 rounded"
+                        className="flex items-center gap-2 text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded"
                       >
                         {file.type.startsWith("video/") ? (
-                          <Film className="h-4 w-4 text-purple-500" />
+                          <Film className="h-4 w-4 text-purple-500 dark:text-purple-400" />
                         ) : (
-                          <ImageIcon className="h-4 w-4 text-blue-500" />
+                          <ImageIcon className="h-4 w-4 text-blue-500 dark:text-blue-400" />
                         )}
-                        <span className="flex-1 truncate">{file.name}</span>
-                        <span className="text-gray-500">
+                        <span className="flex-1 truncate text-gray-900 dark:text-gray-100">{file.name}</span>
+                        <span className="text-gray-500 dark:text-gray-400">
                           {(file.size / 1024 / 1024).toFixed(1)}MB
                         </span>
                       </div>
@@ -540,24 +544,24 @@ export default function VendorGalleryPage() {
               {uploadProgress > 0 && uploadProgress < 100 && (
                 <motion.div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm font-medium text-gray-600">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                       {selectedFiles.length > 1
                         ? `Uploading ${batchProgress.uploaded}/${batchProgress.total} files...`
                         : "Uploading..."}
                     </p>
-                    <p className="text-sm font-semibold text-emerald-600">
+                    <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                       {Math.round(uploadProgress)}%
                     </p>
                   </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="w-full h-2.5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${uploadProgress}%` }}
-                      className="h-full bg-linear-to-r from-emerald-500 to-emerald-600"
+                      className="h-full bg-emerald-600 dark:bg-emerald-500 rounded-full"
                     />
                   </div>
                   {selectedFiles.length > 1 && (
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       {batchProgress.uploaded} of {batchProgress.total} files
                       completed
                     </p>
@@ -567,20 +571,25 @@ export default function VendorGalleryPage() {
 
               {uploadProgress === 100 && (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="mb-6 p-4 bg-emerald-50 rounded-lg border border-emerald-200 flex items-center gap-3"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl border border-emerald-200 dark:border-emerald-800 flex items-center gap-3"
                 >
                   <div className="shrink-0">
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-emerald-500">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-emerald-600 dark:bg-emerald-500">
                       <Check className="h-5 w-5 text-white" />
                     </div>
                   </div>
-                  <p className="text-sm font-medium text-emerald-800">
-                    {selectedFiles.length > 1
-                      ? `All ${selectedFiles.length} files uploaded successfully!`
-                      : "Upload complete!"}
-                  </p>
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+                      {selectedFiles.length > 1
+                        ? `All ${selectedFiles.length} files uploaded successfully!`
+                        : "Upload complete!"}
+                    </p>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-0.5">
+                      Add details to complete
+                    </p>
+                  </div>
                 </motion.div>
               )}
 
@@ -589,11 +598,12 @@ export default function VendorGalleryPage() {
                 uploadProgress === 100 &&
                 uploadedUrls.length > 0 && (
                   <div className="space-y-4 mb-6">
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-sm font-medium text-blue-800 mb-2">
-                        📝 Add details to your uploaded files
+                    <div className="p-4 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                      <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100 mb-1 flex items-center gap-2">
+                        <ImageIcon className="h-4 w-4" />
+                        Add details to your uploaded files
                       </p>
-                      <p className="text-xs text-blue-600">
+                      <p className="text-xs text-emerald-700 dark:text-emerald-300">
                         These details will be applied to all{" "}
                         {uploadedUrls.length} uploaded file
                         {uploadedUrls.length > 1 ? "s" : ""}
@@ -601,7 +611,7 @@ export default function VendorGalleryPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Title (optional)
                       </label>
                       <Input
@@ -613,7 +623,7 @@ export default function VendorGalleryPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Description (optional)
                       </label>
                       <Input
@@ -627,7 +637,7 @@ export default function VendorGalleryPage() {
                 )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              <div className="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
                 {/* Cancel Button - show while uploading or after upload */}
                 <Button
                   onClick={() => {
@@ -647,7 +657,7 @@ export default function VendorGalleryPage() {
                     }
                   }}
                   disabled={uploading}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800"
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium"
                 >
                   {uploadedUrls.length > 0
                     ? "Skip Details"
@@ -662,7 +672,7 @@ export default function VendorGalleryPage() {
                   uploadedUrls.length > 0 && (
                     <Button
                       onClick={finalizeUploads}
-                      className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-emerald-200"
                     >
                       Add to Gallery
                     </Button>
@@ -690,7 +700,7 @@ export default function VendorGalleryPage() {
               className="space-y-6"
             >
               {/* Media Preview */}
-              <div className="relative w-full h-96 rounded-lg overflow-hidden bg-gray-100">
+              <div className="relative w-full h-96 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                 {selectedImage.mediaType === "video" ? (
                   <video
                     src={selectedImage.url}
@@ -711,7 +721,7 @@ export default function VendorGalleryPage() {
               {/* Edit Form */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Title
                   </label>
                   <Input
@@ -725,7 +735,7 @@ export default function VendorGalleryPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Description
                   </label>
                   <Input
@@ -739,11 +749,11 @@ export default function VendorGalleryPage() {
                 </div>
 
                 {/* Upload Date */}
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                     Upload Date
                   </p>
-                  <p className="text-gray-900 font-semibold mt-1">
+                  <p className="text-gray-900 dark:text-gray-100 font-semibold mt-1">
                     {new Date(selectedImage.uploadedAt).toLocaleDateString(
                       "en-US",
                       {
@@ -758,10 +768,10 @@ export default function VendorGalleryPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-4 border-t">
+              <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-800">
                 <Button
                   onClick={() => setIsPreviewOpen(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800"
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium"
                 >
                   Cancel
                 </Button>
@@ -771,7 +781,7 @@ export default function VendorGalleryPage() {
                       handleUpdateImage(selectedImage._id);
                     }
                   }}
-                  className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-emerald-200"
                 >
                   Save Changes
                 </Button>

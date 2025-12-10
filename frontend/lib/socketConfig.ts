@@ -2,7 +2,8 @@ import io, { Socket } from "socket.io-client";
 
 // Extract base URL without /api for Socket.IO connection
 const getSocketUrl = () => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.contuor.app/api";
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL || "https://api.contuor.app/api";
   // Remove /api suffix if present
   return apiUrl.replace(/\/api$/, "");
 };
@@ -51,14 +52,14 @@ export const initSocket = (): Socket => {
 
   socket = io(SOCKET_URL, {
     reconnection: true,
-    reconnectionDelay: 50, // Fastest reconnection
-    reconnectionDelayMax: 500, // Minimal max delay
-    reconnectionAttempts: 15,
-    transports: ["polling"], // Keep polling for stability
+    reconnectionDelay: 1000, // Wait 1 second before reconnecting
+    reconnectionDelayMax: 5000, // Max 5 seconds between attempts
+    reconnectionAttempts: 5, // Try 5 times then give up
+    transports: ["polling", "websocket"], // Try both transports
     forceNew: false,
-    timeout: 5000, // Ultra-fast timeout for instant messaging
-    upgrade: false,
-    rememberUpgrade: false,
+    timeout: 10000, // 10 second timeout
+    upgrade: true,
+    rememberUpgrade: true,
     autoConnect: true,
     auth: {
       token: authToken,
@@ -79,6 +80,18 @@ export const initSocket = (): Socket => {
   socket.on("connect_error", (error) => {
     // Safely get error message
     const errorMessage = error?.message || error?.toString() || "Unknown error";
+
+    // Check if it's a timeout error
+    if (errorMessage.includes("timeout")) {
+      console.warn(
+        "⚠️ Socket connection timeout - server might be unavailable"
+      );
+      console.info(
+        "💡 Tip: Make sure the backend server is running at:",
+        SOCKET_URL
+      );
+      return; // Don't spam console with timeout errors
+    }
 
     // Filter out transient websocket errors to reduce noise
     const isTransientError =

@@ -52,7 +52,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="ml-0!">
+      <SidebarInset>
         {/* Sticky Header */}
         <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60 px-4 transition-all">
           <SidebarTrigger className="-ml-1" />

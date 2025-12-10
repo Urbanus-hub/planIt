@@ -73,6 +73,7 @@ import {
 import ConfirmDialog from "@/components/ui/confirm-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Service = {
   _id: string;
@@ -115,7 +116,8 @@ export default function VendorServicesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-
+  const { user } = useAuth();
+  
   // Form state
   const [formData, setFormData] = useState({
     title: "",
@@ -142,7 +144,7 @@ export default function VendorServicesPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await servicesAPI.getAll();
+      const res = await servicesAPI.getByProvider(user?._id as string);
       const data = res.data?.data || res.data || [];
       setServices(data as Service[]);
     } catch (err: any) {
@@ -440,13 +442,13 @@ export default function VendorServicesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-transparent">
       {/* Header */}
       <div className=" bg-transparent">
         <div className="max-w-6xl mx-auto px-6 lg:px-8 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold  text-green-700 dark:text-green-400">
                 Services
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
@@ -464,7 +466,7 @@ export default function VendorServicesPage() {
               </Button>
               <Button
                 onClick={() => handleOpenForm()}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Service
@@ -584,7 +586,7 @@ export default function VendorServicesPage() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search services..."
-                  className="pl-10 border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="pl-10 border-gray-200 dark:border-gray-600 focus:border-green-500 dark:focus:border-green-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div className="flex gap-2">
@@ -652,7 +654,7 @@ export default function VendorServicesPage() {
 
         {/* Services Table/Grid */}
         <Card className="border-0 shadow-sm overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <CardHeader className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+          <CardHeader className="border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-gray-900 dark:text-white">
@@ -673,7 +675,7 @@ export default function VendorServicesPage() {
                 </Button>
                 <Button
                   onClick={() => handleOpenForm()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-green-600 hover:bg-green-700 text-white"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Service
@@ -738,7 +740,7 @@ export default function VendorServicesPage() {
                     </p>
                     <Button
                       onClick={() => handleOpenForm()}
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      className="bg-green-600 hover:bg-green-700 text-white"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Service
@@ -780,7 +782,7 @@ export default function VendorServicesPage() {
                           >
                             <TableCell className="font-medium">
                               <div className="flex items-start gap-3">
-                                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold flex-shrink-0">
+                                <div className="h-10 w-10 rounded-lg bg-gray-400 flex items-center justify-center text-white font-bold flex-shrink-0">
                                   {service.title?.[0]?.toUpperCase() || "S"}
                                 </div>
                                 <div>

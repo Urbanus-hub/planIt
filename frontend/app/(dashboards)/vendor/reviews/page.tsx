@@ -289,7 +289,7 @@ export default function ReviewsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-2 bg-linear-to-r from-amber-600 to-orange-600 dark:from-amber-400 dark:to-orange-400 bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-bold mb-2 bg-linear-to-r from-green-600 to-green-700 dark:from-green-400 dark:to-green-400 bg-clip-text text-transparent">
                 Reviews & Ratings
               </h1>
               <p className="text-slate-600 dark:text-gray-300 text-lg">

@@ -10,6 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetClose,
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Calendar,
   Clock,
@@ -56,6 +83,8 @@ import {
   Heart,
   Smile,
   Zap,
+  List,
+  Grid,
 } from "lucide-react";
 import AnimatedList from "@/components/ui/animated-list";
 import ConfirmDialog from "@/components/ui/confirm-dialog";
@@ -63,17 +92,38 @@ import { useAuth } from "@/contexts/AuthContext";
 
 type Booking = {
   _id: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string;
+  };
+  service: {
+    _id: string;
+    title: string;
+    category: string;
+    price: number;
+  };
+  provider: string;
+  startDate: string;
+  status: "pending" | "confirmed" | "completed" | "cancelled";
+  paymentStatus: "paid" | "unpaid" | "pending";
+  notes?: string;
+  totalPrice: number;
+  createdAt: string;
+  updatedAt: string;
+  cancelledAt?: string;
+  cancelledBy?: string;
+  // Legacy fields for backward compatibility
   clientName?: string;
   clientEmail?: string;
   clientPhone?: string;
   serviceTitle?: string;
   date?: string;
   time?: string;
-  status?: "pending" | "confirmed" | "completed" | "cancelled";
   amount?: number;
   location?: string;
   guestCount?: number;
-  notes?: string;
 };
 
 type BoostFeature = {
@@ -99,6 +149,8 @@ export default function VendorBookingsPage() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"table" | "list">("table");
 
   const { user } = useAuth();
 
@@ -142,9 +194,10 @@ export default function VendorBookingsPage() {
     if (!q) return list;
     return list.filter(
       (b) =>
-        (b.clientName || "").toLowerCase().includes(q) ||
-        (b.serviceTitle || "").toLowerCase().includes(q) ||
-        (b.clientEmail || "").toLowerCase().includes(q)
+        (b.user?.name || b.clientName || "").toLowerCase().includes(q) ||
+        (b.service?.title || b.serviceTitle || "").toLowerCase().includes(q) ||
+        (b.user?.email || b.clientEmail || "").toLowerCase().includes(q) ||
+        (b.service?.category || "").toLowerCase().includes(q)
     );
   }, [bookings, query, activeTab]);
 
@@ -152,7 +205,10 @@ export default function VendorBookingsPage() {
     const pending = bookings.filter((b) => b.status === "pending").length;
     const confirmed = bookings.filter((b) => b.status === "confirmed").length;
     const completed = bookings.filter((b) => b.status === "completed").length;
-    const totalRevenue = bookings.reduce((sum, b) => sum + (b.amount || 0), 0);
+    const totalRevenue = bookings.reduce(
+      (sum, b) => sum + (b.totalPrice || b.amount || 0),
+      0
+    );
     const conversionRate =
       bookings.length > 0 ? Math.round((confirmed / bookings.length) * 100) : 0;
 
@@ -197,101 +253,6 @@ export default function VendorBookingsPage() {
     }
   };
 
-  // Create animated list items with rich booking cards
-  const animatedListItems = filtered.map((booking) => (
-    <div key={booking._id} className="w-full">
-      <div
-        className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-400 transition-all cursor-pointer shadow-sm hover:shadow-md"
-        onClick={() => setSelectedBooking(booking)}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                {booking.clientName?.[0]?.toUpperCase() || "U"}
-              </div>
-              <div className="min-w-0 flex-1">
-                <h4 className="text-gray-900 font-semibold truncate text-sm">
-                  {booking.clientName || "Unknown"}
-                </h4>
-                <p className="text-emerald-600 truncate font-medium text-xs">
-                  {booking.serviceTitle}
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 gap-2 text-xs text-gray-600 mb-3">
-              <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                <Calendar className="h-3 w-3 text-emerald-600" />
-                <span className="truncate">
-                  {booking.date
-                    ? new Date(booking.date).toLocaleDateString()
-                    : "—"}
-                </span>
-              </div>
-              <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                <Clock className="h-3 w-3 text-emerald-600" />
-                <span className="truncate">{booking.time || "—"}</span>
-              </div>
-              <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                <DollarSign className="h-3 w-3 text-emerald-600" />
-                <span className="truncate font-medium">
-                  KSh {(booking.amount || 0) / 1000}K
-                </span>
-              </div>
-              <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                <Users className="h-3 w-3 text-emerald-600" />
-                <span className="truncate">{booking.guestCount || "—"}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Badge
-                className={`text-xs font-semibold ${
-                  booking.status === "confirmed"
-                    ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                    : booking.status === "pending"
-                    ? "bg-amber-100 text-amber-800 border border-amber-200"
-                    : booking.status === "completed"
-                    ? "bg-blue-100 text-blue-800 border border-blue-200"
-                    : "bg-red-100 text-red-800 border border-red-200"
-                }`}
-                variant="outline"
-              >
-                {booking.status
-                  ? booking.status.charAt(0).toUpperCase() +
-                    booking.status.slice(1)
-                  : "Unknown"}
-              </Badge>
-              <div className="text-xs text-gray-500 font-medium">
-                {booking.location && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" />
-                    {booking.location}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedBooking(booking);
-              }}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  ));
-
   const boostFeatures: BoostFeature[] = [
     {
       id: "featured-weekly",
@@ -306,8 +267,8 @@ export default function VendorBookingsPage() {
         "Early bird advantage",
       ],
       duration: "7 days",
-      color: "text-emerald-600",
-      bgColor: "from-emerald-50 to-emerald-100",
+      color: "text-green-600",
+      bgColor: "from-green-50 to-green-100",
       badge: "Popular",
     },
     {
@@ -324,8 +285,8 @@ export default function VendorBookingsPage() {
         "Social media promotion",
       ],
       duration: "30 days",
-      color: "text-emerald-600",
-      bgColor: "from-emerald-50 to-emerald-100",
+      color: "text-amber-600",
+      bgColor: "from-amber-50 to-amber-100",
       badge: "Best Value",
     },
     {
@@ -342,8 +303,8 @@ export default function VendorBookingsPage() {
         "Client testimonials featured",
       ],
       duration: "15 days",
-      color: "text-emerald-600",
-      bgColor: "from-emerald-50 to-emerald-100",
+      color: "text-orange-600",
+      bgColor: "from-orange-50 to-orange-100",
       badge: "Hot",
     },
   ];
@@ -358,9 +319,9 @@ export default function VendorBookingsPage() {
           transition={{ duration: 0.4 }}
           className="mb-10"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 dark:from-emerald-400 dark:via-teal-400 dark:to-emerald-500 bg-clip-text text-transparent mb-2">
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 dark:from-emerald-400 dark:via-teal-400 dark:to-emerald-500 bg-clip-text text-transparent mb-3">
                 Bookings Hub
               </h1>
               <p className="text-gray-600 dark:text-gray-300 text-lg">
@@ -371,7 +332,7 @@ export default function VendorBookingsPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring" }}
-              className="hidden md:block p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200"
+              className="hidden md:block p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200"
             >
               <Rocket className="h-8 w-8 text-emerald-600" />
             </motion.div>
@@ -383,7 +344,7 @@ export default function VendorBookingsPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8"
+          className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8"
         >
           {[
             {
@@ -430,7 +391,7 @@ export default function VendorBookingsPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.06 }}
               >
-                <Card className="bg-white hover:shadow-md transition-all border-0 shadow-sm">
+                <Card className="bg-white hover:shadow-lg transition-all border border-gray-100 shadow-sm">
                   <CardContent className="pt-5 pb-4">
                     <div className="flex items-start justify-between">
                       <div>
@@ -442,7 +403,7 @@ export default function VendorBookingsPage() {
                         </p>
                       </div>
                       <div
-                        className={`bg-gradient-to-br ${stat.bg} p-2 rounded-lg`}
+                        className={`bg-gradient-to-br ${stat.bg} p-3 rounded-lg`}
                       >
                         <Icon className={`h-4 w-4 ${stat.color}`} />
                       </div>
@@ -461,7 +422,7 @@ export default function VendorBookingsPage() {
           transition={{ duration: 0.4, delay: 0.2 }}
           className="mb-8"
         >
-          <Card className="bg-white border-0 shadow-sm">
+          <Card className="bg-white border border-gray-100 shadow-sm">
             <CardContent className="p-4">
               <div className="flex flex-col md:flex-row gap-3">
                 <div className="flex-1 relative">
@@ -470,7 +431,7 @@ export default function VendorBookingsPage() {
                     placeholder="Search by client, service, or email..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500"
+                    className="pl-10 bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
                 <Button
@@ -493,18 +454,46 @@ export default function VendorBookingsPage() {
           transition={{ duration: 0.4, delay: 0.3 }}
           className="mb-10"
         >
-          <Card className="bg-white border-0 shadow-sm overflow-hidden">
+          <Card className="bg-white border border-gray-100 shadow-sm overflow-hidden">
             <CardHeader className="border-b border-gray-100">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <CardTitle className="text-gray-900 flex items-center gap-2">
+                  <CardTitle className="text-gray-900 dark:text-gray-100 flex items-center gap-2 text-xl">
                     <Heart className="h-5 w-5 text-emerald-600" />
                     Your Bookings
                   </CardTitle>
-                  <CardDescription className="text-gray-500 mt-1">
+                  <CardDescription className="text-gray-500 dark:text-gray-400 mt-1">
                     {filtered.length} booking{filtered.length !== 1 ? "s" : ""}{" "}
                     • Click to view details
                   </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={viewMode === "table" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("table")}
+                    className={
+                      viewMode === "table"
+                        ? "bg-emerald-600 hover:bg-emerald-700"
+                        : "border-gray-300 hover:bg-gray-50"
+                    }
+                  >
+                    <Grid className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Table</span>
+                  </Button>
+                  <Button
+                    variant={viewMode === "list" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("list")}
+                    className={
+                      viewMode === "list"
+                        ? "bg-emerald-600 hover:bg-emerald-700"
+                        : "border-gray-300 hover:bg-gray-50"
+                    }
+                  >
+                    <List className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">List</span>
+                  </Button>
                 </div>
               </div>
             </CardHeader>
@@ -514,7 +503,7 @@ export default function VendorBookingsPage() {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-5 bg-gray-100 border border-gray-200 p-1">
+                <TabsList className="grid w-full grid-cols-5 bg-gray-100 border border-gray-200 p-1 rounded-lg">
                   {[
                     "all",
                     "pending",
@@ -525,7 +514,7 @@ export default function VendorBookingsPage() {
                     <TabsTrigger
                       key={tab}
                       value={tab}
-                      className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-xs md:text-sm text-gray-600"
+                      className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-xs md:text-sm text-gray-600 rounded-md"
                     >
                       {tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </TabsTrigger>
@@ -573,17 +562,511 @@ export default function VendorBookingsPage() {
                         Bookings will appear here as they come in
                       </p>
                     </motion.div>
+                  ) : viewMode === "table" ? (
+                    <div className="rounded-md border overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gray-50 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <TableHead className="font-semibold min-w-[200px]">
+                              Client
+                            </TableHead>
+                            <TableHead className="font-semibold min-w-[180px] hidden md:table-cell">
+                              Service
+                            </TableHead>
+                            <TableHead className="font-semibold min-w-[120px] hidden lg:table-cell">
+                              Date
+                            </TableHead>
+                            <TableHead className="font-semibold min-w-[100px]">
+                              Amount
+                            </TableHead>
+                            <TableHead className="font-semibold min-w-[100px] hidden sm:table-cell">
+                              Status
+                            </TableHead>
+                            <TableHead className="font-semibold min-w-[100px] hidden xl:table-cell">
+                              Payment
+                            </TableHead>
+                            <TableHead className="text-right font-semibold min-w-[120px]">
+                              Actions
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filtered.map((booking) => {
+                            const clientName =
+                              booking.user?.name ||
+                              booking.clientName ||
+                              "Unknown Client";
+                            const clientEmail =
+                              booking.user?.email || booking.clientEmail || "";
+                            const serviceTitle =
+                              booking.service?.title ||
+                              booking.serviceTitle ||
+                              "Unknown Service";
+                            const serviceCategory =
+                              booking.service?.category || "";
+                            const bookingDate =
+                              booking.startDate || booking.date || "";
+                            const amount =
+                              booking.totalPrice || booking.amount || 0;
+
+                            const formattedDate = bookingDate
+                              ? new Date(bookingDate).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  }
+                                )
+                              : "—";
+
+                            const statusConfig = {
+                              confirmed: {
+                                color: "emerald",
+                                bg: "bg-emerald-100 dark:bg-emerald-900/30",
+                                text: "text-emerald-700 dark:text-emerald-300",
+                                border:
+                                  "border-emerald-200 dark:border-emerald-800",
+                              },
+                              pending: {
+                                color: "amber",
+                                bg: "bg-amber-100 dark:bg-amber-900/30",
+                                text: "text-amber-700 dark:text-amber-300",
+                                border:
+                                  "border-amber-200 dark:border-amber-800",
+                              },
+                              completed: {
+                                color: "blue",
+                                bg: "bg-blue-100 dark:bg-blue-900/30",
+                                text: "text-blue-700 dark:text-blue-300",
+                                border: "border-blue-200 dark:border-blue-800",
+                              },
+                              cancelled: {
+                                color: "red",
+                                bg: "bg-red-100 dark:bg-red-900/30",
+                                text: "text-red-700 dark:text-red-300",
+                                border: "border-red-200 dark:border-red-800",
+                              },
+                            };
+
+                            const status =
+                              statusConfig[booking.status] ||
+                              statusConfig.pending;
+
+                            return (
+                              <TableRow
+                                key={booking._id}
+                                className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                              >
+                                <TableCell>
+                                  <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold shadow-md flex-shrink-0">
+                                      {clientName[0]?.toUpperCase()}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                        {clientName}
+                                      </p>
+                                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                        {clientEmail}
+                                      </p>
+                                      <div className="flex items-center gap-2 mt-1 md:hidden">
+                                        <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                                          KSh {(amount / 1000).toFixed(1)}K
+                                        </p>
+                                        <Badge
+                                          className={`${status.bg} ${status.text} ${status.border} font-semibold text-xs sm:hidden`}
+                                        >
+                                          {booking.status?.toUpperCase()}
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell">
+                                  <div>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">
+                                      {serviceTitle}
+                                    </p>
+                                    {serviceCategory && (
+                                      <Badge
+                                        variant="outline"
+                                        className="mt-1 text-xs"
+                                      >
+                                        {serviceCategory}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="hidden lg:table-cell">
+                                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                    <Calendar className="h-4 w-4" />
+                                    {formattedDate}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell">
+                                  <p className="font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                                    KSh {(amount / 1000).toFixed(1)}K
+                                  </p>
+                                </TableCell>
+                                <TableCell className="hidden sm:table-cell">
+                                  <Badge
+                                    className={`${status.bg} ${status.text} ${status.border} font-semibold whitespace-nowrap`}
+                                  >
+                                    {booking.status?.toUpperCase()}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="hidden xl:table-cell">
+                                  {booking.paymentStatus === "paid" ? (
+                                    <div className="flex items-center gap-2">
+                                      <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                      <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                                        Paid
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2">
+                                      <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                                      <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                                        Pending
+                                      </span>
+                                    </div>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                      onClick={() => {
+                                        setSelectedBooking(booking);
+                                        setViewModalOpen(true);
+                                      }}
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm">
+                                          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent
+                                        align="end"
+                                        className="w-48"
+                                      >
+                                        <DropdownMenuLabel>
+                                          Quick Actions
+                                        </DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          onClick={() => {
+                                            window.location.href = `/vendor/messages?userId=${booking.user._id}`;
+                                          }}
+                                        >
+                                          <MessageCircle className="h-4 w-4 mr-2" />
+                                          Message Client
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        {booking.status === "pending" && (
+                                          <>
+                                            <DropdownMenuItem
+                                              onClick={() =>
+                                                handleStatusChange(
+                                                  booking._id,
+                                                  "confirmed"
+                                                )
+                                              }
+                                              className="text-emerald-600"
+                                            >
+                                              <CheckCircle className="h-4 w-4 mr-2" />
+                                              Confirm Booking
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                              onClick={() => {
+                                                setPendingCancelId(booking._id);
+                                                setCancelOpen(true);
+                                              }}
+                                              className="text-red-600"
+                                            >
+                                              <X className="h-4 w-4 mr-2" />
+                                              Cancel Booking
+                                            </DropdownMenuItem>
+                                          </>
+                                        )}
+                                        {booking.status === "confirmed" && (
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              handleStatusChange(
+                                                booking._id,
+                                                "completed"
+                                              )
+                                            }
+                                            className="text-blue-600"
+                                          >
+                                            <Star className="h-4 w-4 mr-2" />
+                                            Mark Complete
+                                          </DropdownMenuItem>
+                                        )}
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
                   ) : (
-                    <AnimatedList
-                      items={animatedListItems}
-                      className="w-full"
-                      itemClassName="w-full"
-                      displayScrollbar={true}
-                      enableArrowNavigation={true}
-                      showGradients={true}
-                      initialSelectedIndex={selectedIndex}
-                      onItemSelect={(item, index) => setSelectedIndex(index)}
-                    />
+                    <div className="space-y-4">
+                      {filtered.map((booking) => {
+                        const clientName =
+                          booking.user?.name ||
+                          booking.clientName ||
+                          "Unknown Client";
+                        const clientEmail =
+                          booking.user?.email || booking.clientEmail || "";
+                        const clientPhone =
+                          booking.user?.phone || booking.clientPhone || "";
+                        const serviceTitle =
+                          booking.service?.title ||
+                          booking.serviceTitle ||
+                          "Unknown Service";
+                        const serviceCategory = booking.service?.category || "";
+                        const bookingDate =
+                          booking.startDate || booking.date || "";
+                        const amount =
+                          booking.totalPrice || booking.amount || 0;
+
+                        const formattedDate = bookingDate
+                          ? new Date(bookingDate).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : "—";
+
+                        const formattedTime = bookingDate
+                          ? new Date(bookingDate).toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "—";
+
+                        const statusConfig = {
+                          confirmed: {
+                            bg: "bg-emerald-100 dark:bg-emerald-900/30",
+                            text: "text-emerald-700 dark:text-emerald-300",
+                            border:
+                              "border-emerald-200 dark:border-emerald-800",
+                            icon: <CheckCircle className="h-4 w-4" />,
+                          },
+                          pending: {
+                            bg: "bg-amber-100 dark:bg-amber-900/30",
+                            text: "text-amber-700 dark:text-amber-300",
+                            border: "border-amber-200 dark:border-amber-800",
+                            icon: <Clock className="h-4 w-4" />,
+                          },
+                          completed: {
+                            bg: "bg-blue-100 dark:bg-blue-900/30",
+                            text: "text-blue-700 dark:text-blue-300",
+                            border: "border-blue-200 dark:border-blue-800",
+                            icon: <Star className="h-4 w-4" />,
+                          },
+                          cancelled: {
+                            bg: "bg-red-100 dark:bg-red-900/30",
+                            text: "text-red-700 dark:text-red-300",
+                            border: "border-red-200 dark:border-red-800",
+                            icon: <X className="h-4 w-4" />,
+                          },
+                        };
+
+                        const status =
+                          statusConfig[booking.status] || statusConfig.pending;
+
+                        return (
+                          <motion.div
+                            key={booking._id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="border rounded-lg hover:shadow-lg transition-all bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800"
+                          >
+                            <div className="p-6">
+                              <div className="flex items-start justify-between gap-4 mb-4">
+                                <div className="flex items-start gap-4 flex-1">
+                                  <div className="h-14 w-14 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-xl font-bold shadow-lg flex-shrink-0">
+                                    {clientName[0]?.toUpperCase()}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">
+                                      {clientName}
+                                    </h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                      {clientEmail}
+                                    </p>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <Badge
+                                        className={`${status.bg} ${status.text} ${status.border} font-semibold`}
+                                      >
+                                        {booking.status?.toUpperCase()}
+                                      </Badge>
+                                      {serviceCategory && (
+                                        <Badge
+                                          variant="outline"
+                                          className="text-xs"
+                                        >
+                                          {serviceCategory}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                                    Amount
+                                  </p>
+                                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                                    KSh {(amount / 1000).toFixed(1)}K
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                                <div>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
+                                    <Sparkles className="h-3 w-3" />
+                                    Service
+                                  </p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    {serviceTitle}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    Date
+                                  </p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    {formattedDate}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    Time
+                                  </p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    {formattedTime}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2">
+                                  {booking.paymentStatus === "paid" ? (
+                                    <>
+                                      <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                      <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                                        Paid
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                                      <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                                        Pending
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                    onClick={() => {
+                                      setSelectedBooking(booking);
+                                      setViewModalOpen(true);
+                                    }}
+                                  >
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View
+                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="outline" size="sm">
+                                        <MoreHorizontal className="h-4 w-4 mr-2" />
+                                        Actions
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                      align="end"
+                                      className="w-48"
+                                    >
+                                      <DropdownMenuLabel>
+                                        Quick Actions
+                                      </DropdownMenuLabel>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          window.location.href = `/vendor/messages?userId=${booking.user._id}`;
+                                        }}
+                                      >
+                                        <MessageCircle className="h-4 w-4 mr-2" />
+                                        Message Client
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      {booking.status === "pending" && (
+                                        <>
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              handleStatusChange(
+                                                booking._id,
+                                                "confirmed"
+                                              )
+                                            }
+                                            className="text-emerald-600"
+                                          >
+                                            <CheckCircle className="h-4 w-4 mr-2" />
+                                            Confirm Booking
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem
+                                            onClick={() => {
+                                              setPendingCancelId(booking._id);
+                                              setCancelOpen(true);
+                                            }}
+                                            className="text-red-600"
+                                          >
+                                            <X className="h-4 w-4 mr-2" />
+                                            Cancel Booking
+                                          </DropdownMenuItem>
+                                        </>
+                                      )}
+                                      {booking.status === "confirmed" && (
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            handleStatusChange(
+                                              booking._id,
+                                              "completed"
+                                            )
+                                          }
+                                          className="text-blue-600"
+                                        >
+                                          <Star className="h-4 w-4 mr-2" />
+                                          Mark Complete
+                                        </DropdownMenuItem>
+                                      )}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
                   )}
                 </TabsContent>
               </Tabs>
@@ -617,7 +1100,7 @@ export default function VendorBookingsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className="bg-white border-0 shadow-sm hover:shadow-lg transition-all relative overflow-hidden group">
+                <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                   <CardHeader className="relative z-10">
@@ -628,7 +1111,7 @@ export default function VendorBookingsPage() {
                         <span className={feature.color}>{feature.icon}</span>
                       </div>
                       <Badge
-                        className={`${feature.bgColor} text-gray-700 border border-gray-200 text-xs font-semibold`}
+                        className={`${feature.bgColor} text-white border border-gray-200 text-xs font-semibold`}
                       >
                         {feature.badge}
                       </Badge>
@@ -686,7 +1169,7 @@ export default function VendorBookingsPage() {
           className="grid md:grid-cols-2 gap-6 mb-10"
         >
           {/* Verification Card */}
-          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-all">
+          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all">
             <CardHeader>
               <div className="flex items-start justify-between mb-4">
                 <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
@@ -696,7 +1179,9 @@ export default function VendorBookingsPage() {
                   Priority
                 </Badge>
               </div>
-              <CardTitle className="text-gray-900">Get Verified</CardTitle>
+              <CardTitle className="text-gray-900 text-xl">
+                Get Verified
+              </CardTitle>
               <CardDescription className="text-gray-600">
                 Build trust and credibility with customers
               </CardDescription>
@@ -726,7 +1211,7 @@ export default function VendorBookingsPage() {
                   </div>
                 </div>
               </div>
-              <Progress value={65} className="h-2" />
+              <Progress value={65} className="h-2 [&>div]:bg-green-400" />
               <p className="text-xs text-gray-500">
                 5 of 8 requirements completed
               </p>
@@ -741,7 +1226,7 @@ export default function VendorBookingsPage() {
           </Card>
 
           {/* Analytics Card */}
-          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-all">
+          <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all">
             <CardHeader>
               <div className="flex items-start justify-between mb-4">
                 <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
@@ -751,7 +1236,7 @@ export default function VendorBookingsPage() {
                   Premium
                 </Badge>
               </div>
-              <CardTitle className="text-gray-900">
+              <CardTitle className="text-gray-900 text-xl">
                 Performance Metrics
               </CardTitle>
               <CardDescription className="text-gray-600">
@@ -765,25 +1250,25 @@ export default function VendorBookingsPage() {
                     <span className="text-gray-700">Response Rate</span>
                     <span className="text-emerald-600 font-semibold">92%</span>
                   </div>
-                  <Progress value={92} className="h-2" />
+                  <Progress value={92} className="h-2 [&>div]:bg-green-400" />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-700">Booking Rate</span>
                     <span className="text-emerald-600 font-semibold">78%</span>
                   </div>
-                  <Progress value={78} className="h-2" />
+                  <Progress value={78} className="h-2 [&>div]:bg-green-400" />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-700">Client Satisfaction</span>
                     <span className="text-emerald-600 font-semibold">95%</span>
                   </div>
-                  <Progress value={95} className="h-2" />
+                  <Progress value={95} className="h-2 [&>div]:bg-green-400" />
                 </div>
               </div>
               <Button
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="w-full bg-emerald-600 hover:bg-emerald-900 text-white"
                 disabled
               >
                 <TrendingUp className="h-4 w-4 mr-2" />
@@ -832,7 +1317,7 @@ export default function VendorBookingsPage() {
               return (
                 <Card
                   key={i}
-                  className="bg-white border-0 shadow-sm hover:shadow-md transition-all"
+                  className="bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all"
                 >
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between">
@@ -866,25 +1351,25 @@ export default function VendorBookingsPage() {
           className="mb-10"
         >
           <Card className="bg-gradient-to-r from-emerald-50 via-emerald-100 to-emerald-50 border border-emerald-200 hover:border-emerald-300 transition-all">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between gap-6">
-                <div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                    <Rocket className="h-6 w-6 text-emerald-600" />
+            <CardContent className="p-4 sm:p-6 md:p-8">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
+                <div className="flex-1">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                    <Rocket className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600" />
                     Ready to boost your bookings?
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-sm sm:text-base text-gray-600">
                     Get featured, verified, and start seeing results today
                   </p>
                 </div>
-                <div className="flex gap-3 flex-shrink-0">
-                  <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                <div className="flex flex-col sm:flex-row gap-3 md:flex-shrink-0">
+                  <Button className="bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto">
                     Explore Plans
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                   <Button
                     variant="outline"
-                    className="border-gray-300 hover:bg-gray-50"
+                    className="border-gray-300 hover:bg-gray-50 w-full sm:w-auto"
                     disabled
                   >
                     Learn More
@@ -895,169 +1380,6 @@ export default function VendorBookingsPage() {
           </Card>
         </motion.div>
       </div>
-
-      {/* Booking Details Slide-Out Panel */}
-      <AnimatePresence>
-        {selectedBooking && (
-          <motion.div
-            key="booking-details"
-            initial={{ x: 500, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 500, opacity: 0 }}
-            className="fixed inset-0 z-50 flex bg-black/50 backdrop-blur-sm"
-            onClick={() => setSelectedBooking(null)}
-          >
-            <div className="flex-1" />
-            <motion.div
-              initial={{ x: 500 }}
-              animate={{ x: 0 }}
-              exit={{ x: 500 }}
-              className="w-full max-w-md bg-white shadow-2xl flex flex-col border-l border-emerald-200"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-6 border-b border-gray-200 flex items-start justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    Booking Details
-                  </h2>
-                  <p className="text-gray-500 text-sm mt-1">
-                    {selectedBooking.serviceTitle}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  onClick={() => setSelectedBooking(null)}
-                  className="text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                <div>
-                  <h3 className="text-gray-700 font-semibold mb-3 flex items-center gap-2">
-                    <User className="h-4 w-4 text-emerald-600" />
-                    Client Info
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <p className="text-gray-900 font-medium">
-                      {selectedBooking.clientName}
-                    </p>
-                    {selectedBooking.clientEmail && (
-                      <p className="text-gray-600 flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        {selectedBooking.clientEmail}
-                      </p>
-                    )}
-                    {selectedBooking.clientPhone && (
-                      <p className="text-gray-600 flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        {selectedBooking.clientPhone}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-gray-700 font-semibold mb-3 flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-emerald-600" />
-                    Booking Info
-                  </h3>
-                  <div className="space-y-2 text-sm bg-gray-50 p-3 rounded-lg">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Date</span>
-                      <span className="text-gray-900 font-medium">
-                        {selectedBooking.date
-                          ? new Date(selectedBooking.date).toLocaleDateString()
-                          : "—"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Time</span>
-                      <span className="text-gray-900 font-medium">
-                        {selectedBooking.time || "—"}
-                      </span>
-                    </div>
-                    {selectedBooking.location && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Location</span>
-                        <span className="text-gray-900 font-medium flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {selectedBooking.location}
-                        </span>
-                      </div>
-                    )}
-                    {selectedBooking.guestCount && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Guests</span>
-                        <span className="text-gray-900 font-medium">
-                          {selectedBooking.guestCount}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-700 font-medium">
-                      Total Amount
-                    </span>
-                    <span className="text-3xl font-bold text-emerald-600">
-                      KSh {selectedBooking.amount?.toLocaleString() || "0"}
-                    </span>
-                  </div>
-                </div>
-
-                {selectedBooking.notes && (
-                  <div>
-                    <h3 className="text-gray-700 font-semibold mb-2 flex items-center gap-2">
-                      <MessageCircle className="h-4 w-4 text-emerald-600" />
-                      Notes
-                    </h3>
-                    <p className="text-gray-600 text-sm bg-gray-50 p-3 rounded-lg">
-                      {selectedBooking.notes}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="p-6 border-t border-gray-200 space-y-3">
-                {selectedBooking.status === "pending" && (
-                  <Button
-                    onClick={() => {
-                      handleStatusChange(selectedBooking._id, "confirmed");
-                      setSelectedBooking(null);
-                    }}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Confirm Booking
-                  </Button>
-                )}
-                {selectedBooking.status !== "cancelled" &&
-                  selectedBooking.status !== "completed" && (
-                    <Button
-                      onClick={() => requestCancelBooking(selectedBooking._id)}
-                      variant="destructive"
-                      className="w-full"
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Cancel Booking
-                    </Button>
-                  )}
-                <Button
-                  onClick={() => setSelectedBooking(null)}
-                  variant="outline"
-                  className="w-full border-gray-300 hover:bg-gray-50"
-                >
-                  Close
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Cancel Confirmation Dialog */}
       <ConfirmDialog
@@ -1073,6 +1395,374 @@ export default function VendorBookingsPage() {
         confirmVariant="destructive"
         onConfirm={performCancelBooking}
       />
+
+      {/* View Booking Details Sheet */}
+      <Sheet open={viewModalOpen} onOpenChange={setViewModalOpen}>
+        <SheetContent className="w-full sm:max-w-[50vw] p-0 overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-white/20 flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <SheetTitle className="text-xl font-bold text-white">
+                    Booking #{selectedBooking?._id?.slice(-6).toUpperCase()}
+                  </SheetTitle>
+                  <SheetDescription className="text-emerald-100 text-xs">
+                    Complete booking details
+                  </SheetDescription>
+                </div>
+              </div>
+            </div>
+            {selectedBooking && (
+              <div className="flex items-center gap-2 mt-3">
+                <Badge
+                  className={`px-3 py-1 text-xs font-semibold ${
+                    selectedBooking.status === "confirmed"
+                      ? "bg-emerald-400 text-emerald-950"
+                      : selectedBooking.status === "pending"
+                      ? "bg-amber-400 text-amber-950"
+                      : selectedBooking.status === "completed"
+                      ? "bg-blue-400 text-blue-950"
+                      : "bg-red-400 text-red-950"
+                  }`}
+                >
+                  {selectedBooking.status?.toUpperCase()}
+                </Badge>
+                <Badge
+                  className={`px-3 py-1 text-xs font-semibold ${
+                    selectedBooking.paymentStatus === "paid"
+                      ? "bg-green-400 text-green-950"
+                      : "bg-orange-400 text-orange-950"
+                  }`}
+                >
+                  <DollarSign className="h-3 w-3 mr-1" />
+                  {selectedBooking.paymentStatus?.toUpperCase() || "PENDING"}
+                </Badge>
+              </div>
+            )}
+          </div>
+
+          {/* Content */}
+          <div
+            className="overflow-y-auto px-6 py-5"
+            style={{ maxHeight: "calc(100vh - 220px)" }}
+          >
+            {selectedBooking && (
+              <div className="space-y-5">
+                {/* Client Information Card */}
+                <Card className="border border-gray-200 dark:border-gray-800">
+                  <CardHeader className="pb-3 pt-4 px-5">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                      <User className="h-4 w-4 text-emerald-600" />
+                      Client Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-5 pb-4">
+                    <div className="flex items-start gap-4">
+                      <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xl font-bold shadow-md">
+                        {(selectedBooking.user?.name ||
+                          selectedBooking.clientName ||
+                          "U")[0]?.toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
+                          {selectedBooking.user?.name ||
+                            selectedBooking.clientName ||
+                            "—"}
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                            <Mail className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />
+                            <span className="truncate">
+                              {selectedBooking.user?.email ||
+                                selectedBooking.clientEmail ||
+                                "—"}
+                            </span>
+                          </div>
+                          {(selectedBooking.user?.phone ||
+                            selectedBooking.clientPhone) && (
+                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                              <Phone className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />
+                              <span>
+                                {selectedBooking.user?.phone ||
+                                  selectedBooking.clientPhone}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Service Details Card */}
+                <Card className="border-2 border-emerald-500 dark:border-emerald-700">
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                          Service Booked
+                        </p>
+                        <p className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                          {selectedBooking.service?.title ||
+                            selectedBooking.serviceTitle ||
+                            "—"}
+                        </p>
+                        {selectedBooking.service?.category && (
+                          <Badge className="text-xs px-3 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+                            {selectedBooking.service.category}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                          Total Amount
+                        </p>
+                        <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                          KSh{" "}
+                          {(
+                            (selectedBooking.totalPrice ||
+                              selectedBooking.amount ||
+                              0) / 1000
+                          ).toFixed(1)}
+                          K
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Notes Card */}
+                {selectedBooking.notes && (
+                  <Card className="border border-amber-500 dark:border-amber-700">
+                    <CardHeader className="pb-2 pt-4 px-5">
+                      <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                        <MessageCircle className="h-4 w-4 text-amber-600" />
+                        Client Notes
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="px-5 pb-4">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {selectedBooking.notes}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Event Details Card */}
+                <Card className="border border-gray-200 dark:border-gray-800">
+                  <CardHeader className="pb-3 pt-4 px-5">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                      <Calendar className="h-4 w-4 text-blue-600" />
+                      Event Details
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-5 pb-4">
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-3.5 w-3.5 text-emerald-600" />
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Event Date
+                          </p>
+                        </div>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                          {selectedBooking.startDate || selectedBooking.date
+                            ? new Date(
+                                selectedBooking.startDate ||
+                                  selectedBooking.date ||
+                                  ""
+                              ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })
+                            : "—"}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-3.5 w-3.5 text-emerald-600" />
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Event Time
+                          </p>
+                        </div>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                          {selectedBooking.startDate || selectedBooking.date
+                            ? new Date(
+                                selectedBooking.startDate ||
+                                  selectedBooking.date ||
+                                  ""
+                              ).toLocaleTimeString("en-US", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : selectedBooking.time || "—"}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-3.5 w-3.5 text-emerald-600" />
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Booked On
+                          </p>
+                        </div>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                          {selectedBooking.createdAt
+                            ? new Date(
+                                selectedBooking.createdAt
+                              ).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })
+                            : "—"}
+                        </p>
+                      </div>
+
+                      {selectedBooking.location && (
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-3.5 w-3.5 text-emerald-600" />
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Location
+                            </p>
+                          </div>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            {selectedBooking.location}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Payment Status Card */}
+                <Card
+                  className={`border-2 ${
+                    selectedBooking.paymentStatus === "paid"
+                      ? "border-green-500 dark:border-green-700 bg-green-50/50 dark:bg-green-950/20"
+                      : "border-orange-500 dark:border-orange-700 bg-orange-50/50 dark:bg-orange-950/20"
+                  }`}
+                >
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <DollarSign
+                            className={`h-4 w-4 ${
+                              selectedBooking.paymentStatus === "paid"
+                                ? "text-green-600"
+                                : "text-orange-600"
+                            }`}
+                          />
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Payment Status
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`h-3 w-3 rounded-full ${
+                              selectedBooking.paymentStatus === "paid"
+                                ? "bg-green-500"
+                                : "bg-orange-500"
+                            } animate-pulse`}
+                          />
+                          <p
+                            className={`text-xl font-bold ${
+                              selectedBooking.paymentStatus === "paid"
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-orange-600 dark:text-orange-400"
+                            }`}
+                          >
+                            {selectedBooking.paymentStatus?.toUpperCase() ||
+                              "PENDING"}
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        className={`h-12 w-12 rounded-xl flex items-center justify-center ${
+                          selectedBooking.paymentStatus === "paid"
+                            ? "bg-green-500"
+                            : "bg-orange-500"
+                        }`}
+                      >
+                        {selectedBooking.paymentStatus === "paid" ? (
+                          <CheckCircle className="h-6 w-6 text-white" />
+                        ) : (
+                          <Clock className="h-6 w-6 text-white" />
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
+
+          {/* Footer Actions */}
+          {selectedBooking && (
+            <div className="border-t bg-gray-50 dark:bg-gray-900 px-6 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    onClick={() => {
+                      window.location.href = `/vendor/messages?userId=${selectedBooking.user._id}`;
+                    }}
+                    className="bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Message
+                  </Button>
+                  {selectedBooking.status === "pending" && (
+                    <Button
+                      onClick={() => {
+                        handleStatusChange(selectedBooking._id, "confirmed");
+                      }}
+                      className="bg-emerald-600 hover:bg-emerald-700"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Confirm
+                    </Button>
+                  )}
+                  {selectedBooking.status === "confirmed" && (
+                    <Button
+                      onClick={() => {
+                        handleStatusChange(selectedBooking._id, "completed");
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Star className="h-4 w-4 mr-2" />
+                      Complete
+                    </Button>
+                  )}
+                  {(selectedBooking.status === "pending" ||
+                    selectedBooking.status === "confirmed") && (
+                    <Button
+                      onClick={() => {
+                        setPendingCancelId(selectedBooking._id);
+                        setCancelOpen(true);
+                      }}
+                      variant="destructive"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+                <SheetClose asChild>
+                  <Button variant="outline">Close</Button>
+                </SheetClose>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

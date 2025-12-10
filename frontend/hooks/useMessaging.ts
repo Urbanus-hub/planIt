@@ -64,6 +64,8 @@ export const useMessaging = ({
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [users, setUsers] = useState<Map<string, boolean>>(new Map());
   const currentConversationIdRef = useRef<string | undefined>(undefined);
+  const connectionAttempts = useRef(0);
+  const maxConnectionAttempts = 5;
 
   /**
    * FIX #1: Initialize socket ONCE with empty dependency array
@@ -81,6 +83,7 @@ export const useMessaging = ({
 
     socket.on("connect", () => {
       setIsConnected(true);
+      connectionAttempts.current = 0; // Reset attempts on successful connection
       console.log("✓ Socket connected");
     });
 
@@ -90,7 +93,25 @@ export const useMessaging = ({
     });
 
     socket.on("connect_error", (error) => {
-      console.error("❌ Connection error:", error?.message);
+      const errorMessage = error?.message || "Unknown error";
+
+      connectionAttempts.current += 1;
+
+      // Only log timeout errors once as a warning, not as errors
+      if (errorMessage.includes("timeout")) {
+        if (connectionAttempts.current === 1) {
+          console.warn(
+            "⚠️ Real-time messaging unavailable - continuing in offline mode"
+          );
+        }
+        setIsConnected(false);
+        return;
+      }
+
+      // Only log non-timeout errors
+      if (connectionAttempts.current <= 3) {
+        console.error("❌ Connection error:", errorMessage);
+      }
       setIsConnected(false);
     });
 

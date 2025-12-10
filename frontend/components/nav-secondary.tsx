@@ -11,6 +11,7 @@ import {
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 export function NavSecondary({
@@ -24,6 +25,7 @@ export function NavSecondary({
   }[];
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   const pathname = usePathname();
+  const { state } = useSidebar();
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
 
   return (
@@ -41,7 +43,10 @@ export function NavSecondary({
                   onMouseEnter={() => setHoveredItem(item.title)}
                   onMouseLeave={() => setHoveredItem(null)}
                   className={cn(
-                    "flex items-center h-10 px-4 text-md font-medium rounded-lg transition-all duration-300 gap-3",
+                    "flex items-center h-10 px-4 text-md font-medium rounded-lg transition-all duration-300 relative overflow-visible group",
+                    state === "collapsed"
+                      ? "justify-center px-2"
+                      : "justify-start gap-3",
                     // Active state
                     isActive && "bg-green-500/20",
                     // Hover state (only for non-active items)
@@ -62,18 +67,27 @@ export function NavSecondary({
                     )}
                     aria-hidden="true"
                   />
-                  <span
-                    className={cn(
-                      "font-medium transition-all duration-300",
-                      isActive
-                        ? "text-green-400 font-semibold"
-                        : isHovered
-                        ? "text-green-400"
-                        : "text-gray-300"
-                    )}
-                  >
-                    {item.title}
-                  </span>
+                  {state !== "collapsed" && (
+                    <span
+                      className={cn(
+                        "font-medium transition-all duration-300",
+                        isActive
+                          ? "text-green-400 font-semibold"
+                          : isHovered
+                          ? "text-green-400"
+                          : "text-gray-300"
+                      )}
+                    >
+                      {item.title}
+                    </span>
+                  )}
+                  {/* Tooltip for collapsed state */}
+                  {state === "collapsed" && isHovered && (
+                    <span className="absolute left-14 bg-gray-900 dark:bg-gray-800 text-white px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap z-50 shadow-lg border border-gray-700">
+                      {item.title}
+                      <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800" />
+                    </span>
+                  )}
                 </Link>
               </SidebarMenuItem>
             );
