@@ -928,22 +928,22 @@ export default function ClientDashboard() {
           </div>
 
           {/* Gallery Section */}
-          <div className="space-y-8">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                   Event Gallery
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 text-lg">
+                <p className="text-gray-600 dark:text-gray-400">
                   Get inspired by our successful events
                 </p>
               </div>
               <Button
                 variant="outline"
-                size="default"
-                className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-6"
+                size="sm"
+                className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
               >
-                <Grid3X3 className="h-5 w-5 mr-2" />
+                <Grid3X3 className="h-4 w-4 mr-2" />
                 View All
               </Button>
             </div>
@@ -952,36 +952,36 @@ export default function ClientDashboard() {
             <Tabs
               value={galleryFilter}
               onValueChange={setGalleryFilter}
-              className="w-full bg-transparent "
+              className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-4 mb-8 bg-transparent   dark:bg-gray-800 p-1 rounded-xl ">
+              <TabsList className="inline-flex h-10 items-center justify-start rounded-lg bg-gray-100 dark:bg-gray-800 p-1 gap-1">
                 <TabsTrigger
                   value="all"
-                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg text-base py-3"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm font-medium"
                 >
                   All Events
                 </TabsTrigger>
                 <TabsTrigger
                   value="wedding"
-                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg text-base py-3"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm font-medium"
                 >
                   Weddings
                 </TabsTrigger>
                 <TabsTrigger
                   value="corporate"
-                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg text-base py-3"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm font-medium"
                 >
                   Corporate
                 </TabsTrigger>
                 <TabsTrigger
                   value="birthday"
-                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg text-base py-3"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm font-medium"
                 >
                   Birthdays
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value={galleryFilter} className="mt-0">
+              <TabsContent value={galleryFilter} className="mt-6">
                 <div
                   ref={galleryRef}
                   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
@@ -1000,7 +1000,7 @@ export default function ClientDashboard() {
                             fill
                             className="object-cover group-hover:scale-110 transition-transform duration-500"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                           {/* Play button for videos */}
                           {item.type === "video" && (
