@@ -25,6 +25,13 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
     // Determine file type (image or video)
     const fileType = file.type.startsWith("video") ? "video" : "image";
 
+    // Note: Advanced optimization parameters like quality, format, and eager transformations
+    // should be configured in your Cloudinary Upload Preset settings at:
+    // https://console.cloudinary.com/settings/upload
+    // 
+    // Alternatively, use the getOptimizedImageUrl() helper function when displaying images
+    // to apply transformations on-the-fly without affecting the original upload.
+
     // Use appropriate endpoint based on file type
     const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/${fileType}/upload`;
 
@@ -99,4 +106,76 @@ export const batchUploadToCloudinary = async (
     console.error("Batch upload error:", error);
     throw error;
   }
+};
+
+// Helper function to get optimized image URL with transformations
+export const getOptimizedImageUrl = (
+  publicUrl: string,
+  options?: {
+    width?: number;
+    height?: number;
+    crop?: "fill" | "fit" | "limit" | "scale" | "thumb";
+    quality?: "auto" | "auto:best" | "auto:good" | "auto:eco" | "auto:low" | number;
+    format?: "auto" | "webp" | "avif" | "jpg" | "png";
+    gravity?: "auto" | "face" | "center" | "north" | "south" | "east" | "west";
+  }
+): string => {
+  try {
+    // Default options
+    const {
+      width,
+      height,
+      crop = "limit",
+      quality = "auto:good",
+      format = "auto",
+      gravity = "auto",
+    } = options || {};
+
+    // Extract cloud name and public ID from URL
+    const urlParts = publicUrl.match(/cloudinary\.com\/([^/]+)\/(image|video)\/upload\/(.+)/);
+    if (!urlParts) {
+      // If URL doesn't match Cloudinary pattern, return original
+      return publicUrl;
+    }
+
+    const [, cloudName, resourceType, publicIdWithExtension] = urlParts;
+
+    // Build transformation string
+    const transformations: string[] = [];
+
+    if (width) transformations.push(`w_${width}`);
+    if (height) transformations.push(`h_${height}`);
+    if (crop) transformations.push(`c_${crop}`);
+    if (quality) transformations.push(`q_${quality}`);
+    if (format) transformations.push(`f_${format}`);
+    if (gravity && (crop === "fill" || crop === "thumb")) transformations.push(`g_${gravity}`);
+
+    // Add dpr_auto for automatic device pixel ratio
+    transformations.push("dpr_auto");
+
+    const transformString = transformations.join(",");
+
+    // Construct optimized URL
+    return `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${transformString}/${publicIdWithExtension}`;
+  } catch (error) {
+    console.error("Error generating optimized image URL:", error);
+    return publicUrl; // Return original URL if optimization fails
+  }
+};
+
+// Helper to get responsive srcset for images
+export const getResponsiveSrcSet = (
+  publicUrl: string,
+  widths: number[] = [400, 800, 1200, 1600]
+): string => {
+  return widths
+    .map((width) => {
+      const optimizedUrl = getOptimizedImageUrl(publicUrl, {
+        width,
+        quality: "auto:good",
+        format: "auto",
+      });
+      return `${optimizedUrl} ${width}w`;
+    })
+    .join(", ");
 };

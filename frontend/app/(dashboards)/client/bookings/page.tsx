@@ -62,26 +62,27 @@ import { useAuth } from "@/contexts/AuthContext";
 // Define the Booking interface to match backend
 interface Booking {
   _id: string;
-  clientName?: string;
-  clientEmail?: string;
-  clientPhone?: string;
-  serviceTitle?: string;
-  vendorName?: string;
-  vendorEmail?: string;
-  vendorPhone?: string;
-  date?: string;
-  time?: string;
-  status?: "pending" | "confirmed" | "completed" | "cancelled";
-  amount?: number;
-  location?: string;
-  guestCount?: number;
-  notes?: string;
-  paymentStatus?: "paid" | "partial" | "unpaid";
-  eventType?: string;
-  duration?: string;
-  specialRequests?: string;
-  rating?: number | null;
-  reviewed?: boolean;
+  user: string;
+  service: {
+    _id: string;
+    title: string;
+    category: string;
+    price: number;
+    location: string;
+  };
+  provider: {
+    _id: string;
+    name: string;
+    businessName: string;
+  };
+  startDate: string;
+  status: "pending" | "confirmed" | "completed" | "cancelled";
+  paymentStatus: "paid" | "partial" | "unpaid";
+  notes: string;
+  totalPrice: number;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 // Define the MobileActionSheet props interface
@@ -106,6 +107,7 @@ export default function ClientBookings() {
     try {
       const response = await bookingsAPI.getUserBookings(user._id);
       const data = response.data?.data || response.data || [];
+      console.log("bookingdata", data);
       setBookings(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(
@@ -198,13 +200,15 @@ export default function ClientBookings() {
   const filteredBookings = bookings.filter((booking: Booking) => {
     const matchesTab = activeTab === "all" || booking.status === activeTab;
     const matchesSearch =
-      (booking.vendorName || "")
+      (booking.provider?.businessName || booking.provider?.name || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      (booking.serviceTitle || "")
+      (booking.service?.title || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      (booking.location || "").toLowerCase().includes(searchTerm.toLowerCase());
+      (booking.service?.location || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
     return matchesTab && matchesSearch;
   });
@@ -239,16 +243,20 @@ export default function ClientBookings() {
     <div className="space-y-3">
       <div className="text-center pb-3 border-b">
         <h3 className="font-semibold text-gray-900 dark:text-white">
-          {booking.vendorName || "Unknown Vendor"}
+          {booking.provider?.businessName ||
+            booking.provider?.name ||
+            "Unknown Provider"}
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          {booking.serviceTitle || "Unknown Service"}
+          {booking.service?.title || "Unknown Service"}
         </p>
       </div>
 
       <div className="space-y-2">
         <Button
-          onClick={() => handleMessage(booking.vendorName || "Vendor")}
+          onClick={() =>
+            handleMessage(booking.provider?.businessName || "Provider")
+          }
           variant="outline"
           size="sm"
           className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
@@ -257,62 +265,28 @@ export default function ClientBookings() {
           Message
         </Button>
 
-        {booking.status === "completed" && !booking.reviewed && (
+        {booking.status !== "completed" && booking.status !== "cancelled" && (
           <Button
-            onClick={() => handleReview(booking._id)}
+            onClick={() => handleCancelBooking(booking._id)}
             variant="outline"
             size="sm"
-            className="w-full border-amber-600 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20"
+            className="w-full border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
           >
-            <Star className="w-4 h-4 mr-2" />
-            Leave Review
+            <X className="w-4 h-4 mr-2" />
+            Cancel Booking
           </Button>
         )}
 
-        {booking.status !== "completed" && booking.status !== "cancelled" && (
-          <>
-            <Button
-              onClick={() => handleReschedule(booking._id)}
-              variant="outline"
-              size="sm"
-              className="w-full border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Reschedule
-            </Button>
-            <Button
-              onClick={() => handleCancelBooking(booking._id)}
-              variant="outline"
-              size="sm"
-              className="w-full border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-          </>
-        )}
-
-        {booking.paymentStatus === "partial" && (
-          <Button
-            onClick={() => handleMakePayment(booking._id)}
-            size="sm"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-          >
-            <CreditCard className="w-4 h-4 mr-2" />
-            Complete Payment
-          </Button>
-        )}
-
-        {booking.status === "completed" && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download Invoice
-          </Button>
-        )}
+        <Button
+          onClick={() => handleMakePayment(booking._id)}
+          size="sm"
+          disabled
+          className="w-full bg-gray-400 cursor-not-allowed text-white opacity-60"
+          title="Payment functionality coming soon"
+        >
+          <CreditCard className="w-4 h-4 mr-2" />
+          Make Payment (Coming Soon)
+        </Button>
       </div>
     </div>
   );
@@ -424,7 +398,10 @@ export default function ClientBookings() {
                     <p className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-1">
                       KSh{" "}
                       {bookings
-                        .reduce((sum, b: Booking) => sum + (b.amount || 0), 0)
+                        .reduce(
+                          (sum, b: Booking) => sum + (b.totalPrice || 0),
+                          0
+                        )
                         .toLocaleString()}
                     </p>
                   </div>
@@ -592,10 +569,15 @@ export default function ClientBookings() {
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
                           <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">
-                            {booking.vendorName || "Unknown Vendor"}
+                            {booking.provider?.businessName ||
+                              booking.provider?.name ||
+                              "Unknown Provider"}
                           </h3>
                           <p className="text-emerald-600 dark:text-emerald-400 font-medium text-sm">
-                            {booking.serviceTitle || "Unknown Service"}
+                            {booking.service?.title || "Unknown Service"}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                            {booking.service?.category || ""}
                           </p>
                         </div>
                         <div className="flex flex-col gap-2 shrink-0">
@@ -625,130 +607,90 @@ export default function ClientBookings() {
                       </div>
 
                       {/* Event Details */}
-                      <div className="grid grid-cols-1 gap-2 text-sm">
+                      <div className="grid grid-cols-1 gap-3 text-sm">
                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                           <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span className="truncate">
-                            {booking.date
-                              ? new Date(booking.date).toLocaleDateString()
+                            {booking.startDate
+                              ? new Date(booking.startDate).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    weekday: "short",
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  }
+                                )
                               : "—"}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <Clock className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span className="truncate">
-                            {booking.time || "—"}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                           <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span className="truncate">
-                            {booking.location || "—"}
+                            {booking.service?.location || "—"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                          <DollarSign className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span className="truncate font-semibold text-gray-900 dark:text-white">
+                            KSh {(booking.totalPrice || 0).toLocaleString()}
                           </span>
                         </div>
                       </div>
 
-                      {/* Additional Info - Collapsible on Mobile */}
-                      <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-3 space-y-2">
-                        {booking.eventType && (
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-gray-600 dark:text-gray-400">
-                              Event Type:
+                      {/* Additional Info */}
+                      <div className="bg-linear-to-br from-emerald-50/50 to-teal-50/30 dark:from-emerald-950/20 dark:to-teal-950/10 rounded-lg p-4 space-y-3 border border-emerald-100 dark:border-emerald-900/30">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                            Booking ID:
+                          </span>
+                          <span className="text-xs font-mono font-medium text-gray-900 dark:text-white">
+                            #{booking._id.slice(-8).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                            Booked On:
+                          </span>
+                          <span className="text-xs font-medium text-gray-900 dark:text-white">
+                            {new Date(booking.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {booking.notes && (
+                          <div className="pt-2 border-t border-emerald-200 dark:border-emerald-800">
+                            <span className="text-xs text-gray-600 dark:text-gray-400 block mb-1">
+                              Notes:
                             </span>
-                            <span className="text-xs font-medium text-gray-900 dark:text-white">
-                              {booking.eventType}
+                            <span className="text-xs text-gray-900 dark:text-white">
+                              {booking.notes}
                             </span>
-                          </div>
-                        )}
-                        {booking.duration && (
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-gray-600 dark:text-gray-400">
-                              Duration:
-                            </span>
-                            <span className="text-xs font-medium text-gray-900 dark:text-white">
-                              {booking.duration}
-                            </span>
-                          </div>
-                        )}
-                        {booking.guestCount && booking.guestCount > 0 && (
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-gray-600 dark:text-gray-400">
-                              Guests:
-                            </span>
-                            <span className="text-xs font-medium text-gray-900 dark:text-white">
-                              {booking.guestCount} attendees
-                            </span>
-                          </div>
-                        )}
-                        {(booking.vendorName ||
-                          booking.vendorPhone ||
-                          booking.vendorEmail) && (
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-gray-600 dark:text-gray-400">
-                              Contact:
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium text-gray-900 dark:text-white">
-                                {booking.vendorName || "Vendor"}
-                              </span>
-                              {booking.vendorPhone && (
-                                <a
-                                  href={`tel:${booking.vendorPhone}`}
-                                  className="text-emerald-600 hover:text-emerald-700"
-                                  title="Call vendor"
-                                >
-                                  <Phone className="w-3 h-3" />
-                                </a>
-                              )}
-                              {booking.vendorEmail && (
-                                <a
-                                  href={`mailto:${booking.vendorEmail}`}
-                                  className="text-emerald-600 hover:text-emerald-700"
-                                  title="Email vendor"
-                                >
-                                  <Mail className="w-3 h-3" />
-                                </a>
-                              )}
-                            </div>
                           </div>
                         )}
                       </div>
 
-                      {/* Price and Actions */}
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                            KSh {(booking.amount || 0).toLocaleString()}
-                          </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
-                            Total Cost
-                          </p>
-                        </div>
-
-                        {/* Mobile Actions using Sheet */}
-                        <Sheet>
-                          <SheetTrigger asChild>
+                      {/* Action Buttons */}
+                      <div className="flex flex-col gap-2 pt-2">
+                        <Button
+                          disabled
+                          size="sm"
+                          className="w-full bg-gray-400 cursor-not-allowed opacity-60"
+                          title="Payment functionality coming soon in Q1 2026"
+                        >
+                          <CreditCard className="w-4 h-4 mr-2" />
+                          Make Payment (Coming Soon)
+                        </Button>
+                        {booking.status !== "completed" &&
+                          booking.status !== "cancelled" && (
                             <Button
+                              onClick={() => handleCancelBooking(booking._id)}
                               variant="outline"
                               size="sm"
-                              className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                              className="w-full border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                             >
-                              <Menu className="w-4 h-4" />
+                              <X className="w-4 h-4 mr-2" />
+                              Cancel Booking
                             </Button>
-                          </SheetTrigger>
-                          <SheetContent side="bottom" className="h-[60vh]">
-                            <SheetHeader>
-                              <SheetTitle>Booking Actions</SheetTitle>
-                              <SheetDescription>
-                                Manage your booking for{" "}
-                                {booking.vendorName || "Unknown Vendor"}
-                              </SheetDescription>
-                            </SheetHeader>
-                            <div className="mt-6">
-                              <MobileActionSheet booking={booking} />
-                            </div>
-                          </SheetContent>
-                        </Sheet>
+                          )}
                       </div>
                     </div>
 
@@ -760,10 +702,15 @@ export default function ClientBookings() {
                         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                           <div>
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                              {booking.vendorName || "Unknown Vendor"}
+                              {booking.provider?.businessName ||
+                                booking.provider?.name ||
+                                "Unknown Provider"}
                             </h3>
                             <p className="text-emerald-600 dark:text-emerald-400 font-medium">
-                              {booking.serviceTitle || "Unknown Service"}
+                              {booking.service?.title || "Unknown Service"}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                              {booking.service?.category || ""}
                             </p>
                           </div>
                           <div className="flex gap-2 flex-wrap">
@@ -795,91 +742,67 @@ export default function ClientBookings() {
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                             <Calendar className="w-4 h-4 text-emerald-600" />
                             <span>
-                              {booking.date
-                                ? new Date(booking.date).toLocaleDateString()
+                              {booking.startDate
+                                ? new Date(
+                                    booking.startDate
+                                  ).toLocaleDateString("en-US", {
+                                    weekday: "short",
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  })
                                 : "—"}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            <Clock className="w-4 h-4 text-emerald-600" />
-                            <span>{booking.time || "—"}</span>
+                            <MapPin className="w-4 h-4 text-emerald-600" />
+                            <span>{booking.service?.location || "—"}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            <MapPin className="w-4 h-4 text-emerald-600" />
-                            <span>{booking.location || "—"}</span>
+                            <User className="w-4 h-4 text-emerald-600" />
+                            <span>{booking.provider?.name || "—"}</span>
                           </div>
                         </div>
 
                         {/* Additional Info */}
-                        <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-4 space-y-2">
-                          {booking.eventType && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600 dark:text-gray-400">
-                                Event Type:
-                              </span>
-                              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                {booking.eventType}
-                              </span>
-                            </div>
-                          )}
-                          {booking.duration && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600 dark:text-gray-400">
-                                Duration:
-                              </span>
-                              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                {booking.duration}
-                              </span>
-                            </div>
-                          )}
-                          {booking.guestCount && booking.guestCount > 0 && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600 dark:text-gray-400">
-                                Guests:
-                              </span>
-                              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                {booking.guestCount} attendees
-                              </span>
-                            </div>
-                          )}
-                          {(booking.vendorName ||
-                            booking.vendorPhone ||
-                            booking.vendorEmail) && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600 dark:text-gray-400">
-                                Contact:
-                              </span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {booking.vendorName || "Vendor"}
-                                </span>
-                                {booking.vendorPhone && (
-                                  <a
-                                    href={`tel:${booking.vendorPhone}`}
-                                    className="text-emerald-600 hover:text-emerald-700"
-                                    title="Call vendor"
-                                  >
-                                    <Phone className="w-3 h-3" />
-                                  </a>
-                                )}
-                                {booking.vendorEmail && (
-                                  <a
-                                    href={`mailto:${booking.vendorEmail}`}
-                                    className="text-emerald-600 hover:text-emerald-700"
-                                    title="Email vendor"
-                                  >
-                                    <Mail className="w-3 h-3" />
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          )}
+                        <div className="bg-linear-to-br from-emerald-50/50 to-teal-50/30 dark:from-emerald-950/20 dark:to-teal-950/10 rounded-lg p-4 space-y-3 border border-emerald-100 dark:border-emerald-900/30">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              Booking ID:
+                            </span>
+                            <span className="text-sm font-mono font-medium text-gray-900 dark:text-white">
+                              #{booking._id.slice(-8).toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              Booked On:
+                            </span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                              {new Date(booking.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                }
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              Last Updated:
+                            </span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                              {new Date(booking.updatedAt).toLocaleDateString()}
+                            </span>
+                          </div>
                           {booking.notes && (
-                            <div className="flex items-start justify-between">
-                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                            <div className="pt-3 border-t border-emerald-200 dark:border-emerald-800">
+                              <span className="text-sm text-gray-600 dark:text-gray-400 block mb-2">
                                 Notes:
                               </span>
-                              <span className="text-sm font-medium text-gray-900 dark:text-white text-right max-w-xs">
+                              <span className="text-sm text-gray-900 dark:text-white">
                                 {booking.notes}
                               </span>
                             </div>
@@ -888,91 +811,68 @@ export default function ClientBookings() {
                       </div>
 
                       {/* Sidebar */}
-                      <div className="lg:w-64 space-y-4">
-                        {/* Price */}
-                        <div className="text-center lg:text-right">
-                          <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                            KSh {(booking.amount || 0).toLocaleString()}
-                          </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            Total Cost
-                          </p>
-                        </div>
+                      <div className="lg:w-72 space-y-4">
+                        {/* Price Card */}
+                        <Card className="bg-linear-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20 border-emerald-200 dark:border-emerald-800">
+                          <CardContent className="p-6 text-center space-y-2">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              Total Amount
+                            </p>
+                            <p className="text-4xl font-bold text-transparent bg-linear-to-r from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400 bg-clip-text">
+                              KSh {(booking.totalPrice || 0).toLocaleString()}
+                            </p>
+                            <Badge
+                              variant="outline"
+                              className={`${getPaymentStatusColor(
+                                booking.paymentStatus || "unpaid"
+                              )} mt-2`}
+                            >
+                              {booking.paymentStatus?.toUpperCase()}
+                            </Badge>
+                          </CardContent>
+                        </Card>
 
                         {/* Actions */}
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-3">
                           <Button
-                            onClick={() =>
-                              handleMessage(booking.vendorName || "Vendor")
-                            }
-                            variant="outline"
-                            size="sm"
-                            className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 w-full"
+                            disabled
+                            size="lg"
+                            className="w-full bg-gray-400 cursor-not-allowed opacity-60 relative group"
+                            title="Payment functionality coming soon in Q1 2026"
                           >
-                            <MessageSquare className="w-4 h-4 mr-2" />
-                            Message
+                            <CreditCard className="w-5 h-5 mr-2" />
+                            Make Payment
+                            <span className="absolute -top-2 -right-2 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">
+                              Soon
+                            </span>
                           </Button>
-
-                          {booking.status === "completed" &&
-                            !booking.reviewed && (
-                              <Button
-                                onClick={() => handleReview(booking._id)}
-                                variant="outline"
-                                size="sm"
-                                className="border-amber-600 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 w-full"
-                              >
-                                <Star className="w-4 h-4 mr-2" />
-                                Leave Review
-                              </Button>
-                            )}
 
                           {booking.status !== "completed" &&
                             booking.status !== "cancelled" && (
-                              <>
-                                <Button
-                                  onClick={() => handleReschedule(booking._id)}
-                                  variant="outline"
-                                  size="sm"
-                                  className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 w-full"
-                                >
-                                  <Edit className="w-4 h-4 mr-2" />
-                                  Reschedule
-                                </Button>
-                                <Button
-                                  onClick={() =>
-                                    handleCancelBooking(booking._id)
-                                  }
-                                  variant="outline"
-                                  size="sm"
-                                  className="border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
-                                >
-                                  <X className="w-4 h-4 mr-2" />
-                                  Cancel
-                                </Button>
-                              </>
+                              <Button
+                                onClick={() => handleCancelBooking(booking._id)}
+                                variant="outline"
+                                size="lg"
+                                className="w-full border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              >
+                                <X className="w-5 h-5 mr-2" />
+                                Cancel Booking
+                              </Button>
                             )}
 
-                          {booking.paymentStatus === "partial" && (
-                            <Button
-                              onClick={() => handleMakePayment(booking._id)}
-                              size="sm"
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white w-full"
-                            >
-                              <CreditCard className="w-4 h-4 mr-2" />
-                              Complete Payment
-                            </Button>
-                          )}
-
-                          {booking.status === "completed" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 w-full"
-                            >
-                              <Download className="w-4 h-4 mr-2" />
-                              Download Invoice
-                            </Button>
-                          )}
+                          <Button
+                            onClick={() =>
+                              handleMessage(
+                                booking.provider?.businessName || "Provider"
+                              )
+                            }
+                            variant="outline"
+                            size="lg"
+                            className="w-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                          >
+                            <MessageSquare className="w-5 h-5 mr-2" />
+                            Message Provider
+                          </Button>
                         </div>
                       </div>
                     </div>
