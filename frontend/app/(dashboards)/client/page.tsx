@@ -1122,12 +1122,12 @@ export default function ClientDashboard() {
                               {item.category}
                             </Badge>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                             <Users className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                             <span className="line-clamp-1">{item.vendor}</span>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                             <Calendar className="h-3.5 w-3.5" />
                             <span>{item.date}</span>
@@ -1162,9 +1162,7 @@ export default function ClientDashboard() {
               </TabsContent>
 
               <TabsContent value="wedding" className="mt-5 sm:mt-6">
-                <div
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {filteredGalleryItems
                     .slice(0, showMoreGallery ? filteredGalleryItems.length : 6)
                     .map((item) => (
@@ -1218,12 +1216,12 @@ export default function ClientDashboard() {
                               {item.category}
                             </Badge>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                             <Users className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                             <span className="line-clamp-1">{item.vendor}</span>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                             <Calendar className="h-3.5 w-3.5" />
                             <span>{item.date}</span>
@@ -1258,9 +1256,7 @@ export default function ClientDashboard() {
               </TabsContent>
 
               <TabsContent value="corporate" className="mt-5 sm:mt-6">
-                <div
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {filteredGalleryItems
                     .slice(0, showMoreGallery ? filteredGalleryItems.length : 6)
                     .map((item) => (
@@ -1314,12 +1310,12 @@ export default function ClientDashboard() {
                               {item.category}
                             </Badge>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                             <Users className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                             <span className="line-clamp-1">{item.vendor}</span>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                             <Calendar className="h-3.5 w-3.5" />
                             <span>{item.date}</span>
