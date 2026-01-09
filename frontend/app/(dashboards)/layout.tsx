@@ -53,7 +53,7 @@ export default function DashboardLayout({
     <div className="w-full max-w-full overflow-x-hidden h-screen flex flex-col">
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset className="flex flex-col h-full overflow-hidden">
+        <SidebarInset className="flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out">
           {/* Sticky Header - Responsive */}
           <header className="sticky top-0 z-20 flex h-14 sm:h-16 shrink-0 items-center gap-2 border-b bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60 px-3 sm:px-4 lg:px-6 transition-all w-full max-w-full">
             <SidebarTrigger className="-ml-1 h-9 w-9 sm:h-10 sm:w-10" />

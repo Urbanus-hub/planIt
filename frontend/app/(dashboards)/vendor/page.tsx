@@ -8,19 +8,17 @@ import {
   Star,
   TrendingUp,
   Package,
-  Users,
   CheckCircle,
   Clock,
-  Award,
-  BarChart3,
   Trophy,
-  Target,
   ArrowUp,
   ArrowDown,
   MoreHorizontal,
   Eye,
-  MessageSquare,
   Bell,
+  Inbox,
+  CalendarX,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   Card,
@@ -80,99 +78,48 @@ export default function VendorDashboard() {
     },
   ];
 
-  const recentBookings = [
-    {
-      id: "1",
-      client: "John Doe",
-      service: "Wedding Photography",
-      date: "Dec 15, 2025",
-      amount: "KSh 35,000",
-      status: "confirmed",
-      avatar:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-    },
-    {
-      id: "2",
-      client: "Sarah Johnson",
-      service: "Corporate Event Catering",
-      date: "Dec 20, 2025",
-      amount: "KSh 50,000",
-      status: "pending",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
-    },
-    {
-      id: "3",
-      client: "Mike Williams",
-      service: "Birthday Party DJ",
-      date: "Jan 5, 2026",
-      amount: "KSh 15,000",
-      status: "confirmed",
-      avatar:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-    },
-  ];
+  // Set to empty arrays as requested to demonstrate empty states
+  const recentBookings: any[] = [];
+  const notifications: any[] = [];
 
+  // Populating this with dummy data because [null] causes crashes, 
+  // but the logic below handles empty arrays too.
   const topServices = [
     {
       id: "1",
-      name: "Wedding Photography Package",
-      bookings: 45,
-      revenue: "KSh 180K",
-      rating: 4.9,
+      name: "Wedding Photography Full Package",
       image:
-        "https://images.unsplash.com/photo-1519741497674-611481863552?w=200&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop",
+      rating: 4.9,
+      bookings: 42,
+      revenue: "KSh 1.2M",
     },
     {
       id: "2",
       name: "Corporate Event Catering",
-      bookings: 32,
-      revenue: "KSh 140K",
-      rating: 4.8,
       image:
-        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1555244162-803834f70033?w=400&h=300&fit=crop",
+      rating: 4.7,
+      bookings: 28,
+      revenue: "KSh 850K",
     },
     {
       id: "3",
-      name: "Sound & DJ Services",
-      bookings: 28,
-      revenue: "KSh 85K",
-      rating: 4.7,
+      name: "Birthday Party DJ Services",
       image:
-        "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1571266028243-d220c6a8b0e5?w=400&h=300&fit=crop",
+      rating: 4.8,
+      bookings: 35,
+      revenue: "KSh 525K",
     },
     {
       id: "4",
-      name: "Event Decoration",
-      bookings: 22,
-      revenue: "KSh 70K",
-      rating: 4.9,
+      name: "Event Decoration & Styling",
       image:
-        "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=200&h=200&fit=crop",
-    },
-  ];
-
-  const notifications = [
-    {
-      id: "1",
-      title: "New booking request",
-      description: "You have a new booking request for Dec 28",
-      time: "2 hours ago",
-      read: false,
-    },
-    {
-      id: "2",
-      title: "Payment received",
-      description: "Payment of KSh 35,000 has been received",
-      time: "5 hours ago",
-      read: false,
-    },
-    {
-      id: "3",
-      title: "New review",
-      description: "You received a 5-star review from a client",
-      time: "1 day ago",
-      read: true,
+        "https://images.unsplash.com/photo-1519225421980-715cb0202128?w=400&h=300&fit=crop",
+      rating: 4.6,
+      bookings: 19,
+      revenue: "KSh 380K",
     },
   ];
 
@@ -180,30 +127,30 @@ export default function VendorDashboard() {
     switch (color) {
       case "emerald":
         return {
-          bg: "bg-emerald-50 dark:bg-emerald-900/20",
-          text: "text-emerald-600 dark:text-emerald-400",
+          bg: "bg-emerald-100 dark:bg-emerald-900/30",
+          text: "text-emerald-700 dark:text-emerald-400",
           border: "border-emerald-200 dark:border-emerald-800",
           progress: "bg-emerald-500",
         };
       case "blue":
         return {
-          bg: "bg-blue-50 dark:bg-blue-900/20",
-          text: "text-blue-600 dark:text-blue-400",
+          bg: "bg-blue-100 dark:bg-blue-900/30",
+          text: "text-blue-700 dark:text-blue-400",
           border: "border-blue-200 dark:border-blue-800",
           progress: "bg-blue-500",
         };
       case "amber":
         return {
-          bg: "bg-amber-50 dark:bg-amber-900/20",
-          text: "text-amber-600 dark:text-amber-400",
+          bg: "bg-amber-100 dark:bg-amber-900/30",
+          text: "text-amber-700 dark:text-amber-400",
           border: "border-amber-200 dark:border-amber-800",
           progress: "bg-amber-500",
         };
       default:
         return {
-          bg: "bg-gray-50 dark:bg-gray-900/20",
-          text: "text-gray-600 dark:text-gray-400",
-          border: "border-gray-200 dark:border-gray-800",
+          bg: "bg-gray-100 dark:bg-gray-800",
+          text: "text-gray-700 dark:text-gray-400",
+          border: "border-gray-200 dark:border-gray-700",
           progress: "bg-gray-500",
         };
     }
@@ -213,23 +160,23 @@ export default function VendorDashboard() {
     switch (status) {
       case "confirmed":
         return {
-          bg: "bg-emerald-100 dark:bg-emerald-900/20",
+          bg: "bg-emerald-100 dark:bg-emerald-900/30",
           text: "text-emerald-700 dark:text-emerald-400",
           border: "border-emerald-200 dark:border-emerald-800",
           icon: CheckCircle,
         };
       case "pending":
         return {
-          bg: "bg-amber-100 dark:bg-amber-900/20",
+          bg: "bg-amber-100 dark:bg-amber-900/30",
           text: "text-amber-700 dark:text-amber-400",
           border: "border-amber-200 dark:border-amber-800",
           icon: Clock,
         };
       default:
         return {
-          bg: "bg-gray-100 dark:bg-gray-900/20",
+          bg: "bg-gray-100 dark:bg-gray-800",
           text: "text-gray-700 dark:text-gray-400",
-          border: "border-gray-200 dark:border-gray-800",
+          border: "border-gray-200 dark:border-gray-700",
           icon: Clock,
         };
     }
@@ -237,43 +184,44 @@ export default function VendorDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={["vendor"]}>
-      <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-gray-50 dark:bg-gray-950">
         {/* Hero Section */}
         <div className="relative overflow-hidden">
-          {/* Background Image with Overlay */}
           <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-linear-to-r from-emerald-900/90 via-emerald-800/80 to-teal-900/90" />
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/95 via-emerald-800/90 to-teal-900/95" />
             <div
-              className="absolute inset-0 opacity-20"
+              className="absolute inset-0 opacity-20 mix-blend-overlay"
               style={{
-                backgroundImage: `url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80')`,
+                backgroundImage: `url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1740&q=80')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
             />
           </div>
 
-          {/* Content */}
           <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
             <div className="max-w-7xl mx-auto">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">
                     Welcome back, {user?.name || "Vendor"}!
                   </h1>
-                  <p className="text-emerald-100 text-sm sm:text-base md:text-lg max-w-2xl">
+                  <p className="text-emerald-100 text-sm sm:text-base md:text-lg max-w-2xl leading-relaxed">
                     Your business is thriving! Here's an overview of your
                     performance and recent activities.
                   </p>
                 </div>
-                <div className="flex gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
-                  <Button className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30 text-xs sm:text-sm">
+                <div className="flex gap-3 flex-wrap">
+                  <Button
+                    variant="outline"
+                    className="bg-white/10 backdrop-blur-md hover:bg-white/20 text-white border-white/30 text-sm"
+                  >
                     <Bell className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Notifications</span>
+                    Notifications
                   </Button>
-                  <Button className="bg-white text-emerald-700 hover:bg-emerald-50 text-xs sm:text-sm">
+                  <Button className="bg-white text-emerald-700 hover:bg-emerald-50 text-sm shadow-lg">
                     <Trophy className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">View Reports</span>
+                    View Reports
                   </Button>
                 </div>
               </div>
@@ -282,9 +230,9 @@ export default function VendorDashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 -mt-4 relative z-20">
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
             {stats.map((stat, index) => {
               const Icon = stat.icon;
               const colorClasses = getColorClasses(stat.color);
@@ -294,26 +242,26 @@ export default function VendorDashboard() {
               return (
                 <Card
                   key={index}
-                  className="border-0 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden bg-white dark:bg-gray-800"
+                  className="border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden bg-white dark:bg-gray-900"
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-200">
+                      <CardDescription className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
                         {stat.title}
                       </CardDescription>
-                      <div className={`p-2 rounded-full ${colorClasses.bg}`}>
-                        <Icon className={`w-5 h-5 ${colorClasses.text}`} />
+                      <div className={`p-2 rounded-lg ${colorClasses.bg}`}>
+                        <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${colorClasses.text}`} />
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex items-baseline justify-between">
-                      <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                         {stat.value}
                       </p>
                       <Badge
                         variant="outline"
-                        className={`${colorClasses.bg} ${colorClasses.text} ${colorClasses.border} border`}
+                        className={`${colorClasses.bg} ${colorClasses.text} ${colorClasses.border} border text-xs`}
                       >
                         {stat.trend === "up" ? (
                           <ArrowUp className="w-3 h-3 mr-1" />
@@ -323,18 +271,17 @@ export default function VendorDashboard() {
                         {stat.change}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                       {stat.description}
                     </p>
-                    {/* Mini Chart */}
-                    <div className="h-12 flex items-end gap-1">
+                    <div className="h-8 sm:h-12 flex items-end gap-1">
                       {stat.chart.map((value, i) => (
                         <div
                           key={i}
-                          className={`flex-1 rounded-t ${colorClasses.progress}`}
+                          className={`flex-1 rounded-t-sm ${colorClasses.progress} transition-all duration-500`}
                           style={{
                             height: `${(value / maxChartValue) * 100}%`,
-                            opacity: i === stat.chart.length - 1 ? 1 : 0.6,
+                            opacity: i === stat.chart.length - 1 ? 1 : 0.4,
                           }}
                         />
                       ))}
@@ -348,191 +295,227 @@ export default function VendorDashboard() {
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Recent Bookings */}
-            <Card className="lg:col-span-2 border-0 shadow-md bg-white dark:bg-gray-800">
+            <Card className="lg:col-span-2 border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900">
               <CardHeader className="flex flex-row items-center justify-between pb-4">
                 <div>
-                  <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
+                  <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                     Recent Bookings
                   </CardTitle>
-                  <CardDescription className="text-gray-600 dark:text-gray-300">
+                  <CardDescription className="text-gray-500 dark:text-gray-400">
                     Latest client bookings and activities
                   </CardDescription>
                 </div>
-                <Button variant="outline" size="sm" className="gap-1">
-                  <Eye className="w-4 h-4" />
+                <Button variant="outline" size="sm" className="gap-1 h-8 text-xs sm:text-sm">
+                  <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
                   View All
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
-                {recentBookings.map((booking) => {
-                  const statusClasses = getStatusClasses(booking.status);
-                  const StatusIcon = statusClasses.icon;
-
-                  return (
-                    <div
-                      key={booking.id}
-                      className="flex items-start gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all bg-white dark:bg-gray-800"
-                    >
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage
-                          src={booking.avatar}
-                          alt={booking.client}
-                        />
-                        <AvatarFallback className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">
-                          {booking.client.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <h4 className="text-base font-semibold text-gray-900 dark:text-white">
-                              {booking.client}
-                            </h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                              {booking.service}
-                            </p>
-                          </div>
-                          <Badge
-                            variant="outline"
-                            className={`${statusClasses.bg} ${statusClasses.text} ${statusClasses.border} border`}
-                          >
-                            <StatusIcon className="w-3 h-3 mr-1" />
-                            {booking.status}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-4 mt-3 text-sm">
-                          <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                            <Calendar className="w-4 h-4" />
-                            {booking.date}
-                          </span>
-                          <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
-                            <DollarSign className="w-4 h-4" />
-                            {booking.amount}
-                          </span>
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
+                {recentBookings.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+                    <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-full mb-3">
+                      <CalendarX className="w-8 h-8 text-gray-400" />
                     </div>
-                  );
-                })}
+                    <h3 className="text-gray-900 dark:text-white font-semibold text-sm mb-1">No Recent Bookings</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm max-w-xs mx-auto">
+                      You don't have any new bookings at the moment. Check back later!
+                    </p>
+                  </div>
+                ) : (
+                  recentBookings.map((booking) => {
+                    const statusClasses = getStatusClasses(booking.status);
+                    const StatusIcon = statusClasses.icon;
+
+                    return (
+                      <div
+                        key={booking.id}
+                        className="flex flex-col sm:flex-row items-start gap-4 p-4 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all bg-gray-50/50 dark:bg-gray-800/50"
+                      >
+                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
+                          <AvatarImage
+                            src={booking.avatar}
+                            alt={booking.client}
+                          />
+                          <AvatarFallback className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">
+                            {booking.client.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0 w-full">
+                          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                            <div>
+                              <h4 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
+                                {booking.client}
+                              </h4>
+                              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                {booking.service}
+                              </p>
+                            </div>
+                            <Badge
+                              variant="outline"
+                              className={`${statusClasses.bg} ${statusClasses.text} ${statusClasses.border} border text-xs w-max`}
+                            >
+                              <StatusIcon className="w-3 h-3 mr-1" />
+                              {booking.status}
+                            </Badge>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-3 sm:gap-4 mt-3 text-xs sm:text-sm">
+                            <span className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                              {booking.date}
+                            </span>
+                            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+                              <DollarSign className="w-3 h-3 sm:w-4 sm:h-4" />
+                              {booking.amount}
+                            </span>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 hover:opacity-100 transition-opacity hidden sm:flex">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    );
+                  })
+                )}
               </CardContent>
             </Card>
 
             {/* Notifications */}
-            <Card className="border-0 shadow-md bg-white dark:bg-gray-800">
+            <Card className="border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900">
               <CardHeader className="flex flex-row items-center justify-between pb-4">
                 <div>
-                  <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
+                  <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                     Notifications
                   </CardTitle>
-                  <CardDescription className="text-gray-600 dark:text-gray-300">
+                  <CardDescription className="text-gray-500 dark:text-gray-400">
                     Recent updates and alerts
                   </CardDescription>
                 </div>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 dark:hover:text-white">
                   <Bell className="w-4 h-4" />
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-3 rounded-lg border ${
-                      notification.read
-                        ? "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                        : "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`w-2 h-2 rounded-full mt-2 ${
-                          notification.read ? "bg-gray-400" : "bg-emerald-500"
-                        }`}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                          {notification.title}
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          {notification.description}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                          {notification.time}
-                        </p>
+                {notifications.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+                    <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-full mb-3">
+                      <Inbox className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-gray-900 dark:text-white font-semibold text-sm mb-1">No Notifications</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
+                      You're all caught up!
+                    </p>
+                  </div>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`p-3 rounded-lg border ${
+                        notification.read
+                          ? "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-800"
+                          : "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                            notification.read ? "bg-gray-300 dark:bg-gray-600" : "bg-emerald-500"
+                          }`}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
+                            {notification.title}
+                          </h4>
+                          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
+                            {notification?.description}
+                          </p>
+                          <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 mt-2">
+                            {notification.time}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-                <Button variant="outline" className="w-full">
-                  View All Notifications
-                </Button>
+                  ))
+                )}
+                {notifications.length > 0 && (
+                  <Button variant="outline" className="w-full text-xs sm:text-sm mt-2">
+                    View All Notifications
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          
-
           {/* Top Services */}
-          <Card className="border-0 shadow-md bg-white dark:bg-gray-800">
+          <Card className="border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-900">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <div>
-                <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
+                <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                   Top Services
                 </CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-300">
+                <CardDescription className="text-gray-500 dark:text-gray-400">
                   Best performing services this month
                 </CardDescription>
               </div>
-              <Button variant="outline" size="sm" className="gap-1">
-                <Package className="w-4 h-4" />
+              <Button variant="outline" size="sm" className="gap-1 h-8 text-xs sm:text-sm">
+                <Package className="w-3 h-3 sm:w-4 sm:h-4" />
                 Manage Services
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {topServices.map((service) => (
-                  <div
-                    key={service.id}
-                    className="flex flex-col items-center text-center space-y-3"
-                  >
-                    <div className="relative w-full h-32 rounded-lg overflow-hidden">
-                      <img
-                        src={service.image}
-                        alt={service.name}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <p className="text-white text-sm font-medium line-clamp-2">
-                          {service.name}
-                        </p>
-                      </div>
+              {topServices.length === 0 ? (
+                 <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+                    <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-full mb-3">
+                      <ImageIcon className="w-8 h-8 text-gray-400" />
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {service.rating}
-                      </span>
-                    </div>
-                    <div className="w-full space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-400">
-                          {service.bookings} bookings
-                        </span>
-                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                          {service.revenue}
-                        </span>
-                      </div>
-                      <Progress
-                        value={(service.bookings / 50) * 100}
-                        className="h-2"
-                      />
-                    </div>
+                    <h3 className="text-gray-900 dark:text-white font-semibold text-sm mb-1">No Services Listed</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
+                      Add services to start tracking performance.
+                    </p>
                   </div>
-                ))}
-              </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                  {topServices.map((service) => (
+                    <div
+                      key={service.id}
+                      className="flex flex-col items-center text-center space-y-3 group"
+                    >
+                      <div className="relative w-full h-40 rounded-xl overflow-hidden shadow-sm">
+                        <img
+                          src={service.image}
+                          alt={service.name}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                        <div className="absolute bottom-3 left-3 right-3">
+                          <p className="text-white text-xs sm:text-sm font-medium line-clamp-2 leading-snug text-left">
+                            {service.name}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 w-full justify-start px-1">
+                        <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-400" />
+                        <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
+                          {service.rating}
+                        </span>
+                      </div>
+                      <div className="w-full space-y-2 px-1">
+                        <div className="flex items-center justify-between text-xs sm:text-sm">
+                          <span className="text-gray-500 dark:text-gray-400">
+                            {service.bookings} bookings
+                          </span>
+                          <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-xs">
+                            {service.revenue}
+                          </span>
+                        </div>
+                        <Progress
+                          value={(service.bookings / 50) * 100}
+                          className="h-1.5"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
