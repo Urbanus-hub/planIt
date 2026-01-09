@@ -88,7 +88,6 @@ export default function ClientDashboard() {
   const heroRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
   const vendorsRef = useRef<HTMLDivElement>(null);
-  const galleryRef = useRef<HTMLDivElement>(null);
   const eventsRef = useRef<HTMLDivElement>(null);
 
   // GSAP animations on mount
@@ -140,24 +139,7 @@ export default function ClientDashboard() {
       );
     }
 
-    // Gallery animation
-    if (galleryRef.current?.children) {
-      gsap.fromTo(
-        galleryRef.current.children,
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          stagger: 0.05,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: galleryRef.current,
-            start: "top 80%",
-          },
-        }
-      );
-    }
+
 
     // Events animation
     if (eventsRef.current?.children) {
@@ -1065,10 +1047,7 @@ export default function ClientDashboard() {
               </TabsList>
 
               <TabsContent value="all" className="mt-5 sm:mt-6">
-                <div
-                  ref={galleryRef}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {filteredGalleryItems
                     .slice(0, showMoreGallery ? filteredGalleryItems.length : 6)
                     .map((item) => (
@@ -1350,10 +1329,7 @@ export default function ClientDashboard() {
               </TabsContent>
 
               <TabsContent value="birthday" className="mt-5 sm:mt-6">
-                <div
-                  ref={galleryRef}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {filteredGalleryItems
                     .slice(0, showMoreGallery ? filteredGalleryItems.length : 6)
                     .map((item) => (
