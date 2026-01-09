@@ -736,6 +736,12 @@ export default function ClientDashboard() {
                 </span>{" "}
                 to start planning your perfect event.
               </p>
+              <Link href="/client/vendors" className="inline-block mt-4">
+                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold px-8 py-3 min-h-11">
+                  View All Vendors
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
             </div>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 bg-white/50 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-emerald-100 dark:border-gray-700 w-full max-w-full overflow-x-hidden">
@@ -1058,7 +1064,296 @@ export default function ClientDashboard() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value={galleryFilter} className="mt-5 sm:mt-6">
+              <TabsContent value="all" className="mt-5 sm:mt-6">
+                <div
+                  ref={galleryRef}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+                >
+                  {filteredGalleryItems
+                    .slice(0, showMoreGallery ? filteredGalleryItems.length : 6)
+                    .map((item) => (
+                      <Card
+                        key={item.id}
+                        className="group overflow-hidden border-0 bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-2xl dark:shadow-gray-900/50 transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+                      >
+                        {/* Image Section */}
+                        <div className="relative h-56 sm:h-64 overflow-hidden">
+                          <Image
+                            src={item.thumbnail}
+                            alt={item.title}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+
+                          {/* Type Badge - Top Right */}
+                          <div className="absolute top-3 right-3">
+                            {item.type === "video" ? (
+                              <div className="bg-emerald-500 rounded-full p-2 shadow-lg">
+                                <Play className="h-4 w-4 text-white fill-white" />
+                              </div>
+                            ) : (
+                              <div className="bg-white/95 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                                <ImageIcon className="h-4 w-4 text-gray-700" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Play button overlay for videos */}
+                          {item.type === "video" && (
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <div className="bg-emerald-500/90 rounded-full p-4 shadow-2xl">
+                                <Play className="h-8 w-8 text-white fill-white" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content Section */}
+                        <div className="p-4 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white line-clamp-2 flex-1">
+                              {item.title}
+                            </h3>
+                            <Badge
+                              variant="secondary"
+                              className="shrink-0 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-xs capitalize"
+                            >
+                              {item.category}
+                            </Badge>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                            <Users className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span className="line-clamp-1">{item.vendor}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <Calendar className="h-3.5 w-3.5" />
+                            <span>{item.date}</span>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                </div>
+
+                {/* Modern Gallery "See More" Button */}
+                {filteredGalleryItems.length > 6 && (
+                  <div className="flex justify-center mt-6 sm:mt-8">
+                    <Button
+                      variant="outline"
+                      className="border-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-2xl font-semibold min-h-12 transition-all hover:scale-105"
+                      onClick={() => setShowMoreGallery(!showMoreGallery)}
+                    >
+                      {showMoreGallery ? (
+                        <>
+                          Show Less
+                          <X className="h-5 w-5 ml-2" />
+                        </>
+                      ) : (
+                        <>
+                          See More ({filteredGalleryItems.length - 6} more)
+                          <ArrowRight className="h-5 w-5 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="wedding" className="mt-5 sm:mt-6">
+                <div
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+                >
+                  {filteredGalleryItems
+                    .slice(0, showMoreGallery ? filteredGalleryItems.length : 6)
+                    .map((item) => (
+                      <Card
+                        key={item.id}
+                        className="group overflow-hidden border-0 bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-2xl dark:shadow-gray-900/50 transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+                      >
+                        {/* Image Section */}
+                        <div className="relative h-56 sm:h-64 overflow-hidden">
+                          <Image
+                            src={item.thumbnail}
+                            alt={item.title}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+
+                          {/* Type Badge - Top Right */}
+                          <div className="absolute top-3 right-3">
+                            {item.type === "video" ? (
+                              <div className="bg-emerald-500 rounded-full p-2 shadow-lg">
+                                <Play className="h-4 w-4 text-white fill-white" />
+                              </div>
+                            ) : (
+                              <div className="bg-white/95 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                                <ImageIcon className="h-4 w-4 text-gray-700" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Play button overlay for videos */}
+                          {item.type === "video" && (
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <div className="bg-emerald-500/90 rounded-full p-4 shadow-2xl">
+                                <Play className="h-8 w-8 text-white fill-white" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content Section */}
+                        <div className="p-4 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white line-clamp-2 flex-1">
+                              {item.title}
+                            </h3>
+                            <Badge
+                              variant="secondary"
+                              className="shrink-0 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-xs capitalize"
+                            >
+                              {item.category}
+                            </Badge>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                            <Users className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span className="line-clamp-1">{item.vendor}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <Calendar className="h-3.5 w-3.5" />
+                            <span>{item.date}</span>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                </div>
+
+                {/* Modern Gallery "See More" Button */}
+                {filteredGalleryItems.length > 6 && (
+                  <div className="flex justify-center mt-6 sm:mt-8">
+                    <Button
+                      variant="outline"
+                      className="border-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-2xl font-semibold min-h-12 transition-all hover:scale-105"
+                      onClick={() => setShowMoreGallery(!showMoreGallery)}
+                    >
+                      {showMoreGallery ? (
+                        <>
+                          Show Less
+                          <X className="h-5 w-5 ml-2" />
+                        </>
+                      ) : (
+                        <>
+                          See More ({filteredGalleryItems.length - 6} more)
+                          <ArrowRight className="h-5 w-5 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="corporate" className="mt-5 sm:mt-6">
+                <div
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+                >
+                  {filteredGalleryItems
+                    .slice(0, showMoreGallery ? filteredGalleryItems.length : 6)
+                    .map((item) => (
+                      <Card
+                        key={item.id}
+                        className="group overflow-hidden border-0 bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-2xl dark:shadow-gray-900/50 transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+                      >
+                        {/* Image Section */}
+                        <div className="relative h-56 sm:h-64 overflow-hidden">
+                          <Image
+                            src={item.thumbnail}
+                            alt={item.title}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+
+                          {/* Type Badge - Top Right */}
+                          <div className="absolute top-3 right-3">
+                            {item.type === "video" ? (
+                              <div className="bg-emerald-500 rounded-full p-2 shadow-lg">
+                                <Play className="h-4 w-4 text-white fill-white" />
+                              </div>
+                            ) : (
+                              <div className="bg-white/95 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                                <ImageIcon className="h-4 w-4 text-gray-700" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Play button overlay for videos */}
+                          {item.type === "video" && (
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <div className="bg-emerald-500/90 rounded-full p-4 shadow-2xl">
+                                <Play className="h-8 w-8 text-white fill-white" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content Section */}
+                        <div className="p-4 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white line-clamp-2 flex-1">
+                              {item.title}
+                            </h3>
+                            <Badge
+                              variant="secondary"
+                              className="shrink-0 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-xs capitalize"
+                            >
+                              {item.category}
+                            </Badge>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                            <Users className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span className="line-clamp-1">{item.vendor}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <Calendar className="h-3.5 w-3.5" />
+                            <span>{item.date}</span>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                </div>
+
+                {/* Modern Gallery "See More" Button */}
+                {filteredGalleryItems.length > 6 && (
+                  <div className="flex justify-center mt-6 sm:mt-8">
+                    <Button
+                      variant="outline"
+                      className="border-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-2xl font-semibold min-h-12 transition-all hover:scale-105"
+                      onClick={() => setShowMoreGallery(!showMoreGallery)}
+                    >
+                      {showMoreGallery ? (
+                        <>
+                          Show Less
+                          <X className="h-5 w-5 ml-2" />
+                        </>
+                      ) : (
+                        <>
+                          See More ({filteredGalleryItems.length - 6} more)
+                          <ArrowRight className="h-5 w-5 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="birthday" className="mt-5 sm:mt-6">
                 <div
                   ref={galleryRef}
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
