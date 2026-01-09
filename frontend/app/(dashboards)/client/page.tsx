@@ -1066,10 +1066,11 @@ export default function ClientDashboard() {
                   {filteredGalleryItems
                     .slice(0, showMoreGallery ? filteredGalleryItems.length : 6)
                     .map((item) => (
-                      <div
+                      <Card
                         key={item.id}
-                        className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl dark:shadow-gray-900/50 transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+                        className="group overflow-hidden border-0 bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-2xl dark:shadow-gray-900/50 transition-all duration-300 cursor-pointer hover:scale-[1.02]"
                       >
+                        {/* Image Section */}
                         <div className="relative h-56 sm:h-64 overflow-hidden">
                           <Image
                             src={item.thumbnail}
@@ -1077,36 +1078,56 @@ export default function ClientDashboard() {
                             fill
                             className="object-cover group-hover:scale-110 transition-transform duration-500"
                           />
-                          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
 
-                          {/* Modern play button for videos */}
+                          {/* Type Badge - Top Right */}
+                          <div className="absolute top-3 right-3">
+                            {item.type === "video" ? (
+                              <div className="bg-emerald-500 rounded-full p-2 shadow-lg">
+                                <Play className="h-4 w-4 text-white fill-white" />
+                              </div>
+                            ) : (
+                              <div className="bg-white/95 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                                <ImageIcon className="h-4 w-4 text-gray-700" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Play button overlay for videos */}
                           {item.type === "video" && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="bg-emerald-500 rounded-full p-4 opacity-90 group-hover:opacity-100 transform scale-100 group-hover:scale-110 transition-all duration-300 shadow-2xl">
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <div className="bg-emerald-500/90 rounded-full p-4 shadow-2xl">
                                 <Play className="h-8 w-8 text-white fill-white" />
                               </div>
                             </div>
                           )}
-
-                          {/* Modern image badge */}
-                          {item.type === "image" && (
-                            <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm rounded-full p-2 shadow-lg">
-                              <ImageIcon className="h-4 w-4 text-gray-700" />
-                            </div>
-                          )}
                         </div>
 
-                        {/* Modern card content - always visible on mobile, hover on desktop */}
-                        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
-                          <h3 className="text-base sm:text-lg font-bold mb-1 line-clamp-1">
-                            {item.title}
-                          </h3>
-                          <p className="text-sm text-white/90 mb-1.5 line-clamp-1">
-                            {item.vendor}
-                          </p>
-                          <p className="text-xs text-white/75">{item.date}</p>
+                        {/* Content Section */}
+                        <div className="p-4 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white line-clamp-2 flex-1">
+                              {item.title}
+                            </h3>
+                            <Badge
+                              variant="secondary"
+                              className="shrink-0 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-xs capitalize"
+                            >
+                              {item.category}
+                            </Badge>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                            <Users className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span className="line-clamp-1">{item.vendor}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <Calendar className="h-3.5 w-3.5" />
+                            <span>{item.date}</span>
+                          </div>
                         </div>
-                      </div>
+                      </Card>
                     ))}
                 </div>
 
