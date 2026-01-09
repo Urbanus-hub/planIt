@@ -139,8 +139,6 @@ export default function ClientDashboard() {
       );
     }
 
-
-
     // Events animation
     if (eventsRef.current?.children) {
       gsap.fromTo(
