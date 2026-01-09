@@ -160,21 +160,21 @@ export default function ReviewsPage() {
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-start gap-3 mb-3">
-              <div className="h-10 w-10 rounded-full bg-linear-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
                 {review.clientName?.[0]?.toUpperCase() || "U"}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="text-gray-900 font-semibold text-sm">
+                  <h4 className="text-gray-900 dark:text-white font-semibold text-sm">
                     {review.clientName || "Anonymous"}
                   </h4>
                   {review.verified && (
-                    <Badge className="bg-green-100 text-green-800 text-xs border-green-200">
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs border-green-200 dark:border-green-800">
                       ✓ Verified
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-emerald-600 font-medium">
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                   {review.serviceTitle}
                 </p>
               </div>
@@ -188,33 +188,33 @@ export default function ReviewsPage() {
                     className={`h-3.5 w-3.5 ${
                       i < (review.rating || 0)
                         ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
+                        : "text-gray-300 dark:text-gray-600"
                     }`}
                   />
                 ))}
               </div>
-              <span className="text-xs font-semibold text-gray-900">
+              <span className="text-xs font-semibold text-gray-900 dark:text-white">
                 {review.rating}.0
               </span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 {new Date(review.date || "").toLocaleDateString()}
               </span>
             </div>
 
-            <p className="text-sm font-semibold text-gray-900 mb-1">
+            <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
               {review.title}
             </p>
-            <p className="text-sm text-gray-600 line-clamp-2">
+            <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
               "{review.content}"
             </p>
 
-            <div className="flex items-center gap-3 mt-3 text-xs text-gray-500">
+            <div className="flex items-center gap-3 mt-3 text-xs text-gray-500 dark:text-gray-400">
               <div className="flex items-center gap-1">
                 <ThumbsUp className="h-3.5 w-3.5" />
                 <span>{review.helpful}</span>
               </div>
               <span>•</span>
-              <span className="text-gray-400">
+              <span className="text-gray-400 dark:text-gray-500">
                 {Math.floor(Math.random() * 500 + 100)} views
               </span>
             </div>
@@ -258,15 +258,17 @@ export default function ReviewsPage() {
             <Star
               key={i}
               className={`h-3 w-3 ${
-                i < stars ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                i < stars
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "text-gray-300 dark:text-gray-600"
               }`}
             />
           ))}
         </div>
-        <span className="text-xs text-gray-500 min-w-6 text-right">
+        <span className="text-xs text-gray-600 dark:text-gray-300 min-w-6 text-right">
           {count}
         </span>
-        <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+        <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-emerald-500"
             initial={{ width: 0 }}
@@ -279,7 +281,7 @@ export default function ReviewsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-950">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -289,7 +291,7 @@ export default function ReviewsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-2 bg-linear-to-r from-green-600 to-green-700 dark:from-green-400 dark:to-green-400 bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-green-600 to-green-700 dark:from-green-400 dark:to-green-400 bg-clip-text text-transparent">
                 Reviews & Ratings
               </h1>
               <p className="text-slate-600 dark:text-gray-300 text-lg">
@@ -300,9 +302,9 @@ export default function ReviewsPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring" }}
-              className="hidden md:block p-4 bg-emerald-50 rounded-lg border border-emerald-200"
+              className="hidden md:block p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800"
             >
-              <Trophy className="h-8 w-8 text-emerald-600" />
+              <Trophy className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
             </motion.div>
           </div>
         </motion.div>
@@ -318,37 +320,37 @@ export default function ReviewsPage() {
               label: "Avg Rating",
               value: stats.averageRating.toFixed(1),
               icon: Star,
-              color: "text-yellow-600",
-              bg: "bg-yellow-50",
+              color: "text-yellow-600 dark:text-yellow-400",
+              bg: "bg-yellow-50 dark:bg-yellow-900/20",
               suffix: "/5",
             },
             {
               label: "Total Reviews",
               value: stats.totalReviews,
               icon: MessageCircle,
-              color: "text-emerald-600",
-              bg: "bg-emerald-50",
+              color: "text-emerald-600 dark:text-emerald-400",
+              bg: "bg-emerald-50 dark:bg-emerald-900/20",
             },
             {
               label: "Verified",
               value: stats.verifiedCount,
               icon: Award,
-              color: "text-emerald-600",
-              bg: "bg-emerald-50",
+              color: "text-emerald-600 dark:text-emerald-400",
+              bg: "bg-emerald-50 dark:bg-emerald-900/20",
             },
             {
               label: "5-Star Rating",
               value: stats.fiveStarCount,
               icon: Flame,
-              color: "text-emerald-600",
-              bg: "bg-emerald-50",
+              color: "text-emerald-600 dark:text-emerald-400",
+              bg: "bg-emerald-50 dark:bg-emerald-900/20",
             },
             {
               label: "Trending Score",
               value: Math.round((stats.averageRating / 5) * 100),
               icon: TrendingUp,
-              color: "text-emerald-600",
-              bg: "bg-emerald-50",
+              color: "text-emerald-600 dark:text-emerald-400",
+              bg: "bg-emerald-50 dark:bg-emerald-900/20",
               suffix: "%",
             },
           ].map((stat, i) => {
@@ -369,6 +371,7 @@ export default function ReviewsPage() {
                         </p>
                         <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mt-2">
                           {stat.value}
+                          {stat.suffix}
                         </p>
                       </div>
                       <div className={`${stat.bg} p-2 rounded-lg`}>
@@ -388,9 +391,9 @@ export default function ReviewsPage() {
           transition={{ duration: 0.4, delay: 0.2 }}
           className="mb-8"
         >
-          <Card className="bg-white border border-gray-200 shadow-sm">
-            <CardHeader className="border-b border-gray-200">
-              <CardTitle className="text-gray-900 text-lg">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+              <CardTitle className="text-gray-900 dark:text-white text-lg">
                 Rating Distribution
               </CardTitle>
             </CardHeader>
@@ -425,18 +428,18 @@ export default function ReviewsPage() {
             <CardContent className="p-4">
               <div className="flex flex-col md:flex-row gap-3">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                   <Input
                     placeholder="Search reviews by client name or content..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="pl-10 bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500"
+                    className="pl-10 bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-emerald-500 dark:focus:border-emerald-500"
                   />
                 </div>
                 <Button
                   variant="outline"
                   onClick={fetchReviews}
-                  className="border-gray-300 hover:bg-gray-50"
+                  className="border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Refresh
@@ -453,14 +456,14 @@ export default function ReviewsPage() {
           className="mb-10"
         >
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-            <CardHeader className="border-b border-gray-200">
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-gray-900 flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-emerald-600" />
+                  <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                     All Reviews
                   </CardTitle>
-                  <CardDescription className="text-gray-500 mt-1">
+                  <CardDescription className="text-gray-600 dark:text-gray-400 mt-1">
                     {filtered.length} review{filtered.length !== 1 ? "s" : ""} •
                     Click to view details
                   </CardDescription>
@@ -473,12 +476,12 @@ export default function ReviewsPage() {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-2 bg-gray-100 border border-gray-200 p-1">
+                <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1">
                   {["all", "published"].map((tab) => (
                     <TabsTrigger
                       key={tab}
                       value={tab}
-                      className="data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-sm text-xs md:text-sm text-gray-600"
+                      className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-emerald-600 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm text-xs md:text-sm text-gray-600 dark:text-gray-400 rounded-md"
                     >
                       {tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </TabsTrigger>
@@ -492,8 +495,8 @@ export default function ReviewsPage() {
                       animate={{ opacity: 1 }}
                       className="text-center py-16"
                     >
-                      <div className="animate-spin h-10 w-10 border-4 border-gray-200 border-t-emerald-600 rounded-full mx-auto mb-4" />
-                      <p className="text-gray-500 font-medium">
+                      <div className="animate-spin h-10 w-10 border-4 border-gray-200 dark:border-gray-700 border-t-emerald-600 dark:border-t-emerald-400 rounded-full mx-auto mb-4" />
+                      <p className="text-gray-600 dark:text-gray-300 font-medium">
                         Loading reviews...
                       </p>
                     </motion.div>
@@ -504,7 +507,9 @@ export default function ReviewsPage() {
                       className="text-center py-16"
                     >
                       <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                      <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
+                      <p className="text-gray-600 dark:text-gray-300 mb-4">
+                        {error}
+                      </p>
                       <Button
                         onClick={fetchReviews}
                         className="bg-emerald-600 hover:bg-emerald-700"
@@ -519,10 +524,10 @@ export default function ReviewsPage() {
                       className="text-center py-16"
                     >
                       <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500 font-medium">
+                      <p className="text-gray-600 dark:text-gray-300 font-medium">
                         No reviews in this category
                       </p>
-                      <p className="text-gray-400 text-sm mt-2">
+                      <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
                         Reviews will appear here as clients submit them
                       </p>
                     </motion.div>
@@ -550,26 +555,26 @@ export default function ReviewsPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedReview(null)}
-            className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 dark:bg-black/60 z-40 flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+              className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-xl border border-gray-200 dark:border-gray-700"
             >
-              <div className="p-6 border-b border-gray-200">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">
-                    <div className="h-12 w-12 rounded-full bg-linear-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
                       {selectedReview.clientName?.[0]?.toUpperCase() || "U"}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                         {selectedReview.clientName}
                       </h3>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         {new Date(
                           selectedReview.date || ""
                         ).toLocaleDateString()}
@@ -582,12 +587,12 @@ export default function ReviewsPage() {
                               className={`h-4 w-4 ${
                                 i < (selectedReview.rating || 0)
                                   ? "fill-yellow-400 text-yellow-400"
-                                  : "text-gray-300"
+                                  : "text-gray-300 dark:text-gray-600"
                               }`}
                             />
                           ))}
                         </div>
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-gray-900 dark:text-white">
                           {selectedReview.rating}.0
                         </span>
                       </div>
@@ -597,6 +602,7 @@ export default function ReviewsPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setSelectedReview(null)}
+                    className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     ✕
                   </Button>
@@ -604,39 +610,41 @@ export default function ReviewsPage() {
               </div>
               <div className="p-6 space-y-4">
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
                     {selectedReview.title}
                   </h4>
-                  <p className="text-gray-700 leading-relaxed">
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                     {selectedReview.content}
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">Service</p>
-                    <p className="text-sm font-semibold text-gray-900 mt-1">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                      Service
+                    </p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">
                       {selectedReview.serviceTitle}
                     </p>
                   </div>
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-500 font-medium">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
                       Helpful Votes
                     </p>
-                    <p className="text-sm font-semibold text-gray-900 mt-1">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">
                       {selectedReview.helpful} people found this helpful
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="p-6 border-t border-gray-200 flex gap-3">
+              <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex gap-3">
                 <Button
                   variant="outline"
-                  className="flex-1 border-gray-300"
+                  className="flex-1 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                   onClick={() => setSelectedReview(null)}
                 >
                   Close
                 </Button>
-                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white">
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Respond
                 </Button>

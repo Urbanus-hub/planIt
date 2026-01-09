@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
+import { useState, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import {
   Card,
@@ -30,7 +30,6 @@ import {
   TrendingUp,
   Users,
   Calendar,
-  FileText,
   CheckCircle,
   Briefcase,
   MessageSquare,
@@ -38,7 +37,6 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { authAPI } from "@/lib/api";
-import { useRef } from "react";
 import Link from "next/link";
 
 type ProfileFormData = {
@@ -150,13 +148,11 @@ export default function VendorProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file");
       return;
     }
 
-    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("File size must be less than 5MB");
       return;
@@ -165,7 +161,6 @@ export default function VendorProfilePage() {
     setSelectedFile(file);
     setUploadingImageType("avatar");
 
-    // Create preview
     const reader = new FileReader();
     reader.onload = (event) => {
       setImagePreview(event.target?.result as string);
@@ -212,13 +207,11 @@ export default function VendorProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file");
       return;
     }
 
-    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("File size must be less than 5MB");
       return;
@@ -227,7 +220,6 @@ export default function VendorProfilePage() {
     setSelectedFile(file);
     setUploadingImageType("cover");
 
-    // Create preview
     const reader = new FileReader();
     reader.onload = (event) => {
       setImagePreview(event.target?.result as string);
@@ -259,7 +251,6 @@ export default function VendorProfilePage() {
   };
 
   const handleEditClick = () => {
-    // Preload current user data when entering edit mode
     if (user) {
       setFormData({
         businessName: user.businessName || "Your Business Name",
@@ -300,7 +291,6 @@ export default function VendorProfilePage() {
     try {
       if (!user?._id) throw new Error("User ID not found");
 
-      // Map formData fields to backend field names
       const updateData = {
         businessName: formData.businessName,
         businessDescription: formData.businessDescription,
@@ -335,7 +325,7 @@ export default function VendorProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-950">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header with Cover */}
         <motion.div
@@ -351,7 +341,7 @@ export default function VendorProfilePage() {
               alt="Cover"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             {isEditing && (
               <>
                 <motion.button
@@ -361,9 +351,9 @@ export default function VendorProfilePage() {
                   onClick={() => coverImageFileInputRef.current?.click()}
                   className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  <div className="flex flex-col items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg">
-                    <Camera className="h-6 w-6 text-gray-700" />
-                    <span className="text-sm text-gray-700 font-medium">
+                  <div className="flex flex-col items-center gap-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <Camera className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
                       Change Cover
                     </span>
                   </div>
@@ -381,12 +371,12 @@ export default function VendorProfilePage() {
           </div>
 
           {/* Profile Card */}
-          <Card className="bg-white border-0 shadow-xl -mt-16 relative z-10">
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-xl -mt-16 relative z-10">
             <CardContent className="p-6 sm:p-8">
               <div className="flex flex-col sm:flex-row sm:items-start gap-6">
                 {/* Avatar */}
-                <div className="relative group shrink-0">
-                  <div className="h-32 w-32 rounded-xl overflow-hidden border-4 border-white shadow-lg bg-linear-to-br from-slate-100 to-slate-50">
+                <div className="relative group shrink-0 mx-auto sm:mx-0">
+                  <div className="h-32 w-32 rounded-xl overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg bg-gradient-to-br from-slate-100 to-slate-50 dark:from-gray-700 dark:to-gray-800">
                     <img
                       src={images.avatar!}
                       alt="Avatar"
@@ -414,19 +404,19 @@ export default function VendorProfilePage() {
                 </div>
 
                 {/* Info */}
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div>
                       <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">
                         {formData.businessName}
                       </h1>
                       <div className="flex items-center gap-3 flex-wrap">
-                        <Badge className="bg-blue-100 text-blue-800 border-blue-200 px-3 py-1 text-sm">
+                        <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800 px-3 py-1 text-sm">
                           {formData.serviceCategory}
                         </Badge>
                         <div className="flex items-center gap-1">
                           <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                          <span className="text-lg font-semibold text-gray-900">
+                          <span className="text-lg font-semibold text-gray-900 dark:text-white">
                             {stats.averageRating}
                           </span>
                           <span className="text-sm text-gray-600 dark:text-gray-300">
@@ -444,7 +434,7 @@ export default function VendorProfilePage() {
                             onClick={handleSave}
                             disabled={isSaving}
                             size="sm"
-                            className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700"
+                            className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white"
                           >
                             <Check className="h-4 w-4 mr-1.5" />
                             {isSaving ? "Saving..." : "Save"}
@@ -453,7 +443,7 @@ export default function VendorProfilePage() {
                             onClick={() => setIsEditing(false)}
                             variant="outline"
                             size="sm"
-                            className="flex-1 sm:flex-none"
+                            className="flex-1 sm:flex-none border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                           >
                             <X className="h-4 w-4 mr-1.5" />
                             Cancel
@@ -467,7 +457,7 @@ export default function VendorProfilePage() {
                           >
                             <Button
                               size="sm"
-                              className="w-full bg-emerald-600 hover:bg-emerald-700"
+                              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                             >
                               View Portfolio
                             </Button>
@@ -475,7 +465,7 @@ export default function VendorProfilePage() {
                           <Button
                             onClick={handleEditClick}
                             size="sm"
-                            className="flex-1 sm:flex-none bg-slate-700 hover:bg-slate-800"
+                            className="flex-1 sm:flex-none bg-slate-700 hover:bg-slate-800 text-white"
                           >
                             <Edit2 className="h-4 w-4 mr-1.5" />
                             Edit Profile
@@ -537,12 +527,16 @@ export default function VendorProfilePage() {
           ].map((stat, i) => {
             const Icon = stat.icon;
             const colorClasses = {
-              blue: "bg-blue-100 text-blue-600",
-              green: "bg-green-100 text-green-600",
-              yellow: "bg-yellow-100 text-yellow-600",
-              purple: "bg-purple-100 text-purple-600",
-              red: "bg-red-100 text-red-600",
-              indigo: "bg-indigo-100 text-indigo-600",
+              blue: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
+              green:
+                "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
+              yellow:
+                "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400",
+              purple:
+                "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
+              red: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+              indigo:
+                "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400",
             };
 
             return (
@@ -552,20 +546,20 @@ export default function VendorProfilePage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.05 }}
               >
-                <Card className="bg-white border-0 shadow-md hover:shadow-lg transition-shadow">
+                <Card className="bg-white dark:bg-gray-800 border-0 shadow-md hover:shadow-lg transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex flex-col items-center text-center">
                       <div
-                        className={`p-2 rounded-full ${
+                        className={`p-2 rounded-full mb-2 ${
                           colorClasses[stat.color as keyof typeof colorClasses]
-                        } mb-2`}
+                        }`}
                       >
                         <Icon className="h-5 w-5" />
                       </div>
-                      <p className="text-xs text-gray-500 font-medium mb-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">
                         {stat.label}
                       </p>
-                      <p className="text-xl font-bold text-gray-900">
+                      <p className="text-xl font-bold text-gray-900 dark:text-white">
                         {stat.value}
                       </p>
                     </div>
@@ -586,17 +580,17 @@ export default function VendorProfilePage() {
           {/* Business Info - Main */}
           <div className="lg:col-span-2 space-y-6">
             {/* About Section */}
-            <Card className="bg-white border-0 shadow-md">
-              <CardHeader className="pb-4 border-b border-gray-100">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Briefcase className="h-5 w-5 text-blue-600" />
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-md border border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700">
+                <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-white">
+                  <Briefcase className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   About Business
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-5">
                 {/* Business Name */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Business Name
                   </label>
                   {isEditing ? (
@@ -604,17 +598,19 @@ export default function VendorProfilePage() {
                       name="businessName"
                       value={formData.businessName}
                       onChange={handleInputChange}
-                      className="bg-gray-50 border-gray-200"
+                      className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   ) : (
-                    <p className="text-gray-900">{formData.businessName}</p>
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {formData.businessName}
+                    </p>
                   )}
                 </div>
 
                 {/* Category & Experience Row */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Service Category
                     </label>
                     {isEditing ? (
@@ -622,16 +618,16 @@ export default function VendorProfilePage() {
                         name="serviceCategory"
                         value={formData.serviceCategory}
                         onChange={handleInputChange}
-                        className="bg-gray-50 border-gray-200"
+                        className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                       />
                     ) : (
-                      <p className="text-gray-900">
+                      <p className="text-gray-900 dark:text-gray-100">
                         {formData.serviceCategory}
                       </p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Experience (years)
                     </label>
                     {isEditing ? (
@@ -640,10 +636,10 @@ export default function VendorProfilePage() {
                         type="number"
                         value={formData.yearsOfExperience}
                         onChange={handleInputChange}
-                        className="bg-gray-50 border-gray-200"
+                        className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                       />
                     ) : (
-                      <p className="text-gray-900">
+                      <p className="text-gray-900 dark:text-gray-100">
                         {formData.yearsOfExperience}+ years
                       </p>
                     )}
@@ -652,20 +648,19 @@ export default function VendorProfilePage() {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Business Description
                   </label>
                   {isEditing ? (
                     <textarea
-                      title="text"
                       name="businessDescription"
                       value={formData.businessDescription}
                       onChange={handleInputChange}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   ) : (
-                    <p className="text-gray-600 leading-relaxed">
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                       {formData.businessDescription}
                     </p>
                   )}
@@ -673,7 +668,7 @@ export default function VendorProfilePage() {
 
                 {/* Specialties */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Specialties
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -681,7 +676,7 @@ export default function VendorProfilePage() {
                       <Badge
                         key={index}
                         variant="outline"
-                        className="bg-blue-50 text-blue-700 border-blue-200"
+                        className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
                       >
                         {specialty}
                       </Badge>
@@ -692,18 +687,18 @@ export default function VendorProfilePage() {
             </Card>
 
             {/* Portfolio Preview */}
-            <Card className="bg-white border-0 shadow-md">
-              <CardHeader className="pb-4 border-b border-gray-100">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Camera className="h-5 w-5 text-blue-600" />
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-md border border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700">
+                <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-white">
+                  <Camera className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   Portfolio Preview
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-600 dark:text-gray-400">
                   Showcase your best work to attract more clients
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {portfolio.map((item) => (
                     <div
                       key={item.id}
@@ -714,7 +709,7 @@ export default function VendorProfilePage() {
                         alt={item.title}
                         className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                         <p className="text-white text-sm font-medium">
                           {item.title}
                         </p>
@@ -726,7 +721,7 @@ export default function VendorProfilePage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                    className="text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                   >
                     View Full Portfolio
                   </Button>
@@ -735,17 +730,17 @@ export default function VendorProfilePage() {
             </Card>
 
             {/* Certifications */}
-            <Card className="bg-white border-0 shadow-md">
-              <CardHeader className="pb-4 border-b border-gray-100">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Award className="h-5 w-5 text-blue-600" />
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-md border border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700">
+                <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-white">
+                  <Award className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   Certifications & Licenses
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 {/* Business License */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Business License
                   </label>
                   {isEditing ? (
@@ -753,12 +748,12 @@ export default function VendorProfilePage() {
                       name="businessLicense"
                       value={formData.businessLicense}
                       onChange={handleInputChange}
-                      className="bg-gray-50 border-gray-200"
+                      className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   ) : (
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      <p className="text-gray-900 font-mono">
+                      <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <p className="text-gray-900 dark:text-gray-100 font-mono">
                         {formData.businessLicense}
                       </p>
                     </div>
@@ -767,17 +762,19 @@ export default function VendorProfilePage() {
 
                 {/* Certifications */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Professional Certifications
                   </label>
                   <div className="space-y-2">
                     {formData.certifications.map((cert, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-2 p-2 bg-gray-50 rounded-md"
+                        className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-md"
                       >
-                        <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
-                        <p className="text-gray-700 text-sm">{cert}</p>
+                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
+                        <p className="text-gray-700 dark:text-gray-300 text-sm">
+                          {cert}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -789,17 +786,17 @@ export default function VendorProfilePage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Contact Info */}
-            <Card className="bg-white border-0 shadow-md">
-              <CardHeader className="pb-4 border-b border-gray-100">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Phone className="h-5 w-5 text-blue-600" />
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-md border border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700">
+                <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-white">
+                  <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   Contact Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 {/* Email */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5 uppercase">
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase">
                     Email
                   </label>
                   {isEditing ? (
@@ -808,12 +805,12 @@ export default function VendorProfilePage() {
                       type="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="bg-gray-50 border-gray-200"
+                      className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   ) : (
                     <a
                       href={`mailto:${formData.email}`}
-                      className="text-blue-600 hover:underline flex items-center gap-2"
+                      className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-2"
                     >
                       <Mail className="h-4 w-4" />
                       {formData.email}
@@ -823,7 +820,7 @@ export default function VendorProfilePage() {
 
                 {/* Phone */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5 uppercase">
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase">
                     Phone
                   </label>
                   {isEditing ? (
@@ -831,12 +828,12 @@ export default function VendorProfilePage() {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="bg-gray-50 border-gray-200"
+                      className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   ) : (
                     <a
                       href={`tel:${formData.phone}`}
-                      className="text-blue-600 hover:underline flex items-center gap-2"
+                      className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-2"
                     >
                       <Phone className="h-4 w-4" />
                       {formData.phone}
@@ -846,7 +843,7 @@ export default function VendorProfilePage() {
 
                 {/* Website */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5 uppercase">
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase">
                     Website
                   </label>
                   {isEditing ? (
@@ -854,14 +851,14 @@ export default function VendorProfilePage() {
                       name="website"
                       value={formData.website}
                       onChange={handleInputChange}
-                      className="bg-gray-50 border-gray-200"
+                      className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   ) : (
                     <a
                       href={`https://${formData.website}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline flex items-center gap-2"
+                      className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-2"
                     >
                       <Globe className="h-4 w-4" />
                       {formData.website}
@@ -872,10 +869,10 @@ export default function VendorProfilePage() {
             </Card>
 
             {/* Business Hours */}
-            <Card className="bg-white border-0 shadow-md">
-              <CardHeader className="pb-4 border-b border-gray-100">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-blue-600" />
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-md border border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700">
+                <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-white">
+                  <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   Business Hours
                 </CardTitle>
               </CardHeader>
@@ -885,14 +882,16 @@ export default function VendorProfilePage() {
                     name="businessHours"
                     value={formData.businessHours}
                     onChange={handleInputChange}
-                    className="bg-gray-50 border-gray-200"
+                    className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                   />
                 ) : (
                   <div className="space-y-2">
                     {formData.businessHours.split(", ").map((hours, index) => (
                       <div key={index} className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-gray-400" />
-                        <p className="text-gray-700 text-sm">{hours}</p>
+                        <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        <p className="text-gray-700 dark:text-gray-300 text-sm">
+                          {hours}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -901,17 +900,17 @@ export default function VendorProfilePage() {
             </Card>
 
             {/* Location */}
-            <Card className="bg-white border-0 shadow-md">
-              <CardHeader className="pb-4 border-b border-gray-100">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-blue-600" />
+            <Card className="bg-white dark:bg-gray-800 border-0 shadow-md border border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-700">
+                <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-white">
+                  <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   Location
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 {/* Street */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">
+                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">
                     Street
                   </label>
                   {isEditing ? (
@@ -919,17 +918,19 @@ export default function VendorProfilePage() {
                       name="address"
                       value={formData.address}
                       onChange={handleInputChange}
-                      className="bg-gray-50 border-gray-200"
+                      className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                     />
                   ) : (
-                    <p className="text-gray-900">{formData.address}</p>
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {formData.address}
+                    </p>
                   )}
                 </div>
 
                 {/* City & State */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">
                       City
                     </label>
                     {isEditing ? (
@@ -937,14 +938,16 @@ export default function VendorProfilePage() {
                         name="city"
                         value={formData.city}
                         onChange={handleInputChange}
-                        className="bg-gray-50 border-gray-200"
+                        className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                       />
                     ) : (
-                      <p className="text-gray-900">{formData.city}</p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {formData.city}
+                      </p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">
                       State
                     </label>
                     {isEditing ? (
@@ -952,26 +955,28 @@ export default function VendorProfilePage() {
                         name="state"
                         value={formData.state}
                         onChange={handleInputChange}
-                        className="bg-gray-50 border-gray-200"
+                        className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white"
                       />
                     ) : (
-                      <p className="text-gray-900">{formData.state}</p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {formData.state}
+                      </p>
                     )}
                   </div>
                 </div>
 
                 {!isEditing && (
                   <div className="pt-2">
-                    <div className="bg-gray-50 rounded-lg p-3 flex items-start gap-2">
-                      <MapPin className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
-                      <p className="text-sm text-gray-600">
+                    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
                         {formData.address}, {formData.city}, {formData.state}
                       </p>
                     </div>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full mt-3 text-blue-600 border-blue-200 hover:bg-blue-50"
+                      className="w-full mt-3 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                     >
                       Get Directions
                     </Button>
@@ -981,27 +986,29 @@ export default function VendorProfilePage() {
             </Card>
 
             {/* Response Time */}
-            <Card className="bg-linear-to-r from-blue-50 to-indigo-50 border-0 shadow-md">
+            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-0 shadow-md border border-transparent dark:border-gray-700">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-gray-700">
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                       Average Response Time
                     </p>
-                    <p className="text-2xl font-bold text-blue-600">
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {formData.responseTime}
                     </p>
                   </div>
-                  <div className="p-3 bg-white rounded-full shadow-sm">
-                    <TrendingUp className="h-6 w-6 text-blue-600" />
+                  <div className="p-3 bg-white dark:bg-gray-800 rounded-full shadow-sm">
+                    <TrendingUp className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         </motion.div>
+      </div>
 
-        {/* Image Preview Modal */}
+      {/* Image Preview Modal */}
+      <AnimatePresence>
         {imagePreview && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -1013,10 +1020,12 @@ export default function VendorProfilePage() {
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
-              className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 border border-gray-200 dark:border-gray-700"
               onClick={(e) => e.stopPropagation()}
             >
-              <h2 className="text-xl font-bold mb-4">Preview Image</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                Preview Image
+              </h2>
               <img
                 src={imagePreview}
                 alt="Preview"
@@ -1030,7 +1039,7 @@ export default function VendorProfilePage() {
                       : saveProfileImage
                   }
                   disabled={uploadingImage}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   {uploadingImage ? (
                     <>
@@ -1047,7 +1056,7 @@ export default function VendorProfilePage() {
                 <Button
                   onClick={cancelImageUpload}
                   disabled={uploadingImage}
-                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800"
+                  className="flex-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200"
                 >
                   <X className="h-4 w-4 mr-2" />
                   Cancel
@@ -1056,7 +1065,7 @@ export default function VendorProfilePage() {
             </motion.div>
           </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 }

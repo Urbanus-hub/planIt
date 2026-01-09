@@ -561,90 +561,101 @@ export default function ClientDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={["client"]}>
-      <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-linear-to-br from-slate-50 to-emerald-50 dark:from-gray-900 dark:to-emerald-950">
-        {/* Hero Section with Professional Emerald Overlay - Responsive Height */}
+      <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-linear-to-br from-slate-50 via-white to-emerald-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-emerald-950/50">
+        {/* Modern Hero Section - Optimized for Mobile */}
         <div
           ref={heroRef}
-          className="relative h-[50vh] sm:h-[55vh] md:h-[60vh] w-full max-w-full overflow-hidden"
+          className="relative min-h-[45vh] sm:min-h-[50vh] md:min-h-[55vh] w-full max-w-full overflow-hidden"
         >
           <div className="absolute inset-0 overflow-hidden">
             <Image
               src="/herobg.png"
               alt="Hero Background"
               fill
-              className="object-cover"
+              className="object-cover scale-105"
+              priority
             />
-            <div className="absolute inset-0 bg-linear-to-r from-emerald-900/90 via-emerald-800/80 to-teal-900/70" />
+            <div className="absolute inset-0 bg-linear-to-br from-emerald-900/95 via-emerald-800/90 to-teal-900/85 dark:from-emerald-950/98 dark:via-emerald-900/95 dark:to-teal-950/90" />
 
-            {/* Animated gradient overlay */}
-            <div className="absolute inset-0 opacity-30">
-              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+            {/* Subtle animated overlay */}
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent animate-pulse" />
             </div>
           </div>
 
-          <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 sm:px-6 lg:px-8">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3 sm:mb-4 md:mb-6 drop-shadow-lg leading-tight px-2">
-              Welcome back, {user?.name || "Guest"}!
-            </h1>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-white/90 max-w-3xl mb-6 sm:mb-8 md:mb-10 px-2">
-              Your dream event is just a click away. Let's create something
-              memorable together.
+          <div className="relative z-10 flex flex-col items-center justify-center min-h-[45vh] sm:min-h-[50vh] md:min-h-[55vh] text-center px-4 sm:px-6 py-8 sm:py-12">
+            {/* Mobile-optimized heading */}
+            <div className="mb-6 sm:mb-8">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-2 sm:mb-3 drop-shadow-2xl leading-tight">
+                Welcome back,
+              </h1>
+              <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-emerald-300 drop-shadow-lg">
+                {user?.name || "Guest"}!
+              </p>
+            </div>
+            <p className="text-base sm:text-lg md:text-xl text-white/95 max-w-2xl mb-8 sm:mb-10 px-4 leading-relaxed">
+              Your dream event is one tap away
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 w-full max-w-md sm:max-w-none px-4">
-              <Button
-                size="lg"
-                className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-6 sm:px-8 md:px-12 py-3 sm:py-4 shadow-xl font-semibold text-sm sm:text-base transition-all hover:shadow-2xl transform hover:-translate-y-1 min-h-[44px]"
-              >
-                Explore Vendors
-                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-              </Button>
+            {/* Mobile-first button layout */}
+            <div className="flex flex-col w-full max-w-sm sm:max-w-md gap-3 px-4">
+              <Link href="/client/vendors" className="w-full">
+                <Button
+                  size="lg"
+                  className="w-full bg-white text-emerald-900 hover:bg-emerald-50 rounded-2xl px-8 py-6 sm:py-7 shadow-2xl font-bold text-base sm:text-lg transition-all hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-[0.98] min-h-14"
+                >
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Explore Vendors
+                </Button>
+              </Link>
               <Button
                 size="lg"
                 variant="outline"
-                className="w-full sm:w-auto border-white text-white bg-transparent hover:bg-white hover:text-emerald-900 rounded-full px-6 sm:px-8 md:px-12 py-3 sm:py-4 font-semibold text-sm sm:text-base transition-all hover:shadow-xl transform hover:-translate-y-1 min-h-[44px]"
+                className="w-full border-2 border-white/80 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-2xl px-8 py-6 sm:py-7 font-semibold text-base sm:text-lg transition-all hover:border-white min-h-14"
               >
+                <Calendar className="mr-2 h-5 w-5" />
                 Plan My Event
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="w-full max-w-full overflow-x-hidden px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 md:max-w-7xl md:mx-auto space-y-8 sm:space-y-10 md:space-y-12">
-          {/* Stats Section - Fully Responsive */}
+        <div className="w-full max-w-full overflow-x-hidden px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:max-w-7xl md:mx-auto space-y-6 sm:space-y-8">
+          {/* Modern Stats Section - Mobile Optimized */}
           <div
             ref={statsRef}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 w-full max-w-full"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full"
           >
             {stats.map((stat, index) => (
               <Card
                 key={index}
-                className="p-3 sm:p-4 md:p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200 w-full overflow-hidden"
+                className="relative p-4 sm:p-5 bg-linear-to-br from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-900/50 border-0 shadow-md hover:shadow-xl dark:shadow-gray-900/50 rounded-2xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] overflow-hidden group"
               >
-                <div className="flex items-center justify-between mb-2 gap-2">
-                  <div
-                    className={`p-2 sm:p-2.5 rounded-lg bg-gray-50 dark:bg-gray-700 shrink-0`}
-                  >
-                    <stat.icon
-                      className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.colorClass}`}
-                    />
-                  </div>
-                  <div className="text-right min-w-0 flex-1">
-                    <div className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white truncate">
-                      {stat.value}
+                {/* Gradient accent */}
+                <div className="absolute top-0 right-0 w-24 h-24 bg-linear-to-br from-emerald-500/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                <div className="relative space-y-3">
+                  {/* Icon and value row */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="p-2.5 rounded-xl bg-linear-to-br from-emerald-500/10 to-emerald-500/5 dark:from-emerald-500/20 dark:to-emerald-500/10 shrink-0">
+                      <stat.icon className={`h-5 w-5 ${stat.colorClass}`} />
                     </div>
-                    <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium truncate">
+                    <div className="text-right">
+                      <div className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">
+                        {stat.value}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Text content */}
+                  <div className="space-y-1">
+                    <h3 className="font-bold text-gray-900 dark:text-white text-sm leading-tight">
+                      {stat.title}
+                    </h3>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                       {stat.change}
-                    </div>
+                    </p>
                   </div>
-                </div>
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm truncate">
-                    {stat.title}
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
-                    {stat.description}
-                  </p>
                 </div>
               </Card>
             ))}
@@ -688,13 +699,13 @@ export default function ClientDashboard() {
                       setSearchQuery(e.target.value);
                       setFeaturedLimit(4);
                     }}
-                    className="pl-9 sm:pl-10 pr-9 sm:pr-10 py-2.5 sm:py-3 w-full border-2 border-emerald-200/50 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 rounded-lg sm:rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm transition-all text-sm sm:text-base min-h-[44px]"
+                    className="pl-9 sm:pl-10 pr-9 sm:pr-10 py-2.5 sm:py-3 w-full border-2 border-emerald-200/50 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 rounded-lg sm:rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm transition-all text-sm sm:text-base min-h-11"
                   />
                   {searchQuery && (
                     <button
                       title="Clear search"
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors p-1 hover:bg-emerald-50 rounded-full min-h-[32px] min-w-[32px] flex items-center justify-center"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors p-1 hover:bg-emerald-50 rounded-full min-h-8 min-w-8 flex items-center justify-center"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -708,7 +719,7 @@ export default function ClientDashboard() {
                     setVendorFilter(e.target.value);
                     setFeaturedLimit(4);
                   }}
-                  className="px-4 sm:px-5 py-2.5 sm:py-3 border-2 border-emerald-200/50 rounded-lg sm:rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 font-medium text-sm transition-all cursor-pointer min-h-[44px] w-full sm:w-auto"
+                  className="px-4 sm:px-5 py-2.5 sm:py-3 border-2 border-emerald-200/50 rounded-lg sm:rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 font-medium text-sm transition-all cursor-pointer min-h-11 w-full sm:w-auto"
                 >
                   <option value="all">🎯 All Categories</option>
                   <option value="Catering">🍽️ Catering</option>
@@ -720,7 +731,7 @@ export default function ClientDashboard() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold backdrop-blur-sm text-xs sm:text-sm min-h-[44px] w-full sm:w-auto"
+                  className="border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold backdrop-blur-sm text-xs sm:text-sm min-h-11 w-full sm:w-auto"
                 >
                   <Filter className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Advanced</span>
@@ -803,98 +814,105 @@ export default function ClientDashboard() {
                 </div>
               )}
 
-            {/* Vendors Grid - Fully Responsive */}
+            {/* Modern Vendors Grid - Mobile Optimized */}
             {!vendorsLoading && !vendorsError && filteredVendors.length > 0 && (
               <>
                 <div
                   ref={vendorsRef}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 w-full max-w-full overflow-x-hidden"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 w-full max-w-full overflow-x-hidden"
                 >
                   {filteredVendors.slice(0, featuredLimit).map((vendor) => (
                     <Card
                       key={vendor.id}
-                      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200 overflow-hidden w-full max-w-full"
+                      className="group relative bg-white dark:bg-gray-800 border-0 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl dark:shadow-gray-900/50 transition-all duration-300 hover:scale-[1.02] w-full max-w-full"
                     >
-                      {/* Compact Image Section - Responsive Height */}
-                      <div className="relative h-40 sm:h-44 md:h-48 lg:h-32 overflow-hidden">
+                      {/* Modern Image Section with Gradient Overlay */}
+                      <div className="relative h-48 sm:h-52 overflow-hidden">
                         <Image
                           src={vendor.recentWork.image}
                           alt={vendor.recentWork.title}
                           fill
-                          className="object-cover"
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
                         />
-                        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
 
-                        {/* Fixed Position Badges - No Movement */}
-                        <div className="absolute top-2 left-2">
-                          <Badge className="bg-emerald-600 text-white text-xs px-2 py-1">
+                        {/* Modern gradient overlay */}
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
+
+                        {/* Floating badges with modern design */}
+                        <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
+                          <Badge className="bg-white/95 text-gray-900 border-0 backdrop-blur-sm font-semibold text-xs px-3 py-1 rounded-full shadow-lg">
                             {vendor.category}
                           </Badge>
+                          <div className="flex gap-1.5">
+                            {vendor.isVerified && (
+                              <div className="p-1.5 bg-emerald-500 rounded-full shadow-lg">
+                                <Award className="h-4 w-4 text-white" />
+                              </div>
+                            )}
+                          </div>
                         </div>
 
-                        <div className="absolute top-2 right-2 flex gap-1">
-                          {vendor.isVerified && (
-                            <div className="bg-blue-600 rounded-full p-1">
-                              <Award className="h-3 w-3 text-white" />
-                            </div>
-                          )}
-                          <div className="bg-yellow-500 rounded px-2 py-1 flex items-center gap-1">
-                            <Star className="h-3 w-3 fill-white text-white" />
-                            <span className="text-xs font-bold text-white">
-                              {vendor.rating}
-                            </span>
-                          </div>
+                        {/* Rating badge - bottom left */}
+                        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-white font-bold text-sm">
+                            {vendor.rating}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Compact Content Section */}
-                      <div className="p-3">
-                        <div className="mb-2">
-                          <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1 truncate">
+                      {/* Modern Card Content */}
+                      <div className="p-4 space-y-3">
+                        {/* Vendor info */}
+                        <div className="space-y-1">
+                          <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                             {vendor.name}
                           </h3>
-                          <p className="text-xs text-gray-500 dark:text-gray-300 line-clamp-1">
+                          <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 leading-relaxed">
                             {vendor.recentWork.title}
                           </p>
                         </div>
 
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-300">
-                            <Users className="h-3 w-3" />
-                            <span>{vendor.reviews} reviews</span>
+                        {/* Meta info */}
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+                            <Users className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span className="font-medium">
+                              {vendor.reviews} reviews
+                            </span>
                           </div>
                           {vendor.email && (
-                            <div className="flex items-center gap-1">
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              <span className="text-xs text-green-600 dark:text-green-400">
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                              <span className="text-green-600 dark:text-green-400 font-semibold">
                                 Available
                               </span>
                             </div>
                           )}
                         </div>
 
-                        {/* Fixed Action Buttons - Always Visible */}
-                        <div className="flex gap-2">
+                        {/* Modern Action Buttons */}
+                        <div className="flex gap-2 pt-1">
                           <Link
                             href={`/vendors/${vendor.id}`}
                             className="flex-1"
                           >
                             <Button
-                              variant="outline"
+                              variant="default"
                               size="sm"
-                              className="w-full text-xs h-8 border-gray-200 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+                              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-sm min-h-11 shadow-sm"
                             >
-                              <Eye className="h-3 w-3 mr-1" />
-                              View
+                              <Eye className="mr-1.5 h-4 w-4" />
+                              View Profile
                             </Button>
                           </Link>
                           <Button
                             size="sm"
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 px-3"
+                            className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-xl min-w-11 min-h-11"
                             onClick={() => handleMessage(vendor)}
+                            title="Message vendor"
                           >
-                            <MessageCircle className="h-3 w-3 mr-1" />
-                            Chat
+                            <MessageCircle className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
@@ -902,12 +920,12 @@ export default function ClientDashboard() {
                   ))}
                 </div>
 
-                {/* Explore More Vendors Button */}
+                {/* Modern "Show More" Button */}
                 {filteredVendors.length > featuredLimit && (
-                  <div className="flex justify-center mt-6">
+                  <div className="flex justify-center mt-6 sm:mt-8">
                     <Button
                       variant="outline"
-                      className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-full"
+                      className="border-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-2xl font-semibold min-h-12 transition-all hover:scale-105"
                       onClick={() => {
                         if (featuredLimit >= filteredVendors.length) {
                           setFeaturedLimit(4);
@@ -919,13 +937,13 @@ export default function ClientDashboard() {
                       {featuredLimit >= filteredVendors.length ? (
                         <>
                           Show Less
-                          <X className="h-4 w-4 ml-2" />
+                          <X className="h-5 w-5 ml-2" />
                         </>
                       ) : (
                         <>
-                          Show More Vendors (
-                          {filteredVendors.length - featuredLimit} more)
-                          <ArrowRight className="h-4 w-4 ml-2" />
+                          Show More ({filteredVendors.length - featuredLimit}{" "}
+                          more)
+                          <ArrowRight className="h-5 w-5 ml-2" />
                         </>
                       )}
                     </Button>
@@ -935,130 +953,129 @@ export default function ClientDashboard() {
             )}
           </div>
 
-          {/* Gallery Section */}
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          {/* Modern Gallery Section */}
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
                   Event Gallery
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Get inspired by our successful events
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Get inspired by successful events
                 </p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                className="border-emerald-600 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-xl font-semibold min-h-11 px-6"
               >
                 <Grid3X3 className="h-4 w-4 mr-2" />
                 View All
               </Button>
             </div>
 
-            {/* Gallery Filter Tabs */}
+            {/* Modern Gallery Filter Tabs */}
             <Tabs
               value={galleryFilter}
               onValueChange={setGalleryFilter}
               className="w-full"
             >
-              <TabsList className="inline-flex h-10 items-center justify-start rounded-lg bg-gray-100 dark:bg-gray-800 p-1 gap-1">
+              <TabsList className="inline-flex h-auto items-center justify-start rounded-xl bg-gray-100 dark:bg-gray-800 p-1.5 gap-2 overflow-x-auto w-full scrollbar-hide">
                 <TabsTrigger
                   value="all"
-                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm font-medium"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg px-5 py-2.5 text-sm font-semibold whitespace-nowrap min-h-11 transition-all"
                 >
                   All Events
                 </TabsTrigger>
                 <TabsTrigger
                   value="wedding"
-                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm font-medium"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg px-5 py-2.5 text-sm font-semibold whitespace-nowrap min-h-11 transition-all"
                 >
                   Weddings
                 </TabsTrigger>
                 <TabsTrigger
                   value="corporate"
-                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm font-medium"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg px-5 py-2.5 text-sm font-semibold whitespace-nowrap min-h-11 transition-all"
                 >
                   Corporate
                 </TabsTrigger>
                 <TabsTrigger
                   value="birthday"
-                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md px-4 py-2 text-sm font-medium"
+                  className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg px-5 py-2.5 text-sm font-semibold whitespace-nowrap min-h-11 transition-all"
                 >
                   Birthdays
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value={galleryFilter} className="mt-6">
+              <TabsContent value={galleryFilter} className="mt-5 sm:mt-6">
                 <div
                   ref={galleryRef}
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
                 >
                   {filteredGalleryItems
                     .slice(0, showMoreGallery ? filteredGalleryItems.length : 6)
                     .map((item) => (
                       <div
                         key={item.id}
-                        className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                        className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl dark:shadow-gray-900/50 transition-all duration-300 cursor-pointer hover:scale-[1.02]"
                       >
-                        <div className="relative h-64 overflow-hidden">
+                        <div className="relative h-56 sm:h-64 overflow-hidden">
                           <Image
                             src={item.thumbnail}
                             alt={item.title}
                             fill
                             className="object-cover group-hover:scale-110 transition-transform duration-500"
                           />
-                          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
 
-                          {/* Play button for videos */}
+                          {/* Modern play button for videos */}
                           {item.type === "video" && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="bg-emerald-500 rounded-full p-3 opacity-0 group-hover:opacity-100 transform group-hover:scale-110 transition-all duration-300">
-                                <Play className="h-6 w-6 text-white fill-white" />
+                              <div className="bg-emerald-500 rounded-full p-4 opacity-90 group-hover:opacity-100 transform scale-100 group-hover:scale-110 transition-all duration-300 shadow-2xl">
+                                <Play className="h-8 w-8 text-white fill-white" />
                               </div>
                             </div>
                           )}
 
-                          {/* Image icon */}
+                          {/* Modern image badge */}
                           {item.type === "image" && (
-                            <div className="absolute top-3 right-3 bg-white/90 rounded-full p-2">
+                            <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm rounded-full p-2 shadow-lg">
                               <ImageIcon className="h-4 w-4 text-gray-700" />
                             </div>
                           )}
                         </div>
 
-                        {/* Card content on hover */}
-                        <div className="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <h3 className="text-lg font-bold mb-1">
+                        {/* Modern card content - always visible on mobile, hover on desktop */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 text-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+                          <h3 className="text-base sm:text-lg font-bold mb-1 line-clamp-1">
                             {item.title}
                           </h3>
-                          <p className="text-sm text-white/80 mb-2">
+                          <p className="text-sm text-white/90 mb-1.5 line-clamp-1">
                             {item.vendor}
                           </p>
-                          <p className="text-xs text-white/70">{item.date}</p>
+                          <p className="text-xs text-white/75">{item.date}</p>
                         </div>
                       </div>
                     ))}
                 </div>
 
-                {/* Gallery See More Button */}
+                {/* Modern Gallery "See More" Button */}
                 {filteredGalleryItems.length > 6 && (
-                  <div className="flex justify-center mt-6">
+                  <div className="flex justify-center mt-6 sm:mt-8">
                     <Button
                       variant="outline"
-                      className="border-emerald-600 dark:border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-full"
+                      className="border-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-2xl font-semibold min-h-12 transition-all hover:scale-105"
                       onClick={() => setShowMoreGallery(!showMoreGallery)}
                     >
                       {showMoreGallery ? (
                         <>
                           Show Less
-                          <X className="h-4 w-4 ml-2" />
+                          <X className="h-5 w-5 ml-2" />
                         </>
                       ) : (
                         <>
-                          See More Gallery ({filteredGalleryItems.length - 6}{" "}
-                          more)
-                          <ArrowRight className="h-4 w-4 ml-2" />
+                          See More ({filteredGalleryItems.length - 6} more)
+                          <ArrowRight className="h-5 w-5 ml-2" />
                         </>
                       )}
                     </Button>
@@ -1068,69 +1085,95 @@ export default function ClientDashboard() {
             </Tabs>
           </div>
 
-          {/* Upcoming Events Section */}
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
-                Your Upcoming Events
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 text-lg">
-                Stay on top of your upcoming bookings
-              </p>
+          {/* Modern Upcoming Events Section */}
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-1">
+                  Upcoming Events
+                </h2>
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
+                  Stay on top of your bookings
+                </p>
+              </div>
             </div>
             <div
               ref={eventsRef}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
             >
               {upcomingEvents.map((event, index) => (
                 <Card
                   key={index}
-                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200 p-4"
+                  className="group relative bg-linear-to-br from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-900/50 border-0 rounded-2xl overflow-hidden shadow-md hover:shadow-xl dark:shadow-gray-900/50 transition-all duration-300 hover:scale-[1.02] p-5"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <Badge
-                      variant={
-                        event.status === "confirmed" ? "default" : "outline"
-                      }
-                      className={`text-xs ${
-                        event.status === "confirmed"
-                          ? "bg-emerald-600 text-white"
-                          : "border-amber-500 text-amber-700 dark:text-amber-400"
-                      }`}
+                  {/* Accent border on top */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500" />
+
+                  <div className="space-y-4">
+                    {/* Header with badge and time */}
+                    <div className="flex items-start justify-between gap-2">
+                      <Badge
+                        className={`shrink-0 font-semibold px-3 py-1.5 rounded-full text-xs ${
+                          event.status === "confirmed"
+                            ? "bg-emerald-500 text-white"
+                            : "bg-amber-500 text-white"
+                        }`}
+                      >
+                        {event.status === "confirmed" ? (
+                          <span className="flex items-center gap-1">
+                            <CheckCircle className="h-3.5 w-3.5" />
+                            Confirmed
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5" />
+                            Pending
+                          </span>
+                        )}
+                      </Badge>
+                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                        {event.time}
+                      </span>
+                    </div>
+
+                    {/* Event info */}
+                    <div className="space-y-1">
+                      <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-1">
+                        {event.name}
+                      </h3>
+                      <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                        {event.vendor}
+                      </p>
+                    </div>
+
+                    {/* Event details with modern icon badges */}
+                    <div className="space-y-2.5">
+                      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                        <div className="p-1.5 bg-emerald-500/10 rounded-lg">
+                          <Calendar className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <span className="text-sm font-medium">
+                          {event.date}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                        <div className="p-1.5 bg-emerald-500/10 rounded-lg">
+                          <MapPin className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <span className="text-sm font-medium line-clamp-1">
+                          {event.location}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Action button */}
+                    <Button
+                      variant="default"
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold min-h-11 mt-2"
                     >
-                      {event.status === "confirmed" ? (
-                        <>
-                          <CheckCircle className="h-3 w-3 mr-1" /> Confirmed
-                        </>
-                      ) : (
-                        <>
-                          <AlertCircle className="h-3 w-3 mr-1" /> Pending
-                        </>
-                      )}
-                    </Badge>
-                    <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                      {event.time}
-                    </span>
-                  </div>
-
-                  <div className="mb-3">
-                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
-                      {event.name}
-                    </h3>
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                      {event.vendor}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 text-xs text-gray-600 dark:text-gray-300">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                      <span>{event.date}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                      <span>{event.location}</span>
-                    </div>
+                      View Details
+                      <ChevronRight className="ml-1 h-4 w-4" />
+                    </Button>
                   </div>
                 </Card>
               ))}
