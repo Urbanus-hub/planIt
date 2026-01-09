@@ -117,7 +117,7 @@ console.log("users",users)
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
-      <div className="flex-1 min-h-screen bg-background transition-colors duration-300">
+      <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-background transition-colors duration-300">
         <div className="max-w-7xl mx-auto p-4 lg:p-8 space-y-8">
           {/* Welcome Banner with background image and overlay */}
           <div className="relative overflow-hidden rounded-2xl shadow-xl">

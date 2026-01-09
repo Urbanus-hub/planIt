@@ -293,8 +293,8 @@ export default function ClientBookings() {
 
   return (
     <ProtectedRoute allowedRoles={["client"]}>
-      <div className="flex-1 min-h-screen bg-linear-to-br from-emerald-50 via-green-50/30 to-teal-50/20 dark:from-gray-900 dark:via-emerald-900/10 dark:to-gray-800">
-        <div className="max-w-7xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
+      <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-linear-to-br from-emerald-50 via-green-50/30 to-teal-50/20 dark:from-gray-900 dark:via-emerald-900/10 dark:to-gray-800">
+        <div className="w-full max-w-full overflow-x-hidden px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 md:max-w-7xl md:mx-auto space-y-4 sm:space-y-6">
           {/* Header */}
           <div className="flex flex-col gap-4">
             <div>
@@ -413,23 +413,23 @@ export default function ClientBookings() {
             </Card>
           </div>
 
-          {/* Search and Filter Section */}
-          <Card className="bg-white dark:bg-gray-800 border-0 shadow-md">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
-                <div className="relative flex-1">
+          {/* Search and Filter Section - Fully Responsive */}
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-md w-full max-w-full overflow-x-hidden">
+            <CardContent className="p-3 sm:p-4 w-full max-w-full overflow-x-hidden">
+              <div className="flex flex-col gap-3 sm:flex-row sm:gap-4 w-full max-w-full">
+                <div className="relative flex-1 min-w-0 w-full sm:w-auto">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                   <Input
                     placeholder="Search bookings..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 sm:pl-10 pr-4 py-2 w-full border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500 text-sm sm:text-base"
+                    className="pl-9 sm:pl-10 pr-9 sm:pr-10 py-2.5 sm:py-2 w-full border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500 text-sm sm:text-base min-h-[44px]"
                   />
                   {searchTerm && (
                     <button
-                      title="btn"
+                      title="Clear search"
                       onClick={() => setSearchTerm("")}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 min-h-[32px] min-w-[32px] flex items-center justify-center"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -439,14 +439,15 @@ export default function ClientBookings() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="border-emerald-200 text-gray-700 dark:text-gray-300 w-full sm:w-auto"
+                      className="border-emerald-200 text-gray-700 dark:text-gray-300 w-full sm:w-auto min-h-[44px]"
                     >
                       <Filter className="w-4 h-4 mr-2" />
-                      <span className="hidden sm:inline">Filter</span>
+                      <span className="hidden sm:inline">Sort</span>
+                      <span className="sm:hidden">Sort</span>
                       <ChevronDown className="w-4 h-4 sm:ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent>
+                  <DropdownMenuContent className="w-[200px] sm:w-auto">
                     <DropdownMenuItem>Date: Newest First</DropdownMenuItem>
                     <DropdownMenuItem>Date: Oldest First</DropdownMenuItem>
                     <DropdownMenuItem>Price: High to Low</DropdownMenuItem>
@@ -560,11 +561,11 @@ export default function ClientBookings() {
               filteredBookings.map((booking: Booking) => (
                 <Card
                   key={booking._id}
-                  className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-800 border-0"
+                  className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-800 border-0 w-full max-w-full"
                 >
-                  <div className="p-4 sm:p-6">
+                  <div className="p-4 sm:p-6 w-full max-w-full overflow-x-hidden">
                     {/* Mobile Layout */}
-                    <div className="block lg:hidden space-y-4">
+                    <div className="block lg:hidden space-y-4 w-full max-w-full">
                       {/* Header */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">

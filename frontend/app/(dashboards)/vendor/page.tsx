@@ -237,7 +237,7 @@ export default function VendorDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={["vendor"]}>
-      <div className="flex-1 min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-gray-50 dark:bg-gray-900">
         {/* Hero Section */}
         <div className="relative overflow-hidden">
           {/* Background Image with Overlay */}

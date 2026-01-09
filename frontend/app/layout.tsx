@@ -24,6 +24,11 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Plan-It",
   description: "Connect with top-tier event professionals across Kenya",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+  },
 };
 
 export default function RootLayout({

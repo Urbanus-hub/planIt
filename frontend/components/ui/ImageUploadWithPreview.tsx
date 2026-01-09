@@ -187,7 +187,7 @@ export function ImageUploadWithPreview({
     <div className={`relative ${className}`}>
       {/* Image Display */}
       <div
-        className={`relative w-32 h-32 mx-auto ${shapeClasses[shape]} overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 border-4 border-white dark:border-gray-700 shadow-xl`}
+        className={`relative w-24 h-24 sm:w-32 sm:h-32 mx-auto ${shapeClasses[shape]} overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 border-4 border-white dark:border-gray-700 shadow-xl`}
       >
         {displayImage ? (
           <Image

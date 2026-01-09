@@ -28,7 +28,7 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
     // Note: Advanced optimization parameters like quality, format, and eager transformations
     // should be configured in your Cloudinary Upload Preset settings at:
     // https://console.cloudinary.com/settings/upload
-    // 
+    //
     // Alternatively, use the getOptimizedImageUrl() helper function when displaying images
     // to apply transformations on-the-fly without affecting the original upload.
 
@@ -115,12 +115,24 @@ export const getOptimizedImageUrl = (
     width?: number;
     height?: number;
     crop?: "fill" | "fit" | "limit" | "scale" | "thumb";
-    quality?: "auto" | "auto:best" | "auto:good" | "auto:eco" | "auto:low" | number;
+    quality?:
+      | "auto"
+      | "auto:best"
+      | "auto:good"
+      | "auto:eco"
+      | "auto:low"
+      | number;
     format?: "auto" | "webp" | "avif" | "jpg" | "png";
     gravity?: "auto" | "face" | "center" | "north" | "south" | "east" | "west";
   }
 ): string => {
   try {
+    // Return original if not a string or empty
+    if (!publicUrl || typeof publicUrl !== "string") {
+      console.warn("getOptimizedImageUrl: Invalid URL provided", publicUrl);
+      return publicUrl || "";
+    }
+
     // Default options
     const {
       width,
@@ -131,14 +143,32 @@ export const getOptimizedImageUrl = (
       gravity = "auto",
     } = options || {};
 
-    // Extract cloud name and public ID from URL
-    const urlParts = publicUrl.match(/cloudinary\.com\/([^/]+)\/(image|video)\/upload\/(.+)/);
+    // Extract cloud name and public ID from URL - support both res.cloudinary.com and cloudinary.com
+    // Also handle existing transformations in the URL
+    const urlParts = publicUrl.match(
+      /(?:res\.)?cloudinary\.com\/([^/]+)\/(image|video)\/upload\/(?:[^/]+\/)*(.+?)(?:\.[^.]+)?$/
+    );
+
     if (!urlParts) {
-      // If URL doesn't match Cloudinary pattern, return original
+      // Debug: log non-Cloudinary URLs
+      console.log(
+        "getOptimizedImageUrl: Not a Cloudinary URL, returning original:",
+        publicUrl.substring(0, 100)
+      );
       return publicUrl;
     }
 
-    const [, cloudName, resourceType, publicIdWithExtension] = urlParts;
+    let [, cloudName, resourceType, publicId] = urlParts;
+
+    // Extract file extension from original URL if present
+    const extensionMatch = publicUrl.match(/\.([a-z0-9]+)$/i);
+    const extension = extensionMatch ? `.${extensionMatch[1]}` : ".jpg";
+
+    // Remove any existing transformations from publicId
+    publicId = publicId.replace(/^v\d+\//, ""); // Remove version prefix
+    const publicIdWithExtension = publicId.includes(".")
+      ? publicId
+      : `${publicId}${extension}`;
 
     // Build transformation string
     const transformations: string[] = [];
@@ -148,7 +178,8 @@ export const getOptimizedImageUrl = (
     if (crop) transformations.push(`c_${crop}`);
     if (quality) transformations.push(`q_${quality}`);
     if (format) transformations.push(`f_${format}`);
-    if (gravity && (crop === "fill" || crop === "thumb")) transformations.push(`g_${gravity}`);
+    if (gravity && (crop === "fill" || crop === "thumb"))
+      transformations.push(`g_${gravity}`);
 
     // Add dpr_auto for automatic device pixel ratio
     transformations.push("dpr_auto");
@@ -156,9 +187,18 @@ export const getOptimizedImageUrl = (
     const transformString = transformations.join(",");
 
     // Construct optimized URL
-    return `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${transformString}/${publicIdWithExtension}`;
+    const optimizedUrl = `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${transformString}/${publicIdWithExtension}`;
+
+    // Debug: log successful optimization
+    console.log("✓ Optimized URL:", {
+      original: publicUrl.substring(0, 80),
+      optimized: optimizedUrl.substring(0, 80),
+      transformations: transformString,
+    });
+
+    return optimizedUrl;
   } catch (error) {
-    console.error("Error generating optimized image URL:", error);
+    console.error("Error generating optimized image URL:", error, publicUrl);
     return publicUrl; // Return original URL if optimization fails
   }
 };

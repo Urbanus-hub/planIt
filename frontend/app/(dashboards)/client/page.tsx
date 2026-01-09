@@ -561,10 +561,10 @@ export default function ClientDashboard() {
 
   return (
     <ProtectedRoute allowedRoles={["client"]}>
-      <div className="flex-1 min-h-screen w-full bg-linear-to-br from-slate-50 to-emerald-50 dark:from-gray-900 dark:to-emerald-950">
-        {/* Hero Section with Professional Emerald Overlay and Rounded Corners */}
-        <div ref={heroRef} className="relative h-[60vh] w-full overflow-hidden">
-          <div className="absolute inset-0 rounded-lg overflow-hidden">
+      <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-linear-to-br from-slate-50 to-emerald-50 dark:from-gray-900 dark:to-emerald-950">
+        {/* Hero Section with Professional Emerald Overlay - Responsive Height */}
+        <div ref={heroRef} className="relative h-[50vh] sm:h-[55vh] md:h-[60vh] w-full max-w-full overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden">
             <Image
               src="/herobg.png"
               alt="Hero Background"
@@ -579,27 +579,27 @@ export default function ClientDashboard() {
             </div>
           </div>
 
-          <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-lg">
+          <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 sm:px-6 lg:px-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-3 sm:mb-4 md:mb-6 drop-shadow-lg leading-tight px-2">
               Welcome back, {user?.name || "Guest"}!
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mb-10">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-white/90 max-w-3xl mb-6 sm:mb-8 md:mb-10 px-2">
               Your dream event is just a click away. Let's create something
               memorable together.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-6">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 w-full max-w-md sm:max-w-none px-4">
               <Button
                 size="lg"
-                className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-12 py-4 shadow-xl font-semibold transition-all hover:shadow-2xl transform hover:-translate-y-1"
+                className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white rounded-full px-6 sm:px-8 md:px-12 py-3 sm:py-4 shadow-xl font-semibold text-sm sm:text-base transition-all hover:shadow-2xl transform hover:-translate-y-1 min-h-[44px]"
               >
                 Explore Vendors
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white text-white bg-transparent hover:bg-white hover:text-emerald-900 rounded-full px-12 py-4 font-semibold transition-all hover:shadow-xl transform hover:-translate-y-1"
+                className="w-full sm:w-auto border-white text-white bg-transparent hover:bg-white hover:text-emerald-900 rounded-full px-6 sm:px-8 md:px-12 py-3 sm:py-4 font-semibold text-sm sm:text-base transition-all hover:shadow-xl transform hover:-translate-y-1 min-h-[44px]"
               >
                 Plan My Event
               </Button>
@@ -607,35 +607,35 @@ export default function ClientDashboard() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto p-6 md:p-10 space-y-12">
-          {/* Stats Section */}
+        <div className="w-full max-w-full overflow-x-hidden px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 md:max-w-7xl md:mx-auto space-y-8 sm:space-y-10 md:space-y-12">
+          {/* Stats Section - Fully Responsive */}
           <div
             ref={statsRef}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 w-full max-w-full"
           >
             {stats.map((stat, index) => (
               <Card
                 key={index}
-                className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200"
+                className="p-3 sm:p-4 md:p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200 w-full overflow-hidden"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <div className={`p-2 rounded-lg bg-gray-50 dark:bg-gray-700`}>
-                    <stat.icon className={`h-4 w-4 ${stat.colorClass}`} />
+                <div className="flex items-center justify-between mb-2 gap-2">
+                  <div className={`p-2 sm:p-2.5 rounded-lg bg-gray-50 dark:bg-gray-700 shrink-0`}>
+                    <stat.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.colorClass}`} />
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <div className="text-right min-w-0 flex-1">
+                    <div className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white truncate">
                       {stat.value}
                     </div>
-                    <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                    <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium truncate">
                       {stat.change}
                     </div>
                   </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm truncate">
                     {stat.title}
                   </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
                     {stat.description}
                   </p>
                 </div>
@@ -643,22 +643,22 @@ export default function ClientDashboard() {
             ))}
           </div>
 
-          {/* Featured Vendors Section */}
-          <div className="space-y-8">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/20 px-6 py-3 rounded-full mb-6">
-                <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-emerald-700 dark:text-emerald-300 font-semibold text-sm uppercase tracking-wider">
+          {/* Featured Vendors Section - Responsive */}
+          <div className="space-y-6 sm:space-y-8 w-full max-w-full overflow-x-hidden">
+            <div className="text-center mb-8 sm:mb-10 md:mb-12 px-2">
+              <div className="inline-flex items-center gap-2 sm:gap-3 bg-emerald-50 dark:bg-emerald-900/20 px-4 sm:px-6 py-2 sm:py-3 rounded-full mb-4 sm:mb-6">
+                <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-emerald-700 dark:text-emerald-300 font-semibold text-xs sm:text-sm uppercase tracking-wider">
                   Premium Vendors
                 </span>
               </div>
-              <h2 className="text-5xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 leading-tight px-2">
                 Featured{" "}
                 <span className="text-emerald-600 dark:text-emerald-400">
                   Event Partners
                 </span>
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-xl max-w-2xl mx-auto leading-relaxed">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed px-2">
                 Connect with top-rated professionals who bring your vision to
                 life.
                 <span className="text-emerald-600 dark:text-emerald-400 font-medium">
@@ -669,25 +669,25 @@ export default function ClientDashboard() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-emerald-100 dark:border-emerald-900/30">
-              {/* Vendor Filter and Search */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-emerald-100 dark:border-emerald-900/30 w-full max-w-full overflow-x-hidden">
+              {/* Vendor Filter and Search - Fully Responsive */}
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center">
-                <div className="relative flex-1 sm:flex-none">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-400 w-5 h-5" />
+                <div className="relative flex-1 sm:flex-none w-full sm:w-72">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-400 w-4 h-4 sm:w-5 sm:h-5" />
                   <Input
-                    placeholder="Search by vendor name..."
+                    placeholder="Search vendors..."
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
-                      setFeaturedLimit(4); // Reset to show fewer items when search changes
+                      setFeaturedLimit(4);
                     }}
-                    className="pl-10 pr-10 py-3 w-full sm:w-72 border-2 border-emerald-200/50 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm transition-all"
+                    className="pl-9 sm:pl-10 pr-9 sm:pr-10 py-2.5 sm:py-3 w-full border-2 border-emerald-200/50 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 rounded-lg sm:rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm transition-all text-sm sm:text-base min-h-[44px]"
                   />
                   {searchQuery && (
                     <button
                       title="Clear search"
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors p-1 hover:bg-emerald-50 rounded-full"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors p-1 hover:bg-emerald-50 rounded-full min-h-[32px] min-w-[32px] flex items-center justify-center"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -699,9 +699,9 @@ export default function ClientDashboard() {
                   value={vendorFilter}
                   onChange={(e) => {
                     setVendorFilter(e.target.value);
-                    setFeaturedLimit(4); // Reset to show fewer items when filter changes
+                    setFeaturedLimit(4);
                   }}
-                  className="px-5 py-3 border-2 border-emerald-200/50 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 font-medium text-sm transition-all cursor-pointer"
+                  className="px-4 sm:px-5 py-2.5 sm:py-3 border-2 border-emerald-200/50 rounded-lg sm:rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 font-medium text-sm transition-all cursor-pointer min-h-[44px] w-full sm:w-auto"
                 >
                   <option value="all">🎯 All Categories</option>
                   <option value="Catering">🍽️ Catering</option>
@@ -713,10 +713,11 @@ export default function ClientDashboard() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 whitespace-nowrap px-6 py-3 rounded-xl font-semibold backdrop-blur-sm"
+                  className="border-2 border-emerald-400 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold backdrop-blur-sm text-xs sm:text-sm min-h-[44px] w-full sm:w-auto"
                 >
                   <Filter className="h-4 w-4 mr-2" />
-                  Advanced
+                  <span className="hidden sm:inline">Advanced</span>
+                  <span className="sm:hidden">More</span>
                 </Button>
               </div>
             </div>
@@ -795,20 +796,20 @@ export default function ClientDashboard() {
                 </div>
               )}
 
-            {/* Vendors Grid */}
+            {/* Vendors Grid - Fully Responsive */}
             {!vendorsLoading && !vendorsError && filteredVendors.length > 0 && (
               <>
                 <div
                   ref={vendorsRef}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6 w-full max-w-full overflow-x-hidden"
                 >
                   {filteredVendors.slice(0, featuredLimit).map((vendor) => (
                     <Card
                       key={vendor.id}
-                      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200 overflow-hidden"
+                      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200 overflow-hidden w-full max-w-full"
                     >
-                      {/* Compact Image Section */}
-                      <div className="relative h-32 overflow-hidden">
+                      {/* Compact Image Section - Responsive Height */}
+                      <div className="relative h-40 sm:h-44 md:h-48 lg:h-32 overflow-hidden">
                         <Image
                           src={vendor.recentWork.image}
                           alt={vendor.recentWork.title}

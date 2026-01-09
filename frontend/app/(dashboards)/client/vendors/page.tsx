@@ -290,7 +290,7 @@ export default function BrowseVendors() {
   if (loading) {
     return (
       <ProtectedRoute allowedRoles={["client"]}>
-        <div className="flex-1 min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-green-50/20 dark:from-gray-900 dark:via-emerald-900/10 dark:to-gray-800 p-4 sm:p-6 lg:p-8">
+        <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-gradient-to-br from-emerald-50 via-teal-50/30 to-green-50/20 dark:from-gray-900 dark:via-emerald-900/10 dark:to-gray-800 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="text-center py-20">
               <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-emerald-600 mx-auto"></div>
@@ -308,7 +308,7 @@ export default function BrowseVendors() {
   if (error) {
     return (
       <ProtectedRoute allowedRoles={["client"]}>
-        <div className="flex-1 min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-green-50/20 dark:from-gray-900 dark:via-emerald-900/10 dark:to-gray-800 p-4 sm:p-6 lg:p-8">
+        <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-gradient-to-br from-emerald-50 via-teal-50/30 to-green-50/20 dark:from-gray-900 dark:via-emerald-900/10 dark:to-gray-800 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="text-center py-20">
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-6 py-4 rounded-xl max-w-md mx-auto">
@@ -332,7 +332,7 @@ export default function BrowseVendors() {
 
   return (
     <ProtectedRoute allowedRoles={["client"]}>
-      <div className="flex-1 min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-green-50/20 dark:from-gray-900 dark:via-emerald-900/10 dark:to-gray-800 p-4 sm:p-6 lg:p-8">
+      <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-gradient-to-br from-emerald-50 via-teal-50/30 to-green-50/20 dark:from-gray-900 dark:via-emerald-900/10 dark:to-gray-800 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

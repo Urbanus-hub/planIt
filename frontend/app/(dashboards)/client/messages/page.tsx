@@ -433,7 +433,7 @@ export default function ClientMessages() {
 
   return (
     <ProtectedRoute allowedRoles={["client"]}>
-      <div className="flex-1 min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-gray-50 dark:bg-gray-900">
         <div className="flex h-screen overflow-hidden">
           {/* Left Sidebar - Conversations List */}
           <div

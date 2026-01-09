@@ -45,7 +45,7 @@ import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { authAPI } from "@/lib/api";
-import { uploadToCloudinary } from "@/lib/cloudinary";
+import { uploadToCloudinary, getOptimizedImageUrl } from "@/lib/cloudinary";
 import { cn } from "@/lib/utils";
 
 export default function ClientProfile() {
@@ -253,7 +253,7 @@ export default function ClientProfile() {
 
   return (
     <ProtectedRoute allowedRoles={["client"]}>
-      <div className="min-h-screen  flex flex-col">
+      <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col">
         {/* Header */}
         <header className=" border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -367,7 +367,19 @@ export default function ClientProfile() {
                     <div className="relative">
                       <Avatar className="w-24 h-24 border-2 border-emerald-600">
                         <AvatarImage
-                          src={user?.avatar || imagePreview || ""}
+                          src={
+                            imagePreview ||
+                            (user?.avatar
+                              ? getOptimizedImageUrl(user.avatar, {
+                                  width: 200,
+                                  height: 200,
+                                  crop: "fill",
+                                  quality: "auto:best",
+                                  format: "auto",
+                                  gravity: "face",
+                                })
+                              : "")
+                          }
                           alt="Profile"
                         />
                         <AvatarFallback className="text-xl font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200">
@@ -586,7 +598,11 @@ export default function ClientProfile() {
                           <Button variant="ghost" size="sm">
                             <Edit2 className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -647,7 +663,11 @@ export default function ClientProfile() {
                           <Button variant="ghost" size="sm">
                             <Edit2 className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -772,7 +792,10 @@ export default function ClientProfile() {
                     {showPassword && (
                       <div className="space-y-3 mt-4">
                         <div>
-                          <Label htmlFor="current-password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          <Label
+                            htmlFor="current-password"
+                            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                          >
                             Current password
                           </Label>
                           <Input
@@ -783,7 +806,10 @@ export default function ClientProfile() {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="new-password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          <Label
+                            htmlFor="new-password"
+                            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                          >
                             New password
                           </Label>
                           <Input
@@ -794,7 +820,10 @@ export default function ClientProfile() {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="confirm-password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          <Label
+                            htmlFor="confirm-password"
+                            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                          >
                             Confirm new password
                           </Label>
                           <Input

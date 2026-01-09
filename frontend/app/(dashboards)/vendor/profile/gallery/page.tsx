@@ -33,7 +33,11 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { uploadToCloudinary, batchUploadToCloudinary } from "@/lib/cloudinary";
+import {
+  uploadToCloudinary,
+  batchUploadToCloudinary,
+  getOptimizedImageUrl,
+} from "@/lib/cloudinary";
 import { galleryAPI } from "@/lib/api";
 import { GalleryImage } from "@/lib/types";
 import Link from "next/link";
@@ -412,7 +416,13 @@ export default function VendorGalleryPage() {
                         </div>
                       ) : (
                         <img
-                          src={image.url}
+                          src={getOptimizedImageUrl(image.url, {
+                            width: 600,
+                            height: 600,
+                            crop: "fill",
+                            quality: "auto:good",
+                            format: "auto",
+                          })}
                           alt={image.title || "Gallery image"}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
@@ -518,7 +528,9 @@ export default function VendorGalleryPage() {
 
               {selectedFiles.length > 0 && (
                 <div className="mb-6">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Files to upload:</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    Files to upload:
+                  </p>
                   <div className="max-h-32 overflow-y-auto space-y-2">
                     {selectedFiles.map((file, index) => (
                       <div
@@ -530,7 +542,9 @@ export default function VendorGalleryPage() {
                         ) : (
                           <ImageIcon className="h-4 w-4 text-blue-500 dark:text-blue-400" />
                         )}
-                        <span className="flex-1 truncate text-gray-900 dark:text-gray-100">{file.name}</span>
+                        <span className="flex-1 truncate text-gray-900 dark:text-gray-100">
+                          {file.name}
+                        </span>
                         <span className="text-gray-500 dark:text-gray-400">
                           {(file.size / 1024 / 1024).toFixed(1)}MB
                         </span>
@@ -711,9 +725,15 @@ export default function VendorGalleryPage() {
                   />
                 ) : (
                   <img
-                    src={selectedImage.url}
-                    alt={selectedImage.title}
-                    className="w-full h-full object-cover"
+                    src={getOptimizedImageUrl(selectedImage.url, {
+                      width: 1200,
+                      height: 800,
+                      crop: "limit",
+                      quality: "auto:best",
+                      format: "auto",
+                    })}
+                    alt={selectedImage.title || "Gallery image"}
+                    className="w-full h-full max-h-96 object-contain rounded-lg"
                   />
                 )}
               </div>
