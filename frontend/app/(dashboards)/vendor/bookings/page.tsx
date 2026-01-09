@@ -311,7 +311,7 @@ export default function VendorBookingsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto p-4  ">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

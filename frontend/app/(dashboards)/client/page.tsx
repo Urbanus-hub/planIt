@@ -669,7 +669,7 @@ export default function ClientDashboard() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-emerald-100 dark:border-emerald-900/30 w-full max-w-full overflow-x-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 bg-white/50 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-emerald-100 dark:border-gray-700 w-full max-w-full overflow-x-hidden">
               {/* Vendor Filter and Search - Fully Responsive */}
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center">
                 <div className="relative flex-1 sm:flex-none w-full sm:w-72">
@@ -846,13 +846,13 @@ export default function ClientDashboard() {
                           <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1 truncate">
                             {vendor.name}
                           </h3>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-300 line-clamp-1">
                             {vendor.recentWork.title}
                           </p>
                         </div>
 
                         <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-300">
                             <Users className="h-3 w-3" />
                             <span>{vendor.reviews} reviews</span>
                           </div>
@@ -875,7 +875,7 @@ export default function ClientDashboard() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="w-full text-xs h-8 border-gray-200 dark:border-gray-600"
+                              className="w-full text-xs h-8 border-gray-200 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
                             >
                               <Eye className="h-3 w-3 mr-1" />
                               View
@@ -1039,7 +1039,7 @@ export default function ClientDashboard() {
                   <div className="flex justify-center mt-6">
                     <Button
                       variant="outline"
-                      className="border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-full"
+                      className="border-emerald-600 dark:border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-8 py-3 rounded-full"
                       onClick={() => setShowMoreGallery(!showMoreGallery)}
                     >
                       {showMoreGallery ? (
@@ -1067,7 +1067,7 @@ export default function ClientDashboard() {
               <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
                 Your Upcoming Events
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">
+              <p className="text-gray-600 dark:text-gray-300 text-lg">
                 Stay on top of your upcoming bookings
               </p>
             </div>
@@ -1115,13 +1115,13 @@ export default function ClientDashboard() {
                     </p>
                   </div>
 
-                  <div className="space-y-2 text-xs text-gray-600 dark:text-gray-400">
+                  <div className="space-y-2 text-xs text-gray-600 dark:text-gray-300">
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-3 w-3 text-emerald-600" />
+                      <Calendar className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                       <span>{event.date}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-3 w-3 text-emerald-600" />
+                      <MapPin className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                       <span>{event.location}</span>
                     </div>
                   </div>

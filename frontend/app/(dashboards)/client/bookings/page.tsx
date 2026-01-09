@@ -423,7 +423,7 @@ export default function ClientBookings() {
                     placeholder="Search bookings..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 sm:pl-10 pr-9 sm:pr-10 py-2.5 sm:py-2 w-full border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500 text-sm sm:text-base min-h-[44px]"
+                    className="pl-9 sm:pl-10 pr-9 sm:pr-10 py-2.5 sm:py-2 w-full border-emerald-200 dark:border-gray-600 focus:border-emerald-500 focus:ring-emerald-500 text-sm sm:text-base min-h-[44px] dark:bg-gray-800 dark:text-white"
                   />
                   {searchTerm && (
                     <button
@@ -439,7 +439,7 @@ export default function ClientBookings() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="border-emerald-200 text-gray-700 dark:text-gray-300 w-full sm:w-auto min-h-[44px]"
+                      className="border-emerald-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 dark:bg-gray-800 w-full sm:w-auto min-h-[44px]"
                     >
                       <Filter className="w-4 h-4 mr-2" />
                       <span className="hidden sm:inline">Sort</span>
@@ -509,7 +509,7 @@ export default function ClientBookings() {
                     className={`${
                       activeTab === option.value
                         ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                        : "border-emerald-200 text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                        : "border-emerald-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                     }`}
                   >
                     {option.label}
@@ -532,7 +532,7 @@ export default function ClientBookings() {
                 <CardContent className="p-8">
                   <div className="flex items-center justify-center">
                     <RefreshCw className="h-6 w-6 animate-spin text-emerald-600 mr-2" />
-                    <span className="text-gray-600 dark:text-gray-400">
+                    <span className="text-gray-600 dark:text-gray-200">
                       Loading bookings...
                     </span>
                   </div>
@@ -545,7 +545,7 @@ export default function ClientBookings() {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                     Failed to load bookings
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
                     {error}
                   </p>
                   <Button
@@ -609,8 +609,8 @@ export default function ClientBookings() {
 
                       {/* Event Details */}
                       <div className="grid grid-cols-1 gap-3 text-sm">
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                          <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                           <span className="truncate">
                             {booking.startDate
                               ? new Date(booking.startDate).toLocaleDateString(
@@ -625,14 +625,14 @@ export default function ClientBookings() {
                               : "—"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                          <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                           <span className="truncate">
                             {booking.service?.location || "—"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                          <DollarSign className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                          <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                           <span className="truncate font-semibold text-gray-900 dark:text-white">
                             KSh {(booking.totalPrice || 0).toLocaleString()}
                           </span>
@@ -642,7 +642,7 @@ export default function ClientBookings() {
                       {/* Additional Info */}
                       <div className="bg-linear-to-br from-emerald-50/50 to-teal-50/30 dark:from-emerald-950/20 dark:to-teal-950/10 rounded-lg p-4 space-y-3 border border-emerald-100 dark:border-emerald-900/30">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                          <span className="text-xs text-gray-600 dark:text-gray-300">
                             Booking ID:
                           </span>
                           <span className="text-xs font-mono font-medium text-gray-900 dark:text-white">
@@ -650,7 +650,7 @@ export default function ClientBookings() {
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                          <span className="text-xs text-gray-600 dark:text-gray-300">
                             Booked On:
                           </span>
                           <span className="text-xs font-medium text-gray-900 dark:text-white">
@@ -658,8 +658,8 @@ export default function ClientBookings() {
                           </span>
                         </div>
                         {booking.notes && (
-                          <div className="pt-2 border-t border-emerald-200 dark:border-emerald-800">
-                            <span className="text-xs text-gray-600 dark:text-gray-400 block mb-1">
+                          <div className="pt-2 border-t border-emerald-200 dark:border-gray-700">
+                            <span className="text-xs text-gray-600 dark:text-gray-300 block mb-1">
                               Notes:
                             </span>
                             <span className="text-xs text-gray-900 dark:text-white">
@@ -686,7 +686,7 @@ export default function ClientBookings() {
                               onClick={() => handleCancelBooking(booking._id)}
                               variant="outline"
                               size="sm"
-                              className="w-full border-red-600 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              className="w-full border-red-600 dark:border-red-500 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                             >
                               <X className="w-4 h-4 mr-2" />
                               Cancel Booking

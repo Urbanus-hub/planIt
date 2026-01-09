@@ -416,7 +416,7 @@ export default function ClientProfile() {
                       <div className="flex-1 w-full">
                         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
                           <div className="flex items-center justify-between mb-2">
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
                               Image Preview
                             </p>
                             <div className="flex gap-2">
@@ -458,7 +458,7 @@ export default function ClientProfile() {
                     <div className="space-y-2">
                       <Label
                         htmlFor="firstName"
-                        className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                        className="text-sm font-medium text-gray-700 dark:text-gray-200"
                       >
                         First Name
                       </Label>
@@ -479,7 +479,7 @@ export default function ClientProfile() {
                     <div className="space-y-2">
                       <Label
                         htmlFor="lastName"
-                        className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                        className="text-sm font-medium text-gray-700 dark:text-gray-200"
                       >
                         Last Name
                       </Label>

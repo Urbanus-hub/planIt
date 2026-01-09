@@ -298,7 +298,7 @@ export default function VendorDashboard() {
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                      <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-200">
                         {stat.title}
                       </CardDescription>
                       <div className={`p-2 rounded-full ${colorClasses.bg}`}>
@@ -323,7 +323,7 @@ export default function VendorDashboard() {
                         {stat.change}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
                       {stat.description}
                     </p>
                     {/* Mini Chart */}
@@ -458,7 +458,7 @@ export default function VendorDashboard() {
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                           {notification.description}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                           {notification.time}
                         </p>
                       </div>

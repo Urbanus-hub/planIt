@@ -247,7 +247,7 @@ console.log("users",users)
                     <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
                       Recent Activity
                     </CardTitle>
-                    <CardDescription className="text-gray-600 dark:text-gray-400">
+                    <CardDescription className="text-gray-600 dark:text-gray-300">
                       Latest platform events and updates
                     </CardDescription>
                   </div>
@@ -293,7 +293,7 @@ console.log("users",users)
                           {activity.user}
                         </p>
                       </div>
-                      <span className="text-xs text-gray-500 dark:text-gray-500 whitespace-nowrap">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                         {activity.time}
                       </span>
                     </div>
@@ -308,7 +308,7 @@ console.log("users",users)
                 <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
                   System Status
                 </CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-400">
+                <CardDescription className="text-gray-600 dark:text-gray-300">
                   Platform health overview
                 </CardDescription>
               </CardHeader>

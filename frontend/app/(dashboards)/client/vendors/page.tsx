@@ -380,7 +380,7 @@ export default function BrowseVendors() {
                   placeholder="Search vendors by name, location, or description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500"
+                  className="pl-10 pr-4 py-2 w-full border-emerald-200 dark:border-gray-600 focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-800 dark:text-white"
                 />
                 {searchTerm && (
                   <button
@@ -398,7 +398,7 @@ export default function BrowseVendors() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full md:w-48 justify-between border-emerald-200 text-gray-700 dark:text-gray-300"
+                    className="w-full md:w-48 justify-between border-emerald-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 dark:bg-gray-800"
                   >
                     {selectedCategory === "all"
                       ? "All Categories"
@@ -427,7 +427,7 @@ export default function BrowseVendors() {
             {/* Active Filters */}
             {(searchTerm || selectedCategory !== "all") && (
               <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="text-sm text-gray-600 dark:text-gray-300">
                   Active filters:
                 </span>
                 {searchTerm && (
@@ -467,7 +467,7 @@ export default function BrowseVendors() {
                     setSearchTerm("");
                     setSelectedCategory("all");
                   }}
-                  className="text-emerald-600 hover:text-emerald-700"
+                  className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
                 >
                   Clear all
                 </Button>
@@ -530,7 +530,7 @@ export default function BrowseVendors() {
                         <CardTitle className="text-lg font-bold text-gray-900 dark:text-white truncate">
                           {vendor.name}
                         </CardTitle>
-                        <CardDescription className="flex items-center gap-1 mt-1 text-sm">
+                        <CardDescription className="flex items-center gap-1 mt-1 text-sm text-gray-600 dark:text-gray-300">
                           <MapPin className="w-4 h-4" />
                           {vendor.location}
                         </CardDescription>
@@ -545,7 +545,7 @@ export default function BrowseVendors() {
                           {vendor.rating}
                         </span>
                       </div>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
                         ({vendor.reviews} reviews)
                       </span>
                     </div>
@@ -553,14 +553,14 @@ export default function BrowseVendors() {
 
                   <CardContent className="space-y-4">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
                         {vendor.description}
                       </p>
                       <p className="text-sm font-semibold text-gray-900 dark:text-white mt-2 flex items-center gap-2">
-                        <DollarSign className="w-4 h-4 text-emerald-600" />
+                        <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         {vendor.price}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-300 mt-1 flex items-center gap-1">
                         <MessageSquare className="w-3 h-3" />
                         Response time: {vendor.responseTime}
                       </p>
@@ -571,7 +571,7 @@ export default function BrowseVendors() {
                         onClick={() => handleMessage(vendor.name)}
                         variant="outline"
                         size="sm"
-                        className="text-emerald-600 border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                        className="text-emerald-600 dark:text-emerald-400 border-emerald-600 dark:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                       >
                         <MessageSquare className="w-4 h-4 mr-1" />
                         Message
@@ -588,7 +588,7 @@ export default function BrowseVendors() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="w-full text-gray-600 dark:text-gray-400"
+                      className="w-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <Eye className="w-4 h-4 mr-2" />
                       View Profile

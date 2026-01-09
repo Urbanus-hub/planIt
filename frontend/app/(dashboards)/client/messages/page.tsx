@@ -501,11 +501,11 @@ export default function ClientMessages() {
                             {conv.vendor}
                           </p>
                         </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-gray-500 dark:text-gray-300">
                           {conv.time}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                      <p className="text-xs text-gray-600 dark:text-gray-300 truncate">
                         {conv.lastMessage}
                       </p>
                     </div>
@@ -536,7 +536,7 @@ export default function ClientMessages() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="md:hidden text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className="md:hidden text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       onClick={handleBackToList}
                     >
                       <ArrowLeft className="w-5 h-5" />
@@ -563,7 +563,7 @@ export default function ClientMessages() {
                             {currentConversation.category}
                           </Badge>
                         )}
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-xs text-gray-500 dark:text-gray-300">
                           {currentConversation.online
                             ? "Active now"
                             : "Offline"}
@@ -575,7 +575,7 @@ export default function ClientMessages() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       onClick={handlePinConversation}
                     >
                       <Pin className="w-5 h-5" />
@@ -583,7 +583,7 @@ export default function ClientMessages() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <MoreVertical className="w-5 h-5" />
                     </Button>
@@ -596,7 +596,7 @@ export default function ClientMessages() {
                     <div className="flex items-center justify-center h-full">
                       <div className="text-center">
                         <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto mb-2" />
-                        <p className="text-gray-500 dark:text-gray-400">
+                        <p className="text-gray-500 dark:text-gray-300">
                           Loading messages...
                         </p>
                       </div>
