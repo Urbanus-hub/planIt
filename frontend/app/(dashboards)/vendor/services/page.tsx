@@ -117,7 +117,7 @@ export default function VendorServicesPage() {
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const { user } = useAuth();
-  
+
   // Form state
   const [formData, setFormData] = useState({
     title: "",
@@ -422,51 +422,52 @@ export default function VendorServicesPage() {
     }
   };
 
+  // Updated with dark mode support
   const getCategoryColor = (category?: string) => {
     switch (category?.toLowerCase()) {
       case "photography":
-        return "bg-violet-100 text-violet-800 border-violet-200";
+        return "bg-violet-100 text-violet-800 border-violet-200 dark:bg-violet-900/30 dark:text-violet-300 dark:border-violet-800";
       case "videography":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800";
       case "catering":
-        return "bg-orange-100 text-orange-800 border-orange-200";
+        return "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800";
       case "decoration":
-        return "bg-pink-100 text-pink-800 border-pink-200";
+        return "bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-900/30 dark:text-pink-300 dark:border-pink-800";
       case "entertainment":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800";
       case "venue":
-        return "bg-indigo-100 text-indigo-800 border-indigo-200";
+        return "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700";
     }
   };
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="min-h-screen w-full bg-transparent dark:bg-gray-950">
       {/* Header */}
-      <div className=" bg-transparent">
-        <div className="max-w-6xl mx-auto px-6 lg:px-8 py-6">
+      <div className="bg-transparent dark:bg-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold  text-green-700 dark:text-green-400">
+              <h1 className="text-3xl font-bold text-green-700 dark:text-green-400">
                 Services
               </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Manage your service offerings
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3 w-full lg:w-auto">
               <Button
                 variant="outline"
                 onClick={fetchServices}
-                className="border-gray-300 hover:bg-gray-50"
+                className="flex-1 lg:flex-none border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
+                <span className="hidden sm:inline">Refresh</span>
               </Button>
               <Button
                 onClick={() => handleOpenForm()}
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="flex-1 lg:flex-none bg-green-600 hover:bg-green-700 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Service
@@ -477,10 +478,10 @@ export default function VendorServicesPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -507,7 +508,7 @@ export default function VendorServicesPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <Card className="shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -516,60 +517,60 @@ export default function VendorServicesPage() {
                   </p>
                   <div className="flex items-center mt-2">
                     <Star className="h-6 w-6 text-amber-400 fill-amber-400" />
-                    <p className="text-3xl font-bold text-gray-900 ml-2">
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white ml-2">
                       {stats.avgRating}
                     </p>
                   </div>
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                     Customer satisfaction
                   </p>
                 </div>
-                <div className="p-3 bg-amber-100 rounded-lg">
-                  <Award className="h-6 w-6 text-amber-600" />
+                <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                  <Award className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <Card className="shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     Total Bookings
                   </p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
                     {stats.totalBookings}
                   </p>
-                  <div className="flex items-center mt-2 text-sm text-green-600">
+                  <div className="flex items-center mt-2 text-sm text-green-600 dark:text-green-400">
                     <TrendingUp className="h-4 w-4 mr-1" />
                     <span className="font-medium">12% increase</span>
                   </div>
                 </div>
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <Calendar className="h-6 w-6 text-green-600" />
+                <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                  <Calendar className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <Card className="shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     Total Views
                   </p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
                     {stats.totalViews}
                   </p>
-                  <div className="flex items-center mt-2 text-sm text-green-600">
+                  <div className="flex items-center mt-2 text-sm text-green-600 dark:text-green-400">
                     <TrendingUp className="h-4 w-4 mr-1" />
                     <span className="font-medium">18% increase</span>
                   </div>
                 </div>
-                <div className="p-3 bg-purple-100 rounded-lg">
-                  <Eye className="h-6 w-6 text-purple-600" />
+                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                  <Eye className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
               </div>
             </CardContent>
@@ -577,24 +578,24 @@ export default function VendorServicesPage() {
         </div>
 
         {/* Search and Filters */}
-        <Card className="border-0 shadow-sm mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <Card className="shadow-sm mb-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
           <CardContent className="p-4">
             <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1 relative">
+              <div className="flex-1 relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search services..."
-                  className="pl-10 border-gray-200 dark:border-gray-600 focus:border-green-500 dark:focus:border-green-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="pl-10 border-gray-200 dark:border-gray-700 focus:border-green-500 dark:focus:border-green-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="border-gray-300 hover:bg-gray-50"
+                      className="border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 whitespace-nowrap"
                     >
                       <Filter className="h-4 w-4 mr-2" />
                       Sort by: {sortBy}
@@ -626,7 +627,7 @@ export default function VendorServicesPage() {
                   onClick={() =>
                     setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                   }
-                  className="border-gray-300 hover:bg-gray-50"
+                  className="border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   {sortOrder === "asc" ? (
                     <ArrowUp className="h-4 w-4" />
@@ -639,7 +640,7 @@ export default function VendorServicesPage() {
                   onClick={() =>
                     setViewMode(viewMode === "table" ? "grid" : "table")
                   }
-                  className="border-gray-300 hover:bg-gray-50"
+                  className="border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   {viewMode === "table" ? (
                     <Grid3x3 className="h-4 w-4" />
@@ -653,29 +654,29 @@ export default function VendorServicesPage() {
         </Card>
 
         {/* Services Table/Grid */}
-        <Card className="border-0 shadow-sm overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <CardHeader className="border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
+        <Card className="shadow-sm overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+          <CardHeader className="border-b border-gray-200 dark:border-gray-800">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <CardTitle className="text-gray-900 dark:text-white">
                   Service Directory
                 </CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-300">
+                <CardDescription className="text-gray-600 dark:text-gray-400">
                   {sorted.length} service{sorted.length !== 1 ? "s" : ""}
                 </CardDescription>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-gray-300 hover:bg-gray-50"
+                  className="border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 flex-1 sm:flex-none"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Export
                 </Button>
                 <Button
                   onClick={() => handleOpenForm()}
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Service
@@ -685,29 +686,29 @@ export default function VendorServicesPage() {
           </CardHeader>
           <CardContent className="p-0">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <div className="px-4 pt-4">
-                <TabsList className="grid w-full grid-cols-4 bg-gray-100 border border-gray-200 p-1">
+              <div className="px-4 pt-4 overflow-x-auto">
+                <TabsList className="grid w-full grid-cols-4 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1 min-w-[300px]">
                   <TabsTrigger
                     value="all"
-                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm text-gray-600"
+                    className="data-[state=active]:bg-white data-[state=active]:text-green-600 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-green-400 data-[state=active]:shadow-sm text-gray-600 dark:text-gray-300"
                   >
                     All
                   </TabsTrigger>
                   <TabsTrigger
                     value="active"
-                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm text-gray-600"
+                    className="data-[state=active]:bg-white data-[state=active]:text-green-600 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-green-400 data-[state=active]:shadow-sm text-gray-600 dark:text-gray-300"
                   >
                     Active
                   </TabsTrigger>
                   <TabsTrigger
                     value="featured"
-                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm text-gray-600"
+                    className="data-[state=active]:bg-white data-[state=active]:text-green-600 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-green-400 data-[state=active]:shadow-sm text-gray-600 dark:text-gray-300"
                   >
                     Featured
                   </TabsTrigger>
                   <TabsTrigger
                     value="inactive"
-                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm text-gray-600"
+                    className="data-[state=active]:bg-white data-[state=active]:text-green-600 dark:data-[state=active]:bg-gray-700 dark:data-[state=active]:text-green-400 data-[state=active]:shadow-sm text-gray-600 dark:text-gray-300"
                   >
                     Inactive
                   </TabsTrigger>
@@ -726,14 +727,14 @@ export default function VendorServicesPage() {
                     <AlertDescription>{error}</AlertDescription>
                   </Alert>
                 ) : sorted.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <div className="p-12 text-center">
+                    <div className="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
                       <Package className="h-8 w-8 text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-gray-800 mb-2">
+                    <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
                       No services found
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
                       {query
                         ? "Try adjusting your search or filters"
                         : "Create your first service to get started"}
@@ -749,27 +750,27 @@ export default function VendorServicesPage() {
                 ) : viewMode === "table" ? (
                   <div className="overflow-x-auto">
                     <Table>
-                      <TableHeader className="bg-gray-50">
+                      <TableHeader className="bg-gray-50 dark:bg-gray-800/50">
                         <TableRow>
-                          <TableHead className="text-gray-700 font-medium">
+                          <TableHead className="text-gray-700 dark:text-gray-300 font-medium">
                             Service
                           </TableHead>
-                          <TableHead className="text-gray-700 font-medium hidden md:table-cell">
+                          <TableHead className="text-gray-700 dark:text-gray-300 font-medium hidden md:table-cell">
                             Category
                           </TableHead>
-                          <TableHead className="text-gray-700 font-medium hidden lg:table-cell">
+                          <TableHead className="text-gray-700 dark:text-gray-300 font-medium hidden lg:table-cell">
                             Rating
                           </TableHead>
-                          <TableHead className="text-gray-700 font-medium">
+                          <TableHead className="text-gray-700 dark:text-gray-300 font-medium">
                             Price
                           </TableHead>
-                          <TableHead className="text-gray-700 font-medium hidden sm:table-cell">
+                          <TableHead className="text-gray-700 dark:text-gray-300 font-medium hidden sm:table-cell">
                             Bookings
                           </TableHead>
-                          <TableHead className="text-gray-700 font-medium">
+                          <TableHead className="text-gray-700 dark:text-gray-300 font-medium">
                             Status
                           </TableHead>
-                          <TableHead className="text-right text-gray-700 font-medium">
+                          <TableHead className="text-right text-gray-700 dark:text-gray-300 font-medium">
                             Actions
                           </TableHead>
                         </TableRow>
@@ -778,24 +779,24 @@ export default function VendorServicesPage() {
                         {sorted.map((service) => (
                           <TableRow
                             key={service._id}
-                            className="hover:bg-gray-50 transition-colors"
+                            className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                           >
                             <TableCell className="font-medium">
-                              <div className="flex items-start gap-3">
-                                <div className="h-10 w-10 rounded-lg bg-gray-400 flex items-center justify-center text-white font-bold flex-shrink-0">
+                              <div className="flex items-start gap-3 min-w-[200px]">
+                                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold flex-shrink-0">
                                   {service.title?.[0]?.toUpperCase() || "S"}
                                 </div>
                                 <div>
-                                  <div className="font-medium text-gray-900 flex items-center gap-2">
+                                  <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2 flex-wrap">
                                     {service.title}
                                     {service.featured && (
-                                      <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-xs">
+                                      <Badge className="bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800 text-xs">
                                         <Star className="h-3 w-3 mr-1 fill-amber-400 text-amber-400" />
                                         Featured
                                       </Badge>
                                     )}
                                   </div>
-                                  <div className="text-sm text-gray-500 line-clamp-1">
+                                  <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
                                     {service.description
                                       ?.substring(0, 30)
                                       .concat("...") || "No description"}
@@ -807,7 +808,7 @@ export default function VendorServicesPage() {
                               <Badge
                                 variant="outline"
                                 className={cn(
-                                  "flex items-center gap-1",
+                                  "flex items-center gap-1 w-max",
                                   getCategoryColor(service.category)
                                 )}
                               >
@@ -818,19 +819,19 @@ export default function VendorServicesPage() {
                             <TableCell className="hidden lg:table-cell">
                               <div className="flex items-center gap-2">
                                 <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
-                                <span className="font-medium text-gray-900">
+                                <span className="font-medium text-gray-900 dark:text-white">
                                   {(service.rating ?? 0).toFixed(1)}
                                 </span>
-                                <span className="text-sm text-gray-500">
+                                <span className="text-sm text-gray-500 dark:text-gray-400">
                                   ({service.reviewsCount || 0})
                                 </span>
                               </div>
                             </TableCell>
-                            <TableCell className="font-semibold text-green-600">
+                            <TableCell className="font-semibold text-green-600 dark:text-green-400 whitespace-nowrap">
                               ${service.price?.toFixed(2) || "0.00"}
                             </TableCell>
                             <TableCell className="hidden sm:table-cell">
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-1 text-gray-900 dark:text-gray-300">
                                 <Calendar className="h-4 w-4 text-gray-400" />
                                 {service.bookingsCount || 0}
                               </div>
@@ -842,8 +843,8 @@ export default function VendorServicesPage() {
                                 }
                                 className={
                                   service.isActive
-                                    ? "bg-green-100 text-green-800 border-green-200"
-                                    : "bg-gray-100 text-gray-800 border-gray-200"
+                                    ? "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"
+                                    : "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
                                 }
                               >
                                 {service.isActive ? (
@@ -864,7 +865,7 @@ export default function VendorServicesPage() {
                                 <DropdownMenuTrigger asChild>
                                   <Button
                                     variant="ghost"
-                                    className="h-8 w-8 p-0 hover:bg-gray-100"
+                                    className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800"
                                   >
                                     <span className="sr-only">Open menu</span>
                                     <MoreHorizontal className="h-4 w-4" />
@@ -937,7 +938,7 @@ export default function VendorServicesPage() {
                                     onClick={() =>
                                       requestDeleteService(service._id)
                                     }
-                                    className="cursor-pointer text-red-600 focus:text-red-600"
+                                    className="cursor-pointer text-red-600 focus:text-red-600 dark:focus:text-red-400"
                                   >
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     Delete
@@ -956,7 +957,7 @@ export default function VendorServicesPage() {
                       {sorted.map((service) => (
                         <Card
                           key={service._id}
-                          className="hover:shadow-md transition-shadow"
+                          className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                         >
                           <CardHeader className="pb-3">
                             <div className="flex items-start justify-between">
@@ -965,7 +966,7 @@ export default function VendorServicesPage() {
                               </div>
                               <div className="flex items-center gap-2">
                                 {service.featured && (
-                                  <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-xs">
+                                  <Badge className="bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800 text-xs">
                                     <Star className="h-3 w-3 mr-1 fill-amber-400 text-amber-400" />
                                     Featured
                                   </Badge>
@@ -976,18 +977,18 @@ export default function VendorServicesPage() {
                                   }
                                   className={
                                     service.isActive
-                                      ? "bg-green-100 text-green-800 border-green-200"
-                                      : "bg-gray-100 text-gray-800 border-gray-200"
+                                      ? "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"
+                                      : "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600"
                                   }
                                 >
                                   {service.isActive ? "Active" : "Inactive"}
                                 </Badge>
                               </div>
                             </div>
-                            <CardTitle className="text-lg font-semibold text-gray-900 line-clamp-1">
+                            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-1">
                               {service.title}
                             </CardTitle>
-                            <CardDescription className="text-sm text-gray-600 line-clamp-2">
+                            <CardDescription className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
                               {service.description}
                             </CardDescription>
                           </CardHeader>
@@ -996,14 +997,14 @@ export default function VendorServicesPage() {
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-1">
                                   <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
-                                  <span className="font-medium text-gray-900">
+                                  <span className="font-medium text-gray-900 dark:text-white">
                                     {(service.rating ?? 0).toFixed(1)}
                                   </span>
-                                  <span className="text-sm text-gray-500">
+                                  <span className="text-sm text-gray-500 dark:text-gray-400">
                                     ({service.reviewsCount || 0})
                                   </span>
                                 </div>
-                                <div className="text-lg font-bold text-green-600">
+                                <div className="text-lg font-bold text-green-600 dark:text-green-400">
                                   ${service.price?.toFixed(2) || "0.00"}
                                 </div>
                               </div>
@@ -1018,7 +1019,7 @@ export default function VendorServicesPage() {
                                   {getCategoryIcon(service.category)}
                                   {service.category || "Uncategorized"}
                                 </Badge>
-                                <div className="flex items-center gap-1 text-gray-500">
+                                <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
                                   <Calendar className="h-3 w-3" />
                                   {service.bookingsCount || 0}
                                 </div>
@@ -1098,7 +1099,7 @@ export default function VendorServicesPage() {
                                       onClick={() =>
                                         requestDeleteService(service._id)
                                       }
-                                      className="cursor-pointer text-red-600 focus:text-red-600"
+                                      className="cursor-pointer text-red-600 focus:text-red-600 dark:focus:text-red-400"
                                     >
                                       <Trash2 className="mr-2 h-4 w-4" />
                                       Delete
@@ -1121,26 +1122,26 @@ export default function VendorServicesPage() {
 
       {/* Service Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-8">
-          <div className="w-full max-w-2xl bg-white rounded-lg shadow-xl p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 overflow-y-auto py-8 px-4">
+          <div className="w-full max-w-2xl bg-white dark:bg-gray-900 rounded-lg shadow-xl p-6 my-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-gray-900">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
                 {editingService ? "Edit Service" : "Create Service"}
               </h2>
               <Button
                 variant="ghost"
                 onClick={handleCloseForm}
-                className="p-0 h-8 w-8"
+                className="p-0 h-8 w-8 hover:bg-gray-100 dark:hover:bg-gray-800"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
               </Button>
             </div>
 
-            <div className="space-y-6 max-h-96 overflow-y-auto pr-4">
+            <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
               {/* Title & Category Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Title *
                   </label>
                   <Input
@@ -1149,12 +1150,12 @@ export default function VendorServicesPage() {
                       setFormData({ ...formData, title: e.target.value })
                     }
                     placeholder="e.g., Professional Wedding Photography"
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Category *
                   </label>
                   <select
@@ -1163,7 +1164,7 @@ export default function VendorServicesPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="w-full mt-1 p-2 border rounded-md text-sm border-gray-200 bg-white text-gray-900"
+                    className="w-full mt-1 p-2 border rounded-md text-sm border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   >
                     <option value="">Select category</option>
                     <option value="Photography">Photography</option>
@@ -1179,7 +1180,7 @@ export default function VendorServicesPage() {
 
               {/* Description */}
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Description *
                 </label>
                 <textarea
@@ -1188,7 +1189,7 @@ export default function VendorServicesPage() {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   placeholder="Describe your service in detail..."
-                  className="w-full mt-1 p-3 border rounded-md text-sm border-gray-200 bg-white text-gray-900"
+                  className="w-full mt-1 p-3 border rounded-md text-sm border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500"
                   rows={4}
                 />
               </div>
@@ -1196,7 +1197,7 @@ export default function VendorServicesPage() {
               {/* Location & Tags Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Location *
                   </label>
                   <Input
@@ -1205,12 +1206,12 @@ export default function VendorServicesPage() {
                       setFormData({ ...formData, location: e.target.value })
                     }
                     placeholder="e.g., New York, NY"
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Tags (comma-separated)
                   </label>
                   <Input
@@ -1219,7 +1220,7 @@ export default function VendorServicesPage() {
                       setFormData({ ...formData, tags: e.target.value })
                     }
                     placeholder="e.g., wedding, outdoor, portrait"
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
               </div>
@@ -1227,7 +1228,7 @@ export default function VendorServicesPage() {
               {/* Price & Pricing Type Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Price *
                   </label>
                   <Input
@@ -1237,13 +1238,13 @@ export default function VendorServicesPage() {
                       setFormData({ ...formData, price: e.target.value })
                     }
                     placeholder="0.00"
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                     step="0.01"
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Pricing Type
                   </label>
                   <select
@@ -1252,7 +1253,7 @@ export default function VendorServicesPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, pricingType: e.target.value })
                     }
-                    className="w-full mt-1 p-2 border rounded-md text-sm border-gray-200 bg-white text-gray-900"
+                    className="w-full mt-1 p-2 border rounded-md text-sm border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   >
                     <option value="fixed">Fixed</option>
                     <option value="per-hour">Per Hour</option>
@@ -1265,7 +1266,7 @@ export default function VendorServicesPage() {
               {/* Duration & Capacity Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Duration (minutes)
                   </label>
                   <Input
@@ -1275,12 +1276,12 @@ export default function VendorServicesPage() {
                       setFormData({ ...formData, duration: e.target.value })
                     }
                     placeholder="e.g., 120"
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Capacity (max bookings)
                   </label>
                   <Input
@@ -1290,7 +1291,7 @@ export default function VendorServicesPage() {
                       setFormData({ ...formData, capacity: e.target.value })
                     }
                     placeholder="e.g., 50"
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
               </div>
@@ -1298,7 +1299,7 @@ export default function VendorServicesPage() {
               {/* Advance Booking Window */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Min Advance Booking (days)
                   </label>
                   <Input
@@ -1310,12 +1311,12 @@ export default function VendorServicesPage() {
                         minAdvanceBooking: e.target.value,
                       })
                     }
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Max Advance Booking (days)
                   </label>
                   <Input
@@ -1327,14 +1328,14 @@ export default function VendorServicesPage() {
                         maxAdvanceBooking: e.target.value,
                       })
                     }
-                    className="mt-1"
+                    className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
               </div>
 
               {/* Cancellation Policy */}
               <div>
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Cancellation Policy
                 </label>
                 <textarea
@@ -1346,13 +1347,13 @@ export default function VendorServicesPage() {
                     })
                   }
                   placeholder="Describe your cancellation policy..."
-                  className="w-full mt-1 p-2 border rounded-md text-sm border-gray-200 bg-white text-gray-900"
+                  className="w-full mt-1 p-2 border rounded-md text-sm border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   rows={2}
                 />
               </div>
 
               {/* Deposit Section */}
-              <div className="p-4 bg-gray-50 rounded-lg space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-4">
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
@@ -1364,11 +1365,11 @@ export default function VendorServicesPage() {
                         depositRequired: e.target.checked,
                       })
                     }
-                    className="h-4 w-4 rounded border-gray-300"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600"
                   />
                   <label
                     htmlFor="depositRequired"
-                    className="text-sm font-medium text-gray-700 cursor-pointer"
+                    className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
                   >
                     Require Deposit
                   </label>
@@ -1376,7 +1377,7 @@ export default function VendorServicesPage() {
 
                 {formData.depositRequired && (
                   <div>
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Deposit Percentage (%)
                     </label>
                     <Input
@@ -1389,7 +1390,7 @@ export default function VendorServicesPage() {
                         })
                       }
                       placeholder="e.g., 50"
-                      className="mt-1"
+                      className="mt-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                       min="0"
                       max="100"
                     />
@@ -1399,11 +1400,11 @@ export default function VendorServicesPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-6 border-t border-gray-200 mt-6">
+            <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
               <Button
                 variant="outline"
                 onClick={handleCloseForm}
-                className="flex-1"
+                className="flex-1 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 Cancel
               </Button>
@@ -1420,80 +1421,80 @@ export default function VendorServicesPage() {
 
       {/* Service Details Modal */}
       {selectedService && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-8">
-          <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 overflow-y-auto py-8 px-4">
+          <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-xl p-6 my-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {selectedService.title}
               </h3>
               <Button
                 variant="ghost"
                 onClick={() => setSelectedService(null)}
-                className="p-0 h-8 w-8"
+                className="p-0 h-8 w-8 hover:bg-gray-100 dark:hover:bg-gray-800"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4 text-gray-500" />
               </Button>
             </div>
 
             <div className="space-y-4">
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-600">
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   {selectedService.description || "No description"}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-xs font-semibold text-gray-500 uppercase">
+                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                     Price
                   </div>
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                     ${selectedService.price?.toFixed(2) || "0.00"}
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-gray-500 uppercase">
+                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                     Rating
                   </div>
                   <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
-                    <span className="text-2xl font-bold text-gray-900">
+                    <span className="text-2xl font-bold text-gray-900 dark:text-white">
                       {(selectedService.rating ?? 0).toFixed(1)}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-gray-200">
-                <div className="text-xs font-semibold text-gray-500 uppercase mb-2">
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">
                   Performance
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Bookings</span>
-                    <span className="font-semibold text-gray-900">
+                    <span className="text-gray-600 dark:text-gray-300">Bookings</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
                       {selectedService.bookingsCount || 0}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Reviews</span>
-                    <span className="font-semibold text-gray-900">
+                    <span className="text-gray-600 dark:text-gray-300">Reviews</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
                       {selectedService.reviewsCount || 0}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Views</span>
-                    <span className="font-semibold text-gray-900">
+                    <span className="text-gray-600 dark:text-gray-300">Views</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
                       {selectedService.views || 0}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-gray-200 flex gap-2">
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
                 <Button
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 border-gray-300 dark:border-gray-600"
                   onClick={() => {
                     handleOpenForm(selectedService);
                     setSelectedService(null);

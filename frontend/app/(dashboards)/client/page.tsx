@@ -563,7 +563,10 @@ export default function ClientDashboard() {
     <ProtectedRoute allowedRoles={["client"]}>
       <div className="flex-1 min-h-screen w-full max-w-full overflow-x-hidden bg-linear-to-br from-slate-50 to-emerald-50 dark:from-gray-900 dark:to-emerald-950">
         {/* Hero Section with Professional Emerald Overlay - Responsive Height */}
-        <div ref={heroRef} className="relative h-[50vh] sm:h-[55vh] md:h-[60vh] w-full max-w-full overflow-hidden">
+        <div
+          ref={heroRef}
+          className="relative h-[50vh] sm:h-[55vh] md:h-[60vh] w-full max-w-full overflow-hidden"
+        >
           <div className="absolute inset-0 overflow-hidden">
             <Image
               src="/herobg.png"
@@ -619,8 +622,12 @@ export default function ClientDashboard() {
                 className="p-3 sm:p-4 md:p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-300 dark:hover:border-emerald-600 transition-colors duration-200 w-full overflow-hidden"
               >
                 <div className="flex items-center justify-between mb-2 gap-2">
-                  <div className={`p-2 sm:p-2.5 rounded-lg bg-gray-50 dark:bg-gray-700 shrink-0`}>
-                    <stat.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.colorClass}`} />
+                  <div
+                    className={`p-2 sm:p-2.5 rounded-lg bg-gray-50 dark:bg-gray-700 shrink-0`}
+                  >
+                    <stat.icon
+                      className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.colorClass}`}
+                    />
                   </div>
                   <div className="text-right min-w-0 flex-1">
                     <div className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white truncate">

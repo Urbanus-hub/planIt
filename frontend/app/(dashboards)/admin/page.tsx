@@ -1,6 +1,6 @@
 "use client";
 
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import ThemeToggle from "@/components/ui/ThemeToggle";
@@ -25,29 +25,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {authAPI} from "@/lib/api";
+import { authAPI } from "@/lib/api";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const [users,setUsers]=useState([]);
-  useEffect(()=>{
-   (async()=>{
-      try{
-        const response=await authAPI.getAllUser();
-        if(response.data.success){
+  const [users, setUsers] = useState([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await authAPI.getAllUser();
+        if (response.data.success) {
           console.log(response.data);
           setUsers(response.data.data);
         }
-      }catch(err){
-        console.error("Failed to fetch users:",err);
+      } catch (err) {
+        console.error("Failed to fetch users:", err);
       }
-})();
-  },[])
+    })();
+  }, []);
 
-console.log("users",users)
-
- 
-  
+  console.log("users", users);
 
   const stats = [
     {
@@ -61,7 +58,7 @@ console.log("users",users)
     },
     {
       title: "Total Vendors",
-      value: users.filter((u:any)=>u.role==="vendor").length.toString(),
+      value: users.filter((u: any) => u.role === "vendor").length.toString(),
       change: "+8.2%",
       trend: "up",
       icon: Briefcase,

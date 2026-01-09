@@ -224,7 +224,7 @@ export default function ReviewsPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50"
+              className="h-8 w-8 p-0 text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedReview(review);
@@ -235,7 +235,7 @@ export default function ReviewsPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
+              className="h-8 w-8 p-0 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
               onClick={(e) => {
                 e.stopPropagation();
                 flagReview(review._id);
@@ -504,7 +504,7 @@ export default function ReviewsPage() {
                       className="text-center py-16"
                     >
                       <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                      <p className="text-gray-500 mb-4">{error}</p>
+                      <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
                       <Button
                         onClick={fetchReviews}
                         className="bg-emerald-600 hover:bg-emerald-700"
@@ -613,7 +613,7 @@ export default function ReviewsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-500 font-medium">Service</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">Service</p>
                     <p className="text-sm font-semibold text-gray-900 mt-1">
                       {selectedReview.serviceTitle}
                     </p>

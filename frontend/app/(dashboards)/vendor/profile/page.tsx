@@ -429,7 +429,7 @@ export default function VendorProfilePage() {
                           <span className="text-lg font-semibold text-gray-900">
                             {stats.averageRating}
                           </span>
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-gray-600 dark:text-gray-300">
                             ({stats.totalReviews} reviews)
                           </span>
                         </div>
@@ -799,7 +799,7 @@ export default function VendorProfilePage() {
               <CardContent className="p-6 space-y-4">
                 {/* Email */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5 uppercase">
                     Email
                   </label>
                   {isEditing ? (
@@ -823,7 +823,7 @@ export default function VendorProfilePage() {
 
                 {/* Phone */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5 uppercase">
                     Phone
                   </label>
                   {isEditing ? (
@@ -846,7 +846,7 @@ export default function VendorProfilePage() {
 
                 {/* Website */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5 uppercase">
                     Website
                   </label>
                   {isEditing ? (

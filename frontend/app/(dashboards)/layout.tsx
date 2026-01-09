@@ -64,59 +64,62 @@ export default function DashboardLayout({
 
             {/* Top Right Actions - Responsive */}
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            {/* Theme Toggle - Hidden on small mobile, visible on larger screens */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="hidden sm:flex h-9 w-9 sm:h-10 sm:w-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors min-h-[44px] min-w-[44px]"
-              title={
-                theme === "light"
-                  ? "Switch to dark mode"
-                  : "Switch to light mode"
-              }
-            >
-              {theme === "light" ? (
-                <Moon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
-              ) : (
-                <Sun className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
-              )}
-            </Button>
+              {/* Theme Toggle - Hidden on small mobile, visible on larger screens */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="hidden sm:flex h-9 w-9 sm:h-10 sm:w-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors min-h-[44px] min-w-[44px]"
+                title={
+                  theme === "light"
+                    ? "Switch to dark mode"
+                    : "Switch to light mode"
+                }
+              >
+                {theme === "light" ? (
+                  <Moon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
+                ) : (
+                  <Sun className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
+                )}
+              </Button>
 
-            <Separator orientation="vertical" className="h-4 sm:h-6 hidden sm:block" />
+              <Separator
+                orientation="vertical"
+                className="h-4 sm:h-6 hidden sm:block"
+              />
 
-            {/* Notifications */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleNotifications}
-              className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px] min-w-[44px]"
-            >
-              <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
-              <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-900" />
-            </Button>
+              {/* Notifications */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleNotifications}
+                className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px] min-w-[44px]"
+              >
+                <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
+                <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-900" />
+              </Button>
 
-            {/* Settings - Hidden on small mobile */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSettings}
-              className="hidden sm:flex h-9 w-9 sm:h-10 sm:w-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px] min-w-[44px]"
-            >
-              <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
-            </Button>
+              {/* Settings - Hidden on small mobile */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSettings}
+                className="hidden sm:flex h-9 w-9 sm:h-10 sm:w-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px] min-w-[44px]"
+              >
+                <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
+              </Button>
 
-            {/* Help & Support - Hidden on mobile */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSupport}
-              className="hidden lg:flex h-9 w-9 sm:h-10 sm:w-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px] min-w-[44px]"
-            >
-              <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
-            </Button>
-          </div>
-        </header>
+              {/* Help & Support - Hidden on mobile */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSupport}
+                className="hidden lg:flex h-9 w-9 sm:h-10 sm:w-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 min-h-[44px] min-w-[44px]"
+              >
+                <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
+              </Button>
+            </div>
+          </header>
 
           {/* Page Content - Scrollable with no horizontal overflow */}
           <main className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-full">
