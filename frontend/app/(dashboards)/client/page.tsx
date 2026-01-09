@@ -259,32 +259,8 @@ export default function ClientDashboard() {
     },
   ];
 
-  const upcomingEvents = [
-    {
-      name: "Wedding Reception",
-      date: "Dec 15, 2025",
-      vendor: "Elite Catering",
-      location: "Nairobi",
-      status: "confirmed",
-      time: "2:00 PM",
-    },
-    {
-      name: "Corporate Dinner",
-      date: "Jan 10, 2026",
-      vendor: "Pro Photographers",
-      location: "Mombasa",
-      status: "pending",
-      time: "6:00 PM",
-    },
-    {
-      name: "Birthday Party",
-      date: "Feb 20, 2026",
-      vendor: "Sound Masters",
-      location: "Kisumu",
-      status: "confirmed",
-      time: "4:00 PM",
-    },
-  ];
+  // Empty array to show empty state for upcoming events
+  const upcomingEvents: any[] = [];
 
   // Default fallback images for different categories
   const getCategoryFallbackImage = (category: string) => {
@@ -435,6 +411,81 @@ export default function ClientDashboard() {
       date: "Jul 15, 2025",
       description:
         "A memorable Sweet 16 party with DJ, dancing, and entertainment.",
+      videoUrl: "#",
+    },
+    {
+      id: 7,
+      title: "Garden Wedding Reception",
+      category: "wedding",
+      type: "image",
+      thumbnail:
+        "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600&h=400&fit=crop",
+      vendor: "Elegant Events Co.",
+      date: "Jun 20, 2025",
+      description:
+        "An enchanting garden wedding with beautiful floral arrangements and ambient lighting.",
+    },
+    {
+      id: 8,
+      title: "Tech Conference 2025",
+      category: "corporate",
+      type: "video",
+      thumbnail:
+        "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=600&h=400&fit=crop",
+      vendor: "AV Solutions Kenya",
+      date: "May 18, 2025",
+      description:
+        "A large-scale tech conference with state-of-the-art AV equipment and networking.",
+      videoUrl: "#",
+    },
+    {
+      id: 9,
+      title: "Milestone 50th Birthday",
+      category: "birthday",
+      type: "image",
+      thumbnail:
+        "https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=600&h=400&fit=crop",
+      vendor: "Party Perfect Planners",
+      date: "Apr 12, 2025",
+      description:
+        "A sophisticated 50th birthday celebration with live entertainment and gourmet dining.",
+    },
+    {
+      id: 10,
+      title: "Outdoor Wedding at Sunset",
+      category: "wedding",
+      type: "video",
+      thumbnail:
+        "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&h=400&fit=crop",
+      vendor: "Dreamscape Weddings",
+      date: "Mar 25, 2025",
+      description:
+        "A magical sunset wedding ceremony with stunning views and romantic ambiance.",
+      videoUrl: "#",
+    },
+    {
+      id: 11,
+      title: "Corporate Team Building Event",
+      category: "corporate",
+      type: "image",
+      thumbnail:
+        "https://images.unsplash.com/photo-1511578314322-379afb476865?w=600&h=400&fit=crop",
+      vendor: "Adventure Events Kenya",
+      date: "Feb 28, 2025",
+      description:
+        "An exciting team building event with outdoor activities and catering.",
+    },
+    {
+      id: 12,
+      title: "Kids Birthday Party",
+      category: "birthday",
+      type: "video",
+      thumbnail:
+        "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=600&h=400&fit=crop",
+      vendor: "Fun Times Entertainment",
+      date: "Jan 15, 2025",
+      description:
+        "A colorful and fun-filled kids birthday party with entertainers and games.",
       videoUrl: "#",
     },
   ];
@@ -1097,87 +1148,112 @@ export default function ClientDashboard() {
                 </p>
               </div>
             </div>
-            <div
-              ref={eventsRef}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
-            >
-              {upcomingEvents.map((event, index) => (
-                <Card
-                  key={index}
-                  className="group relative bg-linear-to-br from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-900/50 border-0 rounded-2xl overflow-hidden shadow-md hover:shadow-xl dark:shadow-gray-900/50 transition-all duration-300 hover:scale-[1.02] p-5"
-                >
-                  {/* Accent border on top */}
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500" />
 
-                  <div className="space-y-4">
-                    {/* Header with badge and time */}
-                    <div className="flex items-start justify-between gap-2">
-                      <Badge
-                        className={`shrink-0 font-semibold px-3 py-1.5 rounded-full text-xs ${
-                          event.status === "confirmed"
-                            ? "bg-emerald-500 text-white"
-                            : "bg-amber-500 text-white"
-                        }`}
+            {upcomingEvents.length > 0 ? (
+              <div
+                ref={eventsRef}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+              >
+                {upcomingEvents.map((event, index) => (
+                  <Card
+                    key={index}
+                    className="group relative bg-linear-to-br from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-900/50 border-0 rounded-2xl overflow-hidden shadow-md hover:shadow-xl dark:shadow-gray-900/50 transition-all duration-300 hover:scale-[1.02] p-5"
+                  >
+                    {/* Accent border on top */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500" />
+
+                    <div className="space-y-4">
+                      {/* Header with badge and time */}
+                      <div className="flex items-start justify-between gap-2">
+                        <Badge
+                          className={`shrink-0 font-semibold px-3 py-1.5 rounded-full text-xs ${
+                            event.status === "confirmed"
+                              ? "bg-emerald-500 text-white"
+                              : "bg-amber-500 text-white"
+                          }`}
+                        >
+                          {event.status === "confirmed" ? (
+                            <span className="flex items-center gap-1">
+                              <CheckCircle className="h-3.5 w-3.5" />
+                              Confirmed
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1">
+                              <AlertCircle className="h-3.5 w-3.5" />
+                              Pending
+                            </span>
+                          )}
+                        </Badge>
+                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                          {event.time}
+                        </span>
+                      </div>
+
+                      {/* Event info */}
+                      <div className="space-y-1">
+                        <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-1">
+                          {event.name}
+                        </h3>
+                        <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                          {event.vendor}
+                        </p>
+                      </div>
+
+                      {/* Event details with modern icon badges */}
+                      <div className="space-y-2.5">
+                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                          <div className="p-1.5 bg-emerald-500/10 rounded-lg">
+                            <Calendar className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                          </div>
+                          <span className="text-sm font-medium">
+                            {event.date}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                          <div className="p-1.5 bg-emerald-500/10 rounded-lg">
+                            <MapPin className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                          </div>
+                          <span className="text-sm font-medium line-clamp-1">
+                            {event.location}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action button */}
+                      <Button
+                        variant="default"
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold min-h-11 mt-2"
                       >
-                        {event.status === "confirmed" ? (
-                          <span className="flex items-center gap-1">
-                            <CheckCircle className="h-3.5 w-3.5" />
-                            Confirmed
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1">
-                            <AlertCircle className="h-3.5 w-3.5" />
-                            Pending
-                          </span>
-                        )}
-                      </Badge>
-                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                        {event.time}
-                      </span>
+                        View Details
+                        <ChevronRight className="ml-1 h-4 w-4" />
+                      </Button>
                     </div>
-
-                    {/* Event info */}
-                    <div className="space-y-1">
-                      <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-1">
-                        {event.name}
-                      </h3>
-                      <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                        {event.vendor}
-                      </p>
-                    </div>
-
-                    {/* Event details with modern icon badges */}
-                    <div className="space-y-2.5">
-                      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                        <div className="p-1.5 bg-emerald-500/10 rounded-lg">
-                          <Calendar className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                        </div>
-                        <span className="text-sm font-medium">
-                          {event.date}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                        <div className="p-1.5 bg-emerald-500/10 rounded-lg">
-                          <MapPin className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                        </div>
-                        <span className="text-sm font-medium line-clamp-1">
-                          {event.location}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Action button */}
-                    <Button
-                      variant="default"
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold min-h-11 mt-2"
-                    >
-                      View Details
-                      <ChevronRight className="ml-1 h-4 w-4" />
-                    </Button>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-8 sm:p-12 text-center bg-linear-to-br from-gray-50 to-white dark:from-gray-800/50 dark:to-gray-900/50 border-0 rounded-2xl">
+                <div className="flex flex-col items-center gap-4 max-w-md mx-auto">
+                  <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full">
+                    <Calendar className="h-12 w-12 text-gray-400 dark:text-gray-500" />
                   </div>
-                </Card>
-              ))}
-            </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                      No Upcoming Events
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">
+                      Start planning your next event by browsing vendors
+                    </p>
+                  </div>
+                  <Link href="/client/vendors" className="w-full sm:w-auto">
+                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold min-h-11 px-8">
+                      Browse Vendors
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            )}
           </div>
         </div>
       </div>
